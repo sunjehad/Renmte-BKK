@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login / Register — Rent Me Bangkok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#070709;--bg2:#0f0f12;--bg3:#17171c;
+  --fg:#f5f5f5;--muted:#888;
+  --red:#e63946;--blue:#2563eb;--blue-l:#60a5fa;
+  --border:rgba(255,255,255,.08);
+  --border-blue:rgba(37,99,235,.3);
+  --border-red:rgba(230,57,70,.3);
+  --radius:10px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --font-head:'Bebas Neue',sans-serif;
+  --font-body:'Inter',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;font-family:var(--font-body)}
+input{font-family:var(--font-body)}
+
+.page-wrap{width:100%;max-width:440px}
+
+/* Logo */
+.logo{text-align:center;margin-bottom:40px}
+.logo a{display:inline-block}
+.logo-text{font-family:var(--font-head);font-size:1.8rem;letter-spacing:.05em;color:var(--fg)}
+.logo-text span{color:var(--red)}
+.logo-sub{font-size:12px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+
+/* Card */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:40px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--blue))}
+
+/* Tabs */
+.tabs{display:flex;gap:2px;margin-bottom:32px;background:var(--bg3);border-radius:8px;padding:4px}
+.tab-btn{flex:1;padding:10px;border-radius:6px;font-size:13px;font-weight:600;color:var(--muted);transition:all .2s;letter-spacing:.03em;text-align:center;cursor:pointer}
+.tab-btn.active{background:var(--bg2);color:var(--fg);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+
+/* Form */
+.form-group{margin-bottom:18px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+input[type=text],input[type=email],input[type=password],input[type=tel]{
+  width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;color:var(--fg);font-size:14px;transition:border-color .2s;
+}
+input:focus{outline:none;border-color:var(--blue)}
+input::placeholder{color:var(--muted)}
+
+.btn-submit{
+  width:100%;padding:14px;background:var(--red);color:#fff;border-radius:8px;
+  font-size:14px;font-weight:700;letter-spacing:.05em;transition:opacity .2s,transform .2s var(--ease);
+  margin-top:8px;
+}
+.btn-submit:hover{opacity:.88;transform:translateY(-1px)}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* Messages */
+.msg{padding:12px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
+.msg.error{background:rgba(230,57,70,.1);border:1px solid var(--border-red);color:#ff6b6b}
+.msg.success{background:rgba(37,99,235,.1);border:1px solid var(--border-blue);color:var(--blue-l)}
+.msg.show{display:block}
+
+/* Divider */
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Forgot link */
+.forgot-link{text-align:right;margin-top:-10px;margin-bottom:18px}
+.forgot-link a{font-size:12px;color:var(--blue-l);transition:opacity .2s}
+.forgot-link a:hover{opacity:.7}
+
+/* Back link */
+.back-link{text-align:center;margin-top:24px;font-size:13px;color:var(--muted)}
+.back-link a{color:var(--fg);font-weight:600}
+.back-link a:hover{color:var(--red)}
+
+/* Notice box */
+.notice{background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:16px;font-size:13px;color:var(--blue-l);line-height:1.6;text-align:center}
+.notice strong{color:var(--fg)}
+
+/* Spinner */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* View: forgot password */
+#view-forgot{display:none}
+#view-forgot.show{display:block}
+
+@media(max-width:480px){
+  .card{padding:28px 20px}
+  .form-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <div class="logo">
+    <a href="index.html">
+      <div class="logo-text">RENT<span>ME</span> BANGKOK</div>
+      <div class="logo-sub">Studio · Podcast · Camera Rental</div>
+    </a>
+  </div>
+
+  <div class="card" id="auth-card">
+
+    <!-- Login / Register tabs -->
+    <div id="view-login-register">
+      <div class="tabs">
+        <div class="tab-btn active" id="tab-login" onclick="switchTab('login')">Log In</div>
+        <div class="tab-btn" id="tab-register" onclick="switchTab('register')">Create Account</div>
+      </div>
+
+      <div class="msg" id="auth-msg"></div>
+
+      <!-- LOGIN FORM -->
+      <form id="form-login" onsubmit="doLogin(event)">
+        <div class="form-group">
+          <label for="l-email">Email</label>
+          <input type="email" id="l-email" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="l-pass">Password</label>
+          <input type="password" id="l-pass" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <div class="forgot-link"><a href="#" onclick="showForgot(event)">Forgot password?</a></div>
+        <button type="submit" class="btn-submit" id="btn-login">Log In</button>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="form-register" style="display:none" onsubmit="doRegister(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="r-first">First Name</label>
+            <input type="text" id="r-first" placeholder="Andy" required>
+          </div>
+          <div class="form-group">
+            <label for="r-last">Last Name</label>
+            <input type="text" id="r-last" placeholder="Smith" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="r-phone">Phone</label>
+          <input type="tel" id="r-phone" placeholder="+66 81 234 5678">
+        </div>
+        <div class="form-group">
+          <label for="r-email">Email</label>
+          <input type="email" id="r-email" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="r-pass">Password</label>
+          <input type="password" id="r-pass" placeholder="Min 6 characters" required autocomplete="new-password" minlength="6">
+        </div>
+        <button type="submit" class="btn-submit" id="btn-register">Create Account</button>
+      </form>
+    </div>
+
+    <!-- FORGOT PASSWORD VIEW -->
+    <div id="view-forgot">
+      <h2 style="font-family:var(--font-head);font-size:1.6rem;margin-bottom:8px">RESET PASSWORD</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:24px">Enter your email and we'll send a reset link.</p>
+      <div class="msg" id="forgot-msg"></div>
+      <form onsubmit="doForgot(event)">
+        <div class="form-group">
+          <label for="f-email">Email</label>
+          <input type="email" id="f-email" placeholder="you@example.com" required>
+        </div>
+        <button type="submit" class="btn-submit" id="btn-forgot">Send Reset Link</button>
+      </form>
+      <div style="text-align:center;margin-top:20px">
+        <a href="#" onclick="hideForgot(event)" style="font-size:13px;color:var(--blue-l)">← Back to Login</a>
+      </div>
+    </div>
+
+    <!-- EMAIL VERIFICATION NOTICE (shown after register) -->
+    <div id="view-verify" style="display:none;text-align:center">
+      <div style="font-size:48px;margin-bottom:20px">📧</div>
+      <h2 style="font-family:var(--font-head);font-size:2rem;margin-bottom:12px">CHECK YOUR EMAIL</h2>
+      <div class="notice">
+        We've sent a verification link to<br><strong id="verify-email-display"></strong><br><br>
+        Click the link to activate your account, then come back and log in.<br><br>
+        <span style="color:#888">Can't find it? Please check your <strong style="color:#f5f5f5">spam / junk folder</strong>.</span>
+      </div>
+      <button onclick="switchTab('login');showLoginRegister()" class="btn-submit" style="margin-top:24px">Go to Login</button>
+    </div>
+
+  </div><!-- /card -->
+
+  <div class="back-link">
+    <a href="index.html">← Back to Rent Me Bangkok</a>
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(
+  'https://nghsyxwhczvwaorssgoh.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5naHN5eHdoY3p2d2FvcnNzZ29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNDA3NDIsImV4cCI6MjA5NzYxNjc0Mn0.3EV00ggHV5domLBbJpTrdIiWatOyhNpFVJo42FqppPk'
+);
+
+// Redirect if already logged in
+sb.auth.getSession().then(({ data }) => {
+  if (data.session) {
+    const ret = new URLSearchParams(location.search).get('return') || 'profile.html';
+    location.href = ret;
+  }
+});
+
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('form-login').style.display = tab === 'login' ? '' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none';
+  clearMsg();
+}
+
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'msg ' + type + ' show';
+}
+function clearMsg() {
+  document.querySelectorAll('.msg').forEach(el => { el.className = 'msg'; el.textContent = ''; });
+}
+
+function setLoading(btnId, loading, text) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.innerHTML = loading ? `<span class="spinner"></span>${text}` : text;
+}
+
+function showForgot(e) {
+  e.preventDefault();
+  document.getElementById('view-login-register').style.display = 'none';
+  document.getElementById('view-forgot').classList.add('show');
+}
+function hideForgot(e) {
+  e.preventDefault();
+  document.getElementById('view-login-register').style.display = '';
+  document.getElementById('view-forgot').classList.remove('show');
+}
+function showLoginRegister() {
+  document.getElementById('view-login-register').style.display = '';
+  document.getElementById('view-verify').style.display = 'none';
+}
+
+async function doLogin(e) {
+  e.preventDefault();
+  clearMsg();
+  setLoading('btn-login', true, 'Logging in…');
+  const email = document.getElementById('l-email').value.trim();
+  const password = document.getElementById('l-pass').value;
+
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  setLoading('btn-login', false, 'Log In');
+
+  if (error) {
+    showMsg('auth-msg', error.message, 'error');
+    return;
+  }
+  const ret = new URLSearchParams(location.search).get('return') || 'profile.html';
+  location.href = ret;
+}
+
+async function doRegister(e) {
+  e.preventDefault();
+  clearMsg();
+  const first    = document.getElementById('r-first').value.trim();
+  const last     = document.getElementById('r-last').value.trim();
+  const phone    = document.getElementById('r-phone').value.trim();
+  const email    = document.getElementById('r-email').value.trim();
+  const password = document.getElementById('r-pass').value;
+
+  if (!first || !email || !password) {
+    showMsg('auth-msg', 'Please fill in all required fields.', 'error');
+    return;
+  }
+  if (password.length < 6) {
+    showMsg('auth-msg', 'Password must be at least 6 characters.', 'error');
+    return;
+  }
+
+  setLoading('btn-register', true, 'Creating account…');
+
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { first_name: first, last_name: last, phone }
+    }
+  });
+
+  setLoading('btn-register', false, 'Create Account');
+
+  if (error) {
+    const msg = error.message || error.msg || error.error_description || error.error || JSON.stringify(error);
+    console.error('Signup error:', error);
+    showMsg('auth-msg', msg || 'Registration failed. Please try again.', 'error');
+    return;
+  }
+
+  if (!data.user) {
+    showMsg('auth-msg', 'Registration failed — no user returned. Check Supabase logs.', 'error');
+    return;
+  }
+
+  // If session exists immediately → email confirmation is OFF → save profile + redirect
+  if (data.session) {
+    try {
+      await sb.from('profiles').upsert({
+        id: data.user.id,
+        first_name: first,
+        last_name: last,
+        phone,
+        email
+      });
+    } catch (_) {}
+    const ret = new URLSearchParams(location.search).get('return') || 'profile.html';
+    location.href = ret;
+    return;
+  }
+
+  // No session → email confirmation is ON → show verify screen
+  // Profile basics are created by the database trigger automatically
+  document.getElementById('view-login-register').style.display = 'none';
+  document.getElementById('view-verify').style.display = '';
+  document.getElementById('verify-email-display').textContent = email;
+}
+
+async function doForgot(e) {
+  e.preventDefault();
+  clearMsg();
+  const email = document.getElementById('f-email').value.trim();
+  setLoading('btn-forgot', true, 'Sending…');
+
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: location.origin + '/auth.html'
+  });
+
+  setLoading('btn-forgot', false, 'Send Reset Link');
+
+  if (error) {
+    showMsg('forgot-msg', error.message, 'error');
+  } else {
+    showMsg('forgot-msg', 'Reset link sent! Check your email.', 'success');
+  }
+}
+</script>
+</body>
+</html>

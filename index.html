@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rent Me Bangkok — Studio, Podcast & Camera Rental</title>
+<meta name="description" content="Professional photo studio, podcast filming & editing, and DJI camera rental in Bangkok's Asoke/Makkasan area.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070709;
+  --bg-card: #0f0f12;
+  --bg-elevated: #17171c;
+  --fg: #f5f5f5;
+  --fg-muted: #888;
+  --accent: #e63946;
+  --accent-blue: #2563eb;
+  --accent-blue-glow: rgba(37,99,235,0.18);
+  --accent-red-glow: rgba(230,57,70,0.15);
+  --border: rgba(255,255,255,0.07);
+  --border-blue: rgba(37,99,235,0.3);
+  --border-red: rgba(230,57,70,0.3);
+  --radius: 12px;
+  --ease: cubic-bezier(0.16,1,0.3,1);
+  --font-head: 'Bebas Neue', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.6;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;font-family:var(--font-body)}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:all .3s var(--ease)}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.nav-logo span{font-family:var(--font-head);font-size:20px;letter-spacing:.05em;color:var(--fg)}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--fg-muted);transition:color .2s;letter-spacing:.05em;text-transform:uppercase}
+.nav-links a:hover{color:var(--fg)}
+.lang-select{position:relative}
+.lang-select select{background:var(--bg-card);color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;font-family:var(--font-body);cursor:pointer;appearance:none;padding-right:24px}
+.lang-select::after{content:'▾';position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:10px;color:var(--fg-muted)}
+.nav-cta{background:var(--accent);color:#fff;padding:10px 22px;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:.05em;transition:opacity .2s,transform .2s var(--ease)}
+.nav-cta:hover{opacity:.85;transform:translateY(-1px)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer}
+.hamburger span{width:24px;height:2px;background:var(--fg);border-radius:2px;transition:.3s}
+
+/* ── HERO ── */
+#hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:120px 40px 80px}
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg img{width:100%;height:100%;object-fit:cover;opacity:.42;filter:saturate(1.3) contrast(1.05)}
+.hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(7,7,9,.3) 0%,rgba(7,7,9,.65) 55%,rgba(7,7,9,1) 100%)}
+.hero-bg::before{content:'';position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 55% 40% at 15% 60%,rgba(37,99,235,.12) 0%,transparent 70%),radial-gradient(ellipse 40% 35% at 85% 40%,rgba(230,57,70,.1) 0%,transparent 70%)}
+.hero-content{position:relative;z-index:1;text-align:center;max-width:900px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(90deg,rgba(230,57,70,.1),rgba(37,99,235,.1));border:1px solid rgba(37,99,235,.35);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:500;color:#60a5fa;letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px;animation:fadeUp .8s var(--ease) both}
+.hero-badge .dot{width:6px;height:6px;background:var(--accent-blue);border-radius:50%;animation:pulse 2s infinite}
+.hero-title{font-family:var(--font-head);font-size:clamp(3.5rem,10vw,9rem);line-height:.92;letter-spacing:.02em;color:var(--fg);animation:fadeUp .8s .1s var(--ease) both}
+:lang(th) .hero-title{font-size:clamp(2rem,6vw,5.5rem);line-height:1.25;letter-spacing:0;word-break:break-word}
+:lang(th) .section-title{font-size:clamp(1.6rem,3.5vw,3rem);line-height:1.3;letter-spacing:0;word-break:break-word}
+:lang(th) .cta-title{font-size:clamp(2rem,6vw,5rem);line-height:1.25;letter-spacing:0;word-break:break-word}
+:lang(th) .service-title{font-size:1.1rem;line-height:1.4}
+:lang(th) .price-title{font-size:1rem;line-height:1.4}
+.hero-title span{color:var(--accent)}
+.hero-sub{font-size:clamp(1rem,2vw,1.2rem);color:var(--fg-muted);margin:24px auto 40px;max-width:560px;font-weight:300;animation:fadeUp .8s .2s var(--ease) both}
+.hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeUp .8s .3s var(--ease) both}
+.btn-primary{background:var(--accent);color:#fff;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;transition:transform .2s var(--ease),opacity .2s;letter-spacing:.03em}
+.btn-primary:hover{transform:translateY(-2px);opacity:.9}
+.btn-ghost{border:1px solid var(--border);color:var(--fg);padding:14px 32px;border-radius:8px;font-weight:500;font-size:15px;transition:border-color .2s,background .2s}
+.btn-ghost:hover{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
+.hero-stats{display:flex;gap:48px;justify-content:center;margin-top:64px;padding-top:40px;border-top:1px solid var(--border);animation:fadeUp .8s .4s var(--ease) both;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-num{font-family:var(--font-head);font-size:2.8rem;color:var(--fg);line-height:1}
+.stat-label{font-size:12px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+
+/* ── TRUST ── */
+#trust{padding:60px 40px;border-bottom:1px solid var(--border)}
+.trust-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:40px;flex-wrap:wrap;justify-content:center}
+.trust-label{font-size:12px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap}
+.trust-divider{width:1px;height:32px;background:var(--border)}
+.trust-items{display:flex;gap:32px;flex-wrap:wrap;align-items:center}
+.trust-item{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--fg-muted)}
+.trust-item svg{color:var(--accent);flex-shrink:0}
+.trust-item strong{color:var(--fg)}
+
+/* ── SECTION COMMON ── */
+section{padding:100px 40px}
+.section-tag{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px}
+.section-title{font-family:var(--font-head);font-size:clamp(2.2rem,5vw,4rem);line-height:1;color:var(--fg);margin-bottom:16px}
+.section-sub{font-size:16px;color:var(--fg-muted);max-width:520px;line-height:1.7}
+.section-header{margin-bottom:64px}
+.container{max-width:1200px;margin:0 auto}
+
+/* ── SERVICES ── */
+#services{background:var(--bg)}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.service-card{background:var(--bg-card);padding:48px 36px;position:relative;overflow:hidden;transition:background .3s var(--ease);cursor:pointer}
+.service-card:hover{background:var(--bg-elevated)}
+.service-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease)}
+.service-card:hover::before{transform:scaleX(1)}
+.service-card.featured-pod{background:linear-gradient(160deg,#0a0a14 0%,#0c0e1a 50%,#0a0a0f 100%);border-top:2px solid var(--accent-blue);border-bottom:1px solid var(--border-blue)}
+.service-card.featured-pod::before{background:linear-gradient(90deg,var(--accent-blue),var(--accent));transform:scaleX(1)}
+.service-card.featured-pod:hover{background:linear-gradient(160deg,#0d0d1a 0%,#0f1120 50%,#0d0d15 100%)}
+.pod-featured-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(37,99,235,.15);border:1px solid var(--border-blue);color:#60a5fa;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:100px;margin-bottom:14px}
+.service-num{font-family:var(--font-head);font-size:4rem;color:rgba(255,255,255,.04);position:absolute;top:20px;right:24px;line-height:1;user-select:none}
+.service-icon{width:48px;height:48px;background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:24px}
+.service-icon svg{color:var(--accent)}
+.service-for{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
+.service-title{font-family:var(--font-head);font-size:1.9rem;color:var(--fg);margin-bottom:12px;line-height:1.05}
+.service-desc{font-size:14px;color:var(--fg-muted);line-height:1.7;margin-bottom:20px}
+.service-benefit{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--fg-muted);margin-bottom:24px;padding:12px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid var(--border)}
+.service-benefit svg{color:var(--accent);flex-shrink:0;margin-top:2px}
+.service-cta{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:10px 18px;transition:border-color .2s,color .2s}
+.service-cta:hover{border-color:var(--accent);color:var(--accent)}
+.service-cta svg{transition:transform .2s var(--ease)}
+.service-cta:hover svg{transform:translateX(4px)}
+.service-images{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin:0 0 28px}
+.service-images img{width:100%;aspect-ratio:4/3;object-fit:cover;filter:brightness(.8)}
+.service-images.single img{grid-column:1/-1;aspect-ratio:16/7}
+
+/* ── SOCIAL PROOF ── */
+#social-proof{background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.proof-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.proof-numbers{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.proof-num-item{padding:24px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius)}
+.proof-num-item .big{font-family:var(--font-head);font-size:3rem;color:var(--fg);line-height:1}
+.proof-num-item .big span{color:var(--accent)}
+.proof-num-item p{font-size:13px;color:var(--fg-muted);margin-top:4px}
+.reviews{display:flex;flex-direction:column;gap:16px}
+.review-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.review-stars{color:#f59e0b;font-size:14px;margin-bottom:8px}
+.review-text{font-size:14px;color:var(--fg-muted);line-height:1.7;font-style:italic;margin-bottom:12px}
+.review-author{display:flex;align-items:center;gap:10px}
+.review-avatar{width:32px;height:32px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--fg)}
+.review-name{font-size:13px;font-weight:600;color:var(--fg)}
+.review-role{font-size:11px;color:var(--fg-muted)}
+
+/* ── PRICING HIGHLIGHT ── */
+#pricing{background:var(--bg)}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.price-card{background:var(--bg-card);padding:40px 32px;position:relative}
+.price-card.featured{background:linear-gradient(135deg,#1a0a0b 0%,#1a0808 100%);border:1px solid rgba(230,57,70,.3)}
+.price-badge{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:0 0 6px 6px;letter-spacing:.08em;text-transform:uppercase}
+.price-service{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
+.price-title{font-family:var(--font-head);font-size:1.6rem;color:var(--fg);margin-bottom:20px}
+.price-amount{margin-bottom:8px}
+.price-amount .amount{font-family:var(--font-head);font-size:3rem;color:var(--fg);line-height:1}
+.price-amount .period{font-size:13px;color:var(--fg-muted)}
+.price-desc{font-size:13px;color:var(--fg-muted);margin-bottom:24px;line-height:1.6}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+.price-features li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--fg-muted)}
+.price-features li svg{color:var(--accent);flex-shrink:0}
+.price-btn{display:block;text-align:center;padding:13px;border-radius:8px;font-weight:600;font-size:14px;transition:.2s var(--ease)}
+.price-btn.primary{background:var(--accent);color:#fff}
+.price-btn.primary:hover{opacity:.85;transform:translateY(-1px)}
+.price-btn.ghost{border:1px solid var(--border);color:var(--fg)}
+.price-btn.ghost:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.04)}
+
+/* ── FAQ ── */
+#faq{background:var(--bg-card);border-top:1px solid var(--border)}
+.faq-layout{display:grid;grid-template-columns:1fr 2fr;gap:80px;align-items:start}
+.faq-list{display:flex;flex-direction:column;gap:2px}
+.faq-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s}
+.faq-item.open{border-color:rgba(230,57,70,.3)}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;padding:20px 24px;font-size:14px;font-weight:600;color:var(--fg);text-align:left;cursor:pointer;gap:16px;background:none;transition:color .2s}
+.faq-q:hover{color:var(--accent)}
+.faq-q .icon{width:20px;height:20px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .3s var(--ease),border-color .2s;font-size:12px;color:var(--fg-muted)}
+.faq-item.open .faq-q .icon{transform:rotate(45deg);border-color:var(--accent);color:var(--accent)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s var(--ease)}
+.faq-a-inner{padding:0 24px 20px;font-size:14px;color:var(--fg-muted);line-height:1.7}
+.faq-item.open .faq-a{max-height:300px}
+
+/* ── FINAL CTA ── */
+#final-cta{padding:120px 40px;text-align:center;background:var(--bg);position:relative;overflow:hidden}
+#final-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 0%,rgba(230,57,70,.08) 0%,transparent 70%)}
+.cta-title{font-family:var(--font-head);font-size:clamp(3rem,8vw,7rem);line-height:.95;color:var(--fg);margin-bottom:24px;position:relative}
+.cta-title span{color:var(--accent)}
+.cta-sub{font-size:17px;color:var(--fg-muted);max-width:480px;margin:0 auto 40px;line-height:1.7}
+.cta-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.location-badge{margin-top:40px;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--fg-muted)}
+.location-badge svg{color:var(--accent)}
+
+/* ── FOOTER ── */
+footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px 40px;text-align:center}
+.footer-logo{font-family:var(--font-head);font-size:1.6rem;letter-spacing:.05em;margin-bottom:12px}
+.footer-logo span{color:var(--accent)}
+.footer-links{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+.footer-links a{font-size:13px;color:var(--fg-muted);transition:color .2s}
+.footer-links a:hover{color:var(--fg)}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.2)}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+.reveal-delay-4{transition-delay:.4s}
+
+/* ── MAKE.COM-STYLE: Animated Gradient Mesh (Hero) ── */
+@keyframes meshShift1{0%{transform:translate(0%,0%) scale(1)}33%{transform:translate(8%,-6%) scale(1.15)}66%{transform:translate(-5%,10%) scale(0.95)}100%{transform:translate(0%,0%) scale(1)}}
+@keyframes meshShift2{0%{transform:translate(0%,0%) scale(1)}33%{transform:translate(-10%,8%) scale(1.1)}66%{transform:translate(6%,-5%) scale(1.2)}100%{transform:translate(0%,0%) scale(1)}}
+@keyframes meshShift3{0%{transform:translate(0%,0%) scale(1.05)}50%{transform:translate(4%,6%) scale(0.9)}100%{transform:translate(0%,0%) scale(1.05)}}
+.hero-mesh{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.hero-mesh-blob{position:absolute;border-radius:50%;filter:blur(120px);mix-blend-mode:screen;will-change:transform}
+.hero-mesh-blob.b1{width:600px;height:600px;background:radial-gradient(circle,rgba(37,99,235,.22) 0%,transparent 70%);top:-100px;left:-100px;animation:meshShift1 14s ease-in-out infinite}
+.hero-mesh-blob.b2{width:500px;height:500px;background:radial-gradient(circle,rgba(230,57,70,.18) 0%,transparent 70%);top:30%;right:-80px;animation:meshShift2 17s ease-in-out infinite}
+.hero-mesh-blob.b3{width:700px;height:700px;background:radial-gradient(circle,rgba(37,99,235,.1) 0%,transparent 70%);bottom:-150px;left:30%;animation:meshShift3 20s ease-in-out infinite}
+
+/* ── MAKE.COM-STYLE: Glow Border on Service Cards ── */
+.service-card{isolation:isolate}
+.service-card::after{content:'';position:absolute;inset:0;border-radius:0;opacity:0;background:transparent;box-shadow:inset 0 0 0 1px rgba(37,99,235,0);transition:opacity .4s var(--ease),box-shadow .4s var(--ease);pointer-events:none;z-index:2}
+.service-card:hover::after{opacity:1;box-shadow:inset 0 0 0 1px rgba(37,99,235,.45),0 0 40px rgba(37,99,235,.12)}
+.service-card.featured-pod::after{opacity:1;box-shadow:inset 0 0 0 1px rgba(37,99,235,.3),0 0 60px rgba(37,99,235,.08)}
+.service-card.featured-pod:hover::after{box-shadow:inset 0 0 0 1px rgba(37,99,235,.6),0 0 80px rgba(37,99,235,.18)}
+
+/* ── MAKE.COM-STYLE: Animated Dot Grid (Booking) ── */
+@keyframes dotPulse{0%,100%{opacity:.18}50%{opacity:.45}}
+@keyframes dotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.booking-dots{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.booking-dots canvas{position:absolute;inset:0;width:100%;height:100%}
+
+/* ── MAKE.COM-STYLE: Breathing Glow CTA ── */
+@keyframes ctaGlowBreathe{0%,100%{opacity:.06;transform:scale(1)}50%{opacity:.14;transform:scale(1.08)}}
+@keyframes ctaGlowBreathe2{0%,100%{opacity:.04;transform:scale(1)}50%{opacity:.1;transform:scale(1.12)}}
+.cta-glow-ring{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.cta-glow-ring::before{content:'';position:absolute;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(230,57,70,1) 0%,transparent 70%);left:50%;top:50%;transform:translate(-50%,-50%);animation:ctaGlowBreathe 4s ease-in-out infinite}
+.cta-glow-ring::after{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.8) 0%,transparent 70%);left:50%;top:50%;transform:translate(-50%,-60%);animation:ctaGlowBreathe2 6s ease-in-out infinite}
+
+/* ── MOBILE MENU ── */
+.mobile-nav{display:none;position:fixed;inset:0;z-index:99;background:rgba(8,8,8,.98);flex-direction:column;align-items:center;justify-content:center;gap:32px;backdrop-filter:blur(20px)}
+.mobile-nav.open{display:flex}
+.mobile-nav a{font-family:var(--font-head);font-size:2.5rem;letter-spacing:.05em;color:var(--fg);transition:color .2s}
+.mobile-nav a:hover{color:var(--accent)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .services-grid{grid-template-columns:1fr}
+  .pricing-grid{grid-template-columns:1fr}
+  .proof-grid{grid-template-columns:1fr}
+  .faq-layout{grid-template-columns:1fr;gap:40px}
+  .dji-grid-inner{grid-template-columns:1fr!important}
+}
+@media(max-width:768px){
+  [style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:1fr!important}
+  [style*="padding:0 40px"]{padding:0 20px!important}
+  nav{padding:14px 20px}
+  .nav-links,.nav-cta{display:none}
+  .hamburger{display:flex}
+  section{padding:70px 20px}
+  #hero{padding:100px 20px 60px}
+  .hero-stats{gap:24px}
+  .proof-numbers{grid-template-columns:1fr 1fr}
+  .trust-inner{flex-direction:column;gap:20px}
+  .trust-divider{display:none}
+  #trust{padding:40px 20px}
+  #final-cta{padding:80px 20px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <img src="https://i.imgur.com/placeholder.png" alt="Rent Me Bangkok" id="nav-logo-img" onerror="this.style.display='none'">
+    <span>RENT<span style="color:var(--accent)">ME</span> BANGKOK</span>
+  </div>
+  <div class="nav-links">
+    <a href="#services" data-i18n="nav_services">Services</a>
+    <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
+    <a href="#social-proof" data-i18n="nav_about">About</a>
+    <a href="#faq" data-i18n="nav_faq">FAQ</a>
+    <div class="lang-select">
+      <select id="lang-switcher" aria-label="Select language">
+        <option value="en">🇬🇧 EN</option>
+        <option value="fr">🇫🇷 FR</option>
+        <option value="de">🇩🇪 DE</option>
+        <option value="ru">🇷🇺 RU</option>
+        <option value="th">🇹🇭 TH</option>
+      </select>
+    </div>
+  </div>
+  <a href="booking.html" class="nav-cta" data-i18n="nav_book">Book Now</a>
+  <div class="hamburger" id="hamburger" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mobile-nav" id="mobile-nav">
+  <a href="#services" onclick="closeMobileNav()" data-i18n="nav_services">Services</a>
+  <a href="#pricing" onclick="closeMobileNav()" data-i18n="nav_pricing">Pricing</a>
+  <a href="#social-proof" onclick="closeMobileNav()" data-i18n="nav_about">About</a>
+  <a href="#faq" onclick="closeMobileNav()" data-i18n="nav_faq">FAQ</a>
+  <a href="booking.html" onclick="closeMobileNav()" class="btn-primary" data-i18n="nav_book">Book Now</a>
+</div>
+
+<!-- ══ HERO ══ -->
+<section id="hero">
+  <div class="hero-mesh">
+    <div class="hero-mesh-blob b1"></div>
+    <div class="hero-mesh-blob b2"></div>
+    <div class="hero-mesh-blob b3"></div>
+  </div>
+  <div class="hero-bg">
+    <img src="images/podcast-on-air.jpg" alt="Podcast studio Bangkok ON AIR" id="hero-img">
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      <span data-i18n="hero_badge">Bangkok · Asoke · Makkasan</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;margin-bottom:24px;font-size:12px;color:rgba(245,245,245,.45);letter-spacing:.04em">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      51 Kamphaeng Phet 7 Rd, Makkasan, Ratchathewi, Bangkok 10400
+    </div>
+    <h1 class="hero-title" data-i18n="hero_title">YOUR SPACE.<br><span>YOUR VISION.</span><br>YOUR STUDIO.</h1>
+    <p class="hero-sub" data-i18n="hero_sub">Photo studio, podcast recording & editing, and DJI camera + drone rental — all in one creative hub in the heart of Bangkok.</p>
+    <div class="hero-actions">
+      <a href="#services" class="btn-primary" data-i18n="hero_cta_primary">Explore Services</a>
+      <a href="https://www.instagram.com/bangkok_rentme" target="_blank" class="btn-ghost" data-i18n="hero_cta_secondary">See Our Work</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num" data-target="141662" id="stat1">0</div>
+        <div class="stat-label" data-i18n="stat_views">Views / 30 days</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">21</div>
+        <div class="stat-label" data-i18n="stat_posts">Posts Published</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">3</div>
+        <div class="stat-label" data-i18n="stat_services">Core Services</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">BTS</div>
+        <div class="stat-label" data-i18n="stat_location">Makkasan / Asoke</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SERVICES ══ -->
+<section id="services">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag" data-i18n="services_tag">What We Offer</div>
+      <h2 class="section-title" data-i18n="services_title">THREE SERVICES.<br>ONE CREATIVE HUB.</h2>
+      <p class="section-sub" data-i18n="services_sub">Whether you're shooting a product, recording your first podcast, or filming aerial footage — we have the space, gear, and skills to make it happen.</p>
+    </div>
+  </div>
+
+  <div class="services-grid">
+
+    <!-- SERVICE 1: Photo Studio -->
+    <div class="service-card reveal">
+      <div class="service-num">01</div>
+      <div class="service-images">
+        <img src="images/photo-studio.jpg" alt="Photo studio colorful backdrop Bangkok">
+        <img src="images/studio-photoshoot.jpg" alt="Fashion photoshoot in action at Rent Me Bangkok studio" style="filter:brightness(.42) contrast(1.05);object-position:center center;">
+      </div>
+      <div class="service-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </div>
+      <div class="service-for" data-i18n="s1_for">For photographers, brands & content creators</div>
+      <h3 class="service-title" data-i18n="s1_title">PHOTO STUDIO RENTAL</h3>
+      <p class="service-desc" data-i18n="s1_desc">A fully equipped photography studio in central Bangkok you can rent by the hour or day. Comes with studio strobe lights, softboxes, seamless backdrop in multiple colors, and a lounge setup for lifestyle shoots. No hidden fees — just show up and shoot.</p>
+      <div class="service-benefit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span data-i18n="s1_benefit">Professional lighting + backdrops ready in minutes — no setup stress.</span>
+      </div>
+      <a href="booking.html" class="service-cta">
+        <span data-i18n="s1_cta">Book the Studio</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
+    <!-- SERVICE 2: Podcast FEATURED -->
+    <div class="service-card featured-pod reveal reveal-delay-1">
+      <div class="pod-featured-badge">
+        <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#2563eb"/></svg>
+        Most Booked Service
+      </div>
+      <div class="service-num" style="color:rgba(37,99,235,.06)">02</div>
+      <div class="service-images">
+        <img src="images/podcast-on-air.jpg" alt="ON AIR podcast studio Bangkok" style="filter:brightness(.8)">
+        <img src="images/podcast-setup.jpg" alt="Podcast studio setup" style="filter:brightness(.8)">
+      </div>
+      <div class="service-icon" style="background:rgba(37,99,235,.12);border-color:rgba(37,99,235,.25)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </div>
+      <div class="service-for" data-i18n="s2_for">For podcasters, YouTubers, entrepreneurs & talk show hosts</div>
+      <h3 class="service-title" data-i18n="s2_title">PODCAST FILMING & EDITING</h3>
+      <p class="service-desc" data-i18n="s2_desc">Record your podcast in a cinematic "ON AIR" studio designed for up to 4 guests. We film with professional cameras, add clean audio with professional microphones, and handle the full edit — color grading, titles, sound design. You just talk. We handle the rest.</p>
+      <div class="service-benefit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span data-i18n="s2_benefit">Walk in with ideas, walk out with a publish-ready episode.</span>
+      </div>
+      <a href="booking.html" class="service-cta" style="border-color:rgba(37,99,235,.4);color:#60a5fa">
+        <span data-i18n="s2_cta">Start Your Podcast</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
+    <!-- SERVICE 3: DJI Rental -->
+    <div class="service-card reveal reveal-delay-2">
+      <div class="service-num">03</div>
+      <div class="service-images single">
+        <img src="images/dji-all-gear.png" alt="DJI Osmo Pocket 3, DJI Neo drone and DJI Osmo Nano all gear">
+      </div>
+      <div class="service-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="service-for" data-i18n="s3_for">For filmmakers, real estate agents, travel content creators</div>
+      <h3 class="service-title" data-i18n="s3_title">DJI CAMERA & DRONE RENTAL</h3>
+      <p class="service-desc" data-i18n="s3_desc">Rent professional DJI cameras and drones without the full purchase price. Perfect for one-off projects, travel shoots, or testing before you buy. Pick up in Bangkok, fly anywhere. All gear comes checked, charged, and ready to use with a brief orientation if needed.</p>
+      <div class="service-benefit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span data-i18n="s3_benefit">Cinematic aerial shots at a fraction of the ownership cost.</span>
+      </div>
+      <a href="booking.html" class="service-cta">
+        <span data-i18n="s3_cta">Rent a DJI</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TRUST BAR ══ -->
+<div id="trust">
+  <div class="trust-inner">
+    <span class="trust-label" data-i18n="trust_label">Why creators choose us</span>
+    <div class="trust-divider"></div>
+    <div class="trust-items">
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span data-i18n="trust_1"><strong>Professional gear</strong> — DJI, studio lights, mics</span>
+      </div>
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span data-i18n="trust_2"><strong>Flexible hours</strong> — book by the session</span>
+      </div>
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span data-i18n="trust_3"><strong>All skill levels</strong> — beginners welcome</span>
+      </div>
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span data-i18n="trust_4"><strong>Central Bangkok</strong> — 5 min from Asoke BTS</span>
+      </div>
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span data-i18n="trust_5"><strong>Full editing service</strong> — we handle post-production</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MUSIC VIDEO BANNER ══ -->
+<section id="music-video" style="position:relative;overflow:hidden;background:#000;">
+  <video autoplay muted loop playsinline
+    style="width:100%;display:block;max-height:600px;object-fit:cover;object-position:center 28%;transform:scale(1.08);transform-origin:center 28%;opacity:.52;filter:brightness(.85) contrast(1.05);"
+    poster="images/studio-photoshoot.jpg">
+    <source src="images/music-video.mp4" type="video/mp4">
+  </video>
+  <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(7,7,9,.2) 0%,rgba(7,7,9,.7) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;">
+    <div style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.3);border-radius:999px;padding:.35rem 1rem;margin-bottom:1.2rem;">
+      <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#e63946"/></svg>
+      <span style="font-family:var(--font-body);font-size:.72rem;letter-spacing:.12em;color:#e63946;text-transform:uppercase;">Now Available</span>
+    </div>
+    <h2 style="font-family:var(--font-head);font-size:clamp(2.2rem,5vw,4rem);color:#f5f5f5;margin:0 0 .8rem;line-height:1;">MUSIC VIDEOS &amp; SHORT FILMS</h2>
+    <p style="font-family:var(--font-body);font-size:1rem;color:rgba(245,245,245,.7);max-width:560px;margin:0 0 1.8rem;line-height:1.6;">Our studio doubles as a cinematic set. Bring your artist, bring your vision — we provide the space, lighting, and backdrop for world-class music video production.</p>
+    <a href="booking.html" style="display:inline-flex;align-items:center;gap:.5rem;background:var(--accent);color:#fff;font-family:var(--font-body);font-size:.88rem;font-weight:600;letter-spacing:.04em;padding:.75rem 1.75rem;border-radius:999px;text-decoration:none;transition:opacity .2s;">
+      Book the Studio
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ══ SOCIAL PROOF ══ -->
+<section id="social-proof">
+  <div class="container">
+    <div class="proof-grid">
+      <div>
+        <div class="section-tag reveal" data-i18n="proof_tag">Real Results</div>
+        <h2 class="section-title reveal" data-i18n="proof_title">CREATORS LOVE THIS SPACE</h2>
+        <p class="section-sub reveal" data-i18n="proof_sub">Hundreds of creators, brands, and entrepreneurs have used Rent Me Bangkok to launch, grow, and tell their story.</p>
+        <div class="proof-numbers" style="margin-top:40px">
+          <div class="proof-num-item reveal">
+            <div class="big">141<span>K</span></div>
+            <p data-i18n="proof_n1">Views in 30 days</p>
+          </div>
+          <div class="proof-num-item reveal reveal-delay-1">
+            <div class="big">1.6<span>K</span></div>
+            <p data-i18n="proof_n2">IG Followers</p>
+          </div>
+          <div class="proof-num-item reveal reveal-delay-2">
+            <div class="big">฿200</div>
+            <p data-i18n="proof_n3">Promo week rate</p>
+          </div>
+          <div class="proof-num-item reveal reveal-delay-3">
+            <div class="big">4<span>+</span></div>
+            <p data-i18n="proof_n4">Guest podcast setups</p>
+          </div>
+        </div>
+      </div>
+      <div class="reviews">
+        <div class="review-card reveal">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text" data-i18n="r1_text">"The podcast studio is insane for the price. The ON AIR setup, the lighting, the mics — everything was ready when I arrived. Recorded two episodes in one session."</p>
+          <div class="review-author">
+            <div class="review-avatar">K</div>
+            <div>
+              <div class="review-name">Khun Nat</div>
+              <div class="review-role" data-i18n="r1_role">Podcast Host, Bangkok</div>
+            </div>
+          </div>
+        </div>
+        <div class="review-card reveal reveal-delay-1">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text" data-i18n="r2_text">"Rented the DJI for a real estate shoot in Pattaya. Everything was charged, calibrated, and came with a quick tutorial. Saved me thousands vs. buying. Will definitely rent again."</p>
+          <div class="review-author">
+            <div class="review-avatar">S</div>
+            <div>
+              <div class="review-name">Sascha M.</div>
+              <div class="review-role" data-i18n="r2_role">Real Estate Photographer</div>
+            </div>
+          </div>
+        </div>
+        <div class="review-card reveal reveal-delay-2">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text" data-i18n="r3_text">"First time using a professional studio and they made it so easy. Multiple backdrop colors, great lights, and flexible timing. My brand photos finally look like real brand photos."</p>
+          <div class="review-author">
+            <div class="review-avatar">A</div>
+            <div>
+              <div class="review-name">Amira L.</div>
+              <div class="review-role" data-i18n="r3_role">Fashion Brand Founder</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PRICING HIGHLIGHT ══ -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag" data-i18n="pricing_tag">Transparent Pricing</div>
+      <h2 class="section-title" data-i18n="pricing_title">SIMPLE RATES.<br>NO SURPRISES.</h2>
+    </div>
+    <div class="pricing-grid">
+
+      <div class="price-card reveal">
+        <div class="price-service" data-i18n="p1_service">Photo Studio</div>
+        <div class="price-title" data-i18n="p1_title">Studio Rental</div>
+        <div class="price-amount">
+          <span class="amount">฿200</span>
+          <span class="period" data-i18n="p1_period"> / hour (promo)</span>
+        </div>
+        <p class="price-desc" data-i18n="p1_desc">Full studio access with lights, backdrops, and lounge setup. Hourly booking, no minimum.</p>
+        <ul class="price-features">
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p1_f1">Studio strobes + softboxes</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p1_f2">Multiple backdrop colors</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p1_f3">Lounge props & furniture</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p1_f4">Ring light + accessories</span></li>
+        </ul>
+        <a href="booking.html" class="price-btn ghost" data-i18n="p1_btn">Book Studio</a>
+      </div>
+
+      <!-- Podcast Studio Setup -->
+      <div class="price-card reveal reveal-delay-1" style="border-color:rgba(37,99,235,.2)">
+        <div class="price-service" style="color:#60a5fa">Podcast Studio</div>
+        <div class="price-title">SET UP YOUR OWN PODCAST</div>
+        <div class="price-amount" style="display:flex;flex-direction:column;gap:6px">
+          <div>
+            <span class="amount" style="color:#60a5fa">฿200</span>
+            <span class="period"> / hour</span>
+          </div>
+          <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.3);border-radius:6px;padding:5px 12px;width:fit-content">
+            <span style="font-size:11px;color:var(--fg-muted)">+ One-time setup</span>
+            <span style="font-family:var(--font-head);font-size:1.1rem;color:var(--accent)">฿1,000</span>
+          </div>
+        </div>
+        <p class="price-desc" style="margin-top:12px">You run the show — we set up everything. Cameras, mics, lighting, sofa & table, decorations. Your vision, our setup.</p>
+        <ul class="price-features">
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Professional cameras & microphones</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Professional lighting rig</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Sofa & table setup</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Decorations & studio design</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Fully customisable style</li>
+        </ul>
+        <a href="booking.html?service=podcast_setup" class="price-btn ghost">Set Up My Podcast</a>
+      </div>
+
+      <!-- Full Podcast Package — Most Popular -->
+      <div class="price-card featured reveal reveal-delay-2">
+        <div class="price-badge">Most Popular</div>
+        <div class="price-service">Podcast Package</div>
+        <div class="price-title">Full Podcast Service</div>
+        <div class="price-amount">
+          <span class="amount">฿10,000</span>
+          <span class="period"> / month</span>
+        </div>
+        <p class="price-desc">4 sessions/month. Full filming, editing, color grade & delivery. Was ฿18,000 — save ฿8,000.</p>
+        <ul class="price-features">
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Videographer on set</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Full video editing</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Color grading & sound design</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Studio rental included</li>
+        </ul>
+        <a href="booking.html" class="price-btn primary">Get This Deal</a>
+      </div>
+
+    </div><!-- end pricing-grid -->
+  </div>
+
+  <!-- DJI GEAR SECTION -->
+  <div style="max-width:1200px;margin:64px auto 0;padding:0 40px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="section-tag">Camera &amp; Drone Rental</div>
+        <h3 style="font-family:var(--font-head);font-size:2.2rem;color:var(--fg);line-height:1">DJI AUTHORIZED RETAILER</h3>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:10px 16px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span style="font-size:12px;color:#60a5fa;font-weight:600;letter-spacing:.08em">AUTHORIZED DJI RETAILER</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
+
+      <!-- Osmo Pocket 3 -->
+      <div class="dji-card reveal" style="background:var(--bg-card);padding:32px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent-blue),transparent)"></div>
+        <img src="images/dji-pocket3.png" alt="DJI Osmo Pocket 3" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:8px;margin-bottom:20px">
+        <div style="font-size:11px;color:#60a5fa;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">DJI OSMO</div>
+        <div style="font-family:var(--font-head);font-size:1.8rem;color:var(--fg);margin-bottom:16px">POCKET 3</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px;margin-bottom:24px">
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>4K/120fps Video</li>
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>3-Axis Stabilization</li>
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>ActiveTrack 6.0</li>
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>2" Rotatable Touchscreen</li>
+        </ul>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">1 Day</div>
+            <div style="font-family:var(--font-head);font-size:1.5rem;color:var(--fg)">฿500</div>
+          </div>
+          <div style="background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">3+ Days</div>
+            <div style="font-family:var(--font-head);font-size:1.5rem;color:#60a5fa">฿300<span style="font-size:.7rem">/day</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DJI Neo -->
+      <div class="dji-card reveal reveal-delay-1" style="background:linear-gradient(160deg,#0a0a14,#0c0e1a);border-top:2px solid var(--accent-blue);padding:32px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:12px;right:12px;background:var(--accent-blue);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:.08em">BEST SELLER</div>
+        <img src="images/dji-neo.png" alt="DJI Neo Drone" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:8px;margin-bottom:20px">
+        <div style="font-size:11px;color:#60a5fa;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">DJI</div>
+        <div style="font-family:var(--font-head);font-size:1.8rem;color:var(--fg);margin-bottom:16px">NEO</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px;margin-bottom:24px">
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>4K Ultra HD Video</li>
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>135g Ultra-Light</li>
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>Palm Takeoff &amp; Landing</li>
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>AI Subject Tracking</li>
+        </ul>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">1 Day</div>
+            <div style="font-family:var(--font-head);font-size:1.5rem;color:var(--fg)">฿700</div>
+          </div>
+          <div style="background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">3+ Days</div>
+            <div style="font-family:var(--font-head);font-size:1.5rem;color:#60a5fa">฿500<span style="font-size:.7rem">/day</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DJI Osmo Nano -->
+      <div class="dji-card reveal reveal-delay-2" style="background:var(--bg-card);padding:32px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent-blue),transparent)"></div>
+        <img src="images/dji-nano.png" alt="DJI Osmo Nano action camera" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:8px;margin-bottom:20px">
+        <div style="font-size:11px;color:#60a5fa;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">DJI OSMO</div>
+        <div style="font-family:var(--font-head);font-size:1.8rem;color:var(--fg);margin-bottom:16px">NANO</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:7px;margin-bottom:24px">
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>4K/60fps Video</li>
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>Magnetic Design</li>
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>Waterproof (10m)</li>
+          <li style="display:flex;gap:8px;font-size:12px;color:var(--fg-muted)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>Voice Control</li>
+        </ul>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">1 Day</div>
+            <div style="font-family:var(--font-head);font-size:1.5rem;color:var(--fg)">฿500</div>
+          </div>
+          <div style="background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">3+ Days</div>
+            <div style="font-family:var(--font-head);font-size:1.5rem;color:#60a5fa">฿300<span style="font-size:.7rem">/day</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end dji grid -->
+
+    <!-- Pickup CTA bar -->
+    <div style="margin-top:2px;background:var(--bg-card);border-top:1px solid var(--border-blue);padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--fg-muted)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>51 Kamphaeng Phet 7 Rd, Makkasan, Ratchathewi, Bangkok 10400</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--fg-muted)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          <span>Instagram: <strong style="color:var(--fg)">@bangkok_rentme</strong></span>
+        </div>
+      </div>
+      <a href="booking.html" style="background:var(--accent-blue);color:#fff;padding:10px 24px;border-radius:6px;font-size:13px;font-weight:600;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Book Camera Rental</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ BOOKING CALENDAR ══ -->
+<section id="booking" style="background:var(--bg);padding:100px 40px;border-top:1px solid var(--border);position:relative;">
+  <div class="booking-dots"><canvas id="dot-grid-canvas"></canvas></div>
+  <div class="container">
+    <div class="section-header reveal" style="margin-bottom:60px">
+      <div class="section-tag">Available Now</div>
+      <h2 class="section-title">CHECK AVAILABILITY<br>& BOOK YOUR SLOT</h2>
+      <p class="section-sub">Pick a date to see open time slots. Book instantly online.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;max-width:900px;margin:0 auto">
+
+      <!-- Calendar -->
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+          <button id="cal-prev" onclick="calNav(-1)" style="background:none;border:1px solid var(--border);color:var(--fg);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center">‹</button>
+          <span id="cal-month" style="font-family:var(--font-head);font-size:1.2rem;letter-spacing:.05em;color:var(--fg)"></span>
+          <button id="cal-next" onclick="calNav(1)" style="background:none;border:1px solid var(--border);color:var(--fg);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center">›</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-bottom:8px">
+          <span style="font-size:.68rem;color:var(--fg-muted);padding:4px 0">SUN</span>
+          <span style="font-size:.68rem;color:var(--fg-muted);padding:4px 0">MON</span>
+          <span style="font-size:.68rem;color:var(--fg-muted);padding:4px 0">TUE</span>
+          <span style="font-size:.68rem;color:var(--fg-muted);padding:4px 0">WED</span>
+          <span style="font-size:.68rem;color:var(--fg-muted);padding:4px 0">THU</span>
+          <span style="font-size:.68rem;color:var(--fg-muted);padding:4px 0">FRI</span>
+          <span style="font-size:.68rem;color:var(--fg-muted);padding:4px 0">SAT</span>
+        </div>
+        <div id="cal-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center"></div>
+        <div style="display:flex;gap:16px;margin-top:20px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:3px;background:rgba(37,99,235,.25);border:1px solid rgba(37,99,235,.5)"></div><span style="font-size:.7rem;color:var(--fg-muted)">Available</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:3px;background:rgba(230,57,70,.2);border:1px solid rgba(230,57,70,.4)"></div><span style="font-size:.7rem;color:var(--fg-muted)">Booked</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:3px;background:var(--accent)"></div><span style="font-size:.7rem;color:var(--fg-muted)">Selected</span></div>
+        </div>
+      </div>
+
+      <!-- Time slots + service picker -->
+      <div>
+        <div id="slot-panel" style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px;min-height:280px">
+          <p id="slot-hint" style="color:var(--fg-muted);font-size:.9rem;margin:0;padding-top:40px;text-align:center">← Select a date to see available slots</p>
+          <div id="slot-content" style="display:none">
+            <div id="slot-date-label" style="font-family:var(--font-head);font-size:1.1rem;color:var(--fg);margin-bottom:18px;letter-spacing:.04em"></div>
+            <div style="margin-bottom:18px">
+              <div style="font-size:.75rem;color:var(--fg-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Service</div>
+              <div style="display:flex;flex-direction:column;gap:6px" id="service-picks">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.85rem;color:var(--fg)"><input type="radio" name="svc" value="Photo Studio" style="accent-color:var(--accent)"> Photo Studio Rental</label>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.85rem;color:var(--fg)"><input type="radio" name="svc" value="Podcast" style="accent-color:var(--accent)"> Podcast Filming & Editing</label>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.85rem;color:var(--fg)"><input type="radio" name="svc" value="DJI Rental" style="accent-color:var(--accent)"> DJI Camera / Drone Rental</label>
+              </div>
+            </div>
+            <div style="font-size:.75rem;color:var(--fg-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Time Slot</div>
+            <div id="slots-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+            <a id="book-cta" href="booking.html" style="display:none;margin-top:20px;width:100%;padding:.75rem;background:var(--accent);color:#fff;border-radius:999px;font-size:.85rem;font-weight:600;text-align:center;text-decoration:none;letter-spacing:.04em;box-sizing:border-box">
+              Book This Slot →
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const TIMES = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'];
+
+  // Simulate booked slots: weekends partially booked, some weekday slots taken
+  function isBooked(y, m, d) {
+    const seed = (y * 31 + m * 7 + d * 13) % 10;
+    return seed < 3; // ~30% booked
+  }
+  function isSlotBooked(h, d, m, y) {
+    const seed = (h * 17 + d * 7 + m * 3 + y) % 5;
+    return seed === 0;
+  }
+
+  let cur = new Date(), selDate = null, selSlot = null;
+  cur.setDate(1);
+
+  function render() {
+    const y = cur.getFullYear(), m = cur.getMonth();
+    document.getElementById('cal-month').textContent = MONTHS[m] + ' ' + y;
+    const first = new Date(y, m, 1).getDay();
+    const days = new Date(y, m+1, 0).getDate();
+    const today = new Date();
+    let html = '';
+    for(let i=0;i<first;i++) html += '<div></div>';
+    for(let d=1;d<=days;d++){
+      const past = new Date(y,m,d) < new Date(today.getFullYear(),today.getMonth(),today.getDate());
+      const booked = !past && isBooked(y,m,d);
+      const sel = selDate && selDate.d===d && selDate.m===m && selDate.y===y;
+      let bg='transparent', border='rgba(255,255,255,.06)', color='var(--fg-muted)', cursor='default';
+      if(past){ color='rgba(255,255,255,.18)'; }
+      else if(sel){ bg='var(--accent)'; border='var(--accent)'; color='#fff'; cursor='pointer'; }
+      else if(booked){ bg='rgba(230,57,70,.15)'; border='rgba(230,57,70,.35)'; color='rgba(230,57,70,.7)'; cursor='default'; }
+      else { bg='rgba(37,99,235,.12)'; border='rgba(37,99,235,.35)'; color='var(--fg)'; cursor='pointer'; }
+      const click = (!past && !booked) ? `onclick="calPick(${d},${m},${y})"` : '';
+      html += `<div ${click} style="padding:6px 0;border-radius:6px;font-size:.8rem;background:${bg};border:1px solid ${border};color:${color};cursor:${cursor};transition:all .15s">${d}</div>`;
+    }
+    document.getElementById('cal-days').innerHTML = html;
+  }
+
+  window.calNav = function(dir){ cur.setMonth(cur.getMonth()+dir); render(); };
+
+  window.calPick = function(d,m,y){
+    selDate={d,m,y}; selSlot=null;
+    render();
+    document.getElementById('slot-hint').style.display='none';
+    document.getElementById('slot-content').style.display='block';
+    document.getElementById('slot-date-label').textContent = MONTHS[m]+' '+d+', '+y;
+    document.getElementById('book-cta').style.display='none';
+    let html='';
+    TIMES.forEach(t=>{
+      const h=parseInt(t);
+      const taken = isSlotBooked(h,d,m,y);
+      if(taken){
+        html+=`<div style="padding:8px 4px;border-radius:8px;font-size:.78rem;text-align:center;background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.25);color:rgba(230,57,70,.5);">${t}<br><span style="font-size:.65rem">Booked</span></div>`;
+      } else {
+        html+=`<div onclick="pickSlot('${t}')" style="padding:8px 4px;border-radius:8px;font-size:.78rem;text-align:center;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.3);color:var(--fg);cursor:pointer;transition:all .15s" id="slot-${t.replace(':','')}">​${t}</div>`;
+      }
+    });
+    document.getElementById('slots-grid').innerHTML=html;
+  };
+
+  window.pickSlot = function(t){
+    if(selSlot) document.getElementById('slot-'+selSlot.replace(':',''))?.style && (document.getElementById('slot-'+selSlot.replace(':','')).style.background='rgba(37,99,235,.1)',document.getElementById('slot-'+selSlot.replace(':','')).style.borderColor='rgba(37,99,235,.3)',document.getElementById('slot-'+selSlot.replace(':','')).style.color='var(--fg)');
+    selSlot=t;
+    const el=document.getElementById('slot-'+t.replace(':',''));
+    if(el){el.style.background='var(--accent)';el.style.borderColor='var(--accent)';el.style.color='#fff';}
+    document.getElementById('book-cta').style.display='block';
+  };
+
+
+  render();
+})();
+</script>
+
+<!-- ══ FAQ ══ -->
+<section id="faq">
+  <div class="container">
+    <div class="faq-layout">
+      <div>
+        <div class="section-tag reveal" data-i18n="faq_tag">FAQ</div>
+        <h2 class="section-title reveal" data-i18n="faq_title">GOT QUESTIONS?</h2>
+        <p class="section-sub reveal" data-i18n="faq_sub">Here are the answers we get asked the most. Still have one? Message us on Instagram.</p>
+        <a href="https://www.instagram.com/bangkok_rentme" target="_blank" class="btn-ghost" style="display:inline-flex;align-items:center;gap:8px;margin-top:32px" data-i18n="faq_ig">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          @bangkok_rentme
+        </a>
+      </div>
+      <div class="faq-list reveal">
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq_q1">Where are you located exactly?</span><span class="icon">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a1">We are based in the Makkasan Station area of Bangkok, very close to Asoke BTS and Phetchaburi MRT. Easy to reach from any part of the city. DM us on Instagram for the exact address.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq_q2">Do I need experience to use the photo studio?</span><span class="icon">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a2">Not at all. Complete beginners are welcome. The studio is set up and ready to shoot — you just bring your camera or phone. We can give a quick orientation on using the lights if needed.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq_q3">What is included in the podcast filming package?</span><span class="icon">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a3">The monthly package includes 4 sessions (up to 2 hours each), professional camera filming, quality microphones, a videographer on set, and full post-production editing — color grading, sound design, and titles. You receive a publish-ready video file.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq_q4">Can I rent the DJI drone without experience?</span><span class="icon">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a4">We provide a short orientation session on pickup so you understand the basics. That said, you should have some familiarity with drone operation. If you are completely new, we recommend booking with our videographer who can fly it for you.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq_q5">How do I book a session?</span><span class="icon">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a5">The easiest way is to send us a DM on Instagram @bangkok_rentme or use the contact button on this page. Tell us the service, your preferred date and time, and we will confirm availability within a few hours.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq_q6">Can I bring my own team or guests to the studio?</span><span class="icon">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner" data-i18n="faq_a6">Yes, absolutely. The podcast studio fits up to 4 people at the recording table and there is additional lounge seating. Bring your guests, co-hosts, or team. The photo studio is also spacious for small crews.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FINAL CTA ══ -->
+<section id="final-cta">
+  <div class="cta-glow-ring"></div>
+  <div class="container">
+    <h2 class="cta-title reveal" data-i18n="cta_title">READY TO<br><span>CREATE?</span></h2>
+    <p class="cta-sub reveal" data-i18n="cta_sub">Book your studio session, podcast package, or DJI rental today. DM us on Instagram or tap below — we reply fast.</p>
+    <div class="cta-actions reveal">
+      <a href="https://www.instagram.com/bangkok_rentme" target="_blank" class="btn-primary" style="display:inline-flex;align-items:center;gap:10px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        <span data-i18n="cta_ig">DM on Instagram</span>
+      </a>
+    </div>
+    <div class="reveal" style="margin-top:32px;display:flex;flex-wrap:wrap;gap:24px;justify-content:center">
+      <div class="location-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>51 Kamphaeng Phet 7 Rd, Makkasan, Ratchathewi, Bangkok 10400</span>
+      </div>
+      <div class="location-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        <span><strong style="color:var(--fg)">@bangkok_rentme</strong></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<!-- ═══ MAP ═══ -->
+<section style="padding:0;border-top:1px solid var(--border)">
+  <iframe
+    title="Rent Me Bangkok location"
+    src="https://www.google.com/maps?q=51%20Kamphaeng%20Phet%207%20Rd,%20Makkasan,%20Ratchathewi,%20Bangkok%2010400&output=embed"
+    style="width:100%;height:360px;border:0;display:block;filter:grayscale(.3) contrast(1.05)"
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade"
+    allowfullscreen></iframe>
+</section>
+
+<footer>
+  <div class="footer-logo">RENT<span>ME</span> BANGKOK</div>
+  <div class="footer-links">
+    <a href="#services" data-i18n="nav_services">Services</a>
+    <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
+    <a href="#faq" data-i18n="nav_faq">FAQ</a>
+    <a href="https://www.instagram.com/bangkok_rentme" target="_blank">@bangkok_rentme</a>
+    <a href="https://www.instagram.com/bangkok_rentme" target="_blank" style="color:#60a5fa">@bangkok_rentme</a>
+  </div>
+  <p style="font-size:13px;color:var(--fg-muted);margin-bottom:8px">51 Kamphaeng Phet 7 Rd, Makkasan, Ratchathewi, Bangkok 10400</p>
+  <p class="footer-copy">© 2025 Rent Me Bangkok. All rights reserved.</p>
+</footer>
+
+<script>
+// ── i18n ──
+const translations = {
+  en: {
+    nav_services:"Services", nav_pricing:"Pricing", nav_about:"About", nav_faq:"FAQ", nav_book:"Book Now",
+    hero_badge:"Bangkok · Asoke · Makkasan",
+    hero_title:"YOUR SPACE.<br><span>YOUR VISION.</span><br>YOUR STUDIO.",
+    hero_sub:"Photo studio, podcast recording & editing, and DJI camera + drone rental — all in one creative hub in the heart of Bangkok.",
+    hero_cta_primary:"Explore Services", hero_cta_secondary:"See Our Work",
+    stat_views:"Views / 30 days", stat_posts:"Posts Published", stat_services:"Core Services", stat_location:"Makkasan / Asoke",
+    trust_label:"Why creators choose us",
+    trust_1:"<strong>Professional gear</strong> — DJI, studio lights, mics",
+    trust_2:"<strong>Flexible hours</strong> — book by the session",
+    trust_3:"<strong>All skill levels</strong> — beginners welcome",
+    trust_4:"<strong>Central Bangkok</strong> — 5 min from Asoke BTS",
+    trust_5:"<strong>Full editing service</strong> — we handle post-production",
+    services_tag:"What We Offer", services_title:"THREE SERVICES.<br>ONE CREATIVE HUB.",
+    services_sub:"Whether you're shooting a product, recording your first podcast, or filming aerial footage — we have the space, gear, and skills to make it happen.",
+    s1_for:"For photographers, brands & content creators", s1_title:"PHOTO STUDIO RENTAL",
+    s1_desc:"A fully equipped photography studio in central Bangkok you can rent by the hour or day. Comes with studio strobe lights, softboxes, seamless backdrop in multiple colors, and a lounge setup for lifestyle shoots. No hidden fees — just show up and shoot.",
+    s1_benefit:"Professional lighting + backdrops ready in minutes — no setup stress.", s1_cta:"Book the Studio",
+    s2_for:"For podcasters, YouTubers, entrepreneurs & talk show hosts", s2_title:"PODCAST FILMING & EDITING",
+    s2_desc:"Record your podcast in a cinematic \"ON AIR\" studio designed for up to 4 guests. We film with professional cameras, add clean audio with professional microphones, and handle the full edit — color grading, titles, sound design. You just talk. We handle the rest.",
+    s2_benefit:"Walk in with ideas, walk out with a publish-ready episode.", s2_cta:"Start Your Podcast",
+    s3_for:"For filmmakers, real estate agents, travel content creators", s3_title:"DJI CAMERA & DRONE RENTAL",
+    s3_desc:"Rent professional DJI cameras and drones without the full purchase price. Perfect for one-off projects, travel shoots, or testing before you buy. Pick up in Bangkok, fly anywhere. All gear comes checked, charged, and ready to use.",
+    s3_benefit:"Cinematic aerial shots at a fraction of the ownership cost.", s3_cta:"Rent a DJI",
+    proof_tag:"Real Results", proof_title:"CREATORS LOVE THIS SPACE",
+    proof_sub:"Hundreds of creators, brands, and entrepreneurs have used Rent Me Bangkok to launch, grow, and tell their story.",
+    proof_n1:"Views in 30 days", proof_n2:"IG Followers", proof_n3:"Promo week rate", proof_n4:"Guest podcast setups",
+    r1_text:'"The podcast studio is insane for the price. The ON AIR setup, the lighting, the mics — everything was ready when I arrived. Recorded two episodes in one session."',
+    r1_role:"Podcast Host, Bangkok",
+    r2_text:'"Rented the DJI for a real estate shoot in Pattaya. Everything was charged, calibrated, and came with a quick tutorial. Saved me thousands vs. buying. Will definitely rent again."',
+    r2_role:"Real Estate Photographer",
+    r3_text:'"First time using a professional studio and they made it so easy. Multiple backdrop colors, great lights, and flexible timing. My brand photos finally look like real brand photos."',
+    r3_role:"Fashion Brand Founder",
+    pricing_tag:"Transparent Pricing", pricing_title:"SIMPLE RATES.<br>NO SURPRISES.",
+    p1_service:"Photo Studio", p1_title:"Studio Rental", p1_period:" / hour (promo)",
+    p1_desc:"Full studio access with lights, backdrops, and lounge setup. Hourly booking, no minimum.",
+    p1_f1:"Studio strobes + softboxes", p1_f2:"Multiple backdrop colors", p1_f3:"Lounge props & furniture", p1_f4:"Ring light + accessories",
+    p1_btn:"Book Studio",
+    p2_service:"Podcast Package", p2_title:"Monthly Podcast", p2_period:" / month", p2_badge:"Most Popular",
+    p2_desc:"4 sessions per month (max 2hrs each). Full filming, editing, color grade, and delivery. Was ฿18,000 — save ฿8,000.",
+    p2_f1:"Professional cameras & mics", p2_f2:"Video editing included", p2_f3:"Videographer on set", p2_f4:"Full podcast setup", p2_f5:"Studio rental included",
+    p2_btn:"Get This Deal",
+    p3_service:"DJI Rental", p3_title:"Camera & Drone", p3_amount:"Ask us", p3_period:" / day rate",
+    p3_desc:"Flexible daily rental for DJI cameras and drones. Rates vary by model. All gear checked and ready.",
+    p3_f1:"DJI cameras & drones", p3_f2:"Charged & calibrated on pickup", p3_f3:"Quick orientation session", p3_f4:"Flexible multi-day rates",
+    p3_btn:"Get a Quote",
+    faq_tag:"FAQ", faq_title:"GOT QUESTIONS?",
+    faq_sub:"Here are the answers we get asked the most. Still have one? Message us on Instagram.",
+    faq_ig:"@bangkok_rentme",
+    faq_q1:"Where are you located exactly?", faq_a1:"We are based in the Makkasan Station area of Bangkok, very close to Asoke BTS and Phetchaburi MRT. Easy to reach from any part of the city. DM us on Instagram for the exact address.",
+    faq_q2:"Do I need experience to use the photo studio?", faq_a2:"Not at all. Complete beginners are welcome. The studio is set up and ready to shoot — you just bring your camera or phone. We can give a quick orientation on using the lights if needed.",
+    faq_q3:"What is included in the podcast filming package?", faq_a3:"The monthly package includes 4 sessions (up to 2 hours each), professional camera filming, quality microphones, a videographer on set, and full post-production editing — color grading, sound design, and titles. You receive a publish-ready video file.",
+    faq_q4:"Can I rent the DJI drone without experience?", faq_a4:"We provide a short orientation session on pickup so you understand the basics. That said, you should have some familiarity with drone operation. If you are completely new, we recommend booking with our videographer who can fly it for you.",
+    faq_q5:"How do I book a session?", faq_a5:"The easiest way is to send us a DM on Instagram @bangkok_rentme or use the contact button on this page. Tell us the service, your preferred date and time, and we will confirm availability within a few hours.",
+    faq_q6:"Can I bring my own team or guests to the studio?", faq_a6:"Yes, absolutely. The podcast studio fits up to 4 people at the recording table and there is additional lounge seating. Bring your guests, co-hosts, or team. The photo studio is also spacious for small crews.",
+    cta_title:"READY TO<br><span>CREATE?</span>",
+    cta_sub:"Book your studio session, podcast package, or DJI rental today. DM us on Instagram or tap below — we reply fast.",
+    cta_ig:"DM on Instagram", cta_services:"View All Services",
+    cta_location:"Makkasan Station · Asoke · Bangkok, Thailand"
+  },
+  fr: {
+    nav_services:"Services", nav_pricing:"Tarifs", nav_about:"À propos", nav_faq:"FAQ", nav_book:"Réserver",
+    hero_badge:"Bangkok · Asoke · Makkasan",
+    hero_title:"VOTRE ESPACE.<br><span>VOTRE VISION.</span><br>VOTRE STUDIO.",
+    hero_sub:"Studio photo, enregistrement & montage podcast, et location de caméras DJI + drones — tout en un seul hub créatif au cœur de Bangkok.",
+    hero_cta_primary:"Découvrir nos services", hero_cta_secondary:"Voir notre travail",
+    stat_views:"Vues / 30 jours", stat_posts:"Publications", stat_services:"Services principaux", stat_location:"Makkasan / Asoke",
+    trust_label:"Pourquoi les créateurs nous choisissent",
+    trust_1:"<strong>Équipement pro</strong> — DJI, éclairages studio, micros",
+    trust_2:"<strong>Horaires flexibles</strong> — réservez à la session",
+    trust_3:"<strong>Tous niveaux</strong> — débutants bienvenus",
+    trust_4:"<strong>Centre de Bangkok</strong> — 5 min du BTS Asoke",
+    trust_5:"<strong>Service montage complet</strong> — on gère la post-prod",
+    services_tag:"Ce que nous offrons", services_title:"TROIS SERVICES.<br>UN SEUL HUB CRÉATIF.",
+    services_sub:"Que vous photographiez un produit, enregistriez votre premier podcast, ou filmiez des prises de vue aériennes — nous avons l'espace, le matériel et les compétences pour le réaliser.",
+    s1_for:"Pour photographes, marques et créateurs de contenu", s1_title:"LOCATION DE STUDIO PHOTO",
+    s1_desc:"Un studio photo entièrement équipé au centre de Bangkok que vous pouvez louer à l'heure ou à la journée. Fourni avec éclairages stroboscopiques, boîtes à lumière, fonds sans couture en plusieurs couleurs et décor lounge pour shootings lifestyle.",
+    s1_benefit:"Éclairage professionnel + fonds prêts en quelques minutes.", s1_cta:"Réserver le studio",
+    s2_for:"Pour podcasteurs, YouTubeurs, entrepreneurs et animateurs", s2_title:"TOURNAGE & MONTAGE PODCAST",
+    s2_desc:"Enregistrez votre podcast dans un studio cinématographique \"ON AIR\" conçu pour jusqu'à 4 invités. Nous filmons avec des caméras professionnelles, ajoutons un son clair avec des microphones pro, et gérons le montage complet — étalonnage, titres, design sonore.",
+    s2_benefit:"Entrez avec vos idées, sortez avec un épisode prêt à publier.", s2_cta:"Lancer mon podcast",
+    s3_for:"Pour cinéastes, agents immobiliers, créateurs voyage", s3_title:"LOCATION CAMÉRAS & DRONES DJI",
+    s3_desc:"Louez des caméras et drones DJI professionnels sans le coût d'achat total. Parfait pour les projets ponctuels, shootings voyage ou tests avant achat. Retrait à Bangkok, vol partout.",
+    s3_benefit:"Des prises de vue aériennes cinématographiques à une fraction du coût.", s3_cta:"Louer un DJI",
+    proof_tag:"Résultats réels", proof_title:"LES CRÉATEURS ADORENT CET ESPACE",
+    proof_sub:"Des centaines de créateurs, marques et entrepreneurs ont utilisé Rent Me Bangkok pour lancer, grandir et raconter leur histoire.",
+    proof_n1:"Vues en 30 jours", proof_n2:"Abonnés Instagram", proof_n3:"Tarif promo semaine", proof_n4:"Invités podcast max",
+    r1_text:'"Le studio podcast est incroyable pour le prix. Le setup ON AIR, l\'éclairage, les micros — tout était prêt à mon arrivée. Deux épisodes enregistrés en une seule session."', r1_role:"Podcasteur, Bangkok",
+    r2_text:'"Loué le DJI pour un shooting immobilier à Pattaya. Tout était chargé, calibré, avec un tutoriel rapide. Économisé des milliers vs l\'achat. Je re-louerai."', r2_role:"Photographe immobilier",
+    r3_text:'"Première fois dans un studio pro et ils ont tout rendu si simple. Plusieurs couleurs de fond, bons éclairages, timing flexible. Mes photos de marque ressemblent enfin à de vraies photos de marque."', r3_role:"Fondatrice de marque mode",
+    pricing_tag:"Tarifs transparents", pricing_title:"TARIFS SIMPLES.<br>SANS SURPRISES.",
+    p1_service:"Studio photo", p1_title:"Location studio", p1_period:" / heure (promo)",
+    p1_desc:"Accès complet au studio avec éclairages, fonds et décor lounge. Réservation à l'heure, sans minimum.",
+    p1_f1:"Stroboscopes + boîtes à lumière", p1_f2:"Plusieurs couleurs de fond", p1_f3:"Accessoires lounge", p1_f4:"Ring light + accessoires", p1_btn:"Réserver le studio",
+    p2_service:"Pack podcast", p2_title:"Podcast mensuel", p2_period:" / mois", p2_badge:"Le plus populaire",
+    p2_desc:"4 sessions par mois (max 2h chacune). Tournage, montage, étalonnage et livraison complets. Était ฿18 000 — économisez ฿8 000.",
+    p2_f1:"Caméras & micros pro", p2_f2:"Montage vidéo inclus", p2_f3:"Vidéaste sur place", p2_f4:"Setup podcast complet", p2_f5:"Location studio incluse", p2_btn:"Profiter de cette offre",
+    p3_service:"Location DJI", p3_title:"Caméra & Drone", p3_amount:"Nous contacter", p3_period:" / tarif journalier",
+    p3_desc:"Location journalière flexible pour caméras et drones DJI. Tarifs selon le modèle. Tout le matériel vérifié et prêt.",
+    p3_f1:"Caméras & drones DJI", p3_f2:"Chargé & calibré à l'enlèvement", p3_f3:"Session d'orientation rapide", p3_f4:"Tarifs multi-jours flexibles", p3_btn:"Obtenir un devis",
+    faq_tag:"FAQ", faq_title:"DES QUESTIONS ?",
+    faq_sub:"Voici les réponses aux questions les plus fréquentes. Une autre question ? Écrivez-nous sur Instagram.",
+    faq_ig:"@bangkok_rentme",
+    faq_q1:"Où êtes-vous situés exactement ?", faq_a1:"Nous sommes situés dans le quartier de la gare Makkasan à Bangkok, très proche du BTS Asoke et du MRT Phetchaburi. Facile d'accès depuis n'importe quelle partie de la ville. DM-nous sur Instagram pour l'adresse exacte.",
+    faq_q2:"Ai-je besoin d'expérience pour utiliser le studio photo ?", faq_a2:"Pas du tout. Les débutants complets sont bienvenus. Le studio est installé et prêt à shooter — apportez juste votre appareil ou téléphone. Nous pouvons donner une orientation rapide sur l'utilisation des éclairages.",
+    faq_q3:"Qu'est-ce qui est inclus dans le pack podcast ?", faq_a3:"Le pack mensuel comprend 4 sessions (jusqu'à 2h chacune), tournage caméra professionnelle, micros de qualité, vidéaste sur place, et montage post-production complet — étalonnage, design sonore et titres. Vous recevez un fichier vidéo prêt à publier.",
+    faq_q4:"Puis-je louer le drone DJI sans expérience ?", faq_a4:"Nous fournissons une courte session d'orientation au retrait pour que vous compreniez les bases. Cela dit, vous devriez avoir une certaine familiarité avec les drones. Si vous êtes complètement novice, nous recommandons de réserver avec notre vidéaste.",
+    faq_q5:"Comment réserver une session ?", faq_a5:"Le plus simple est de nous envoyer un DM sur Instagram @bangkok_rentme ou d'utiliser le bouton de contact sur cette page. Indiquez le service, votre date et heure préférées, et nous confirmerons la disponibilité dans les heures qui suivent.",
+    faq_q6:"Puis-je amener mon équipe ou des invités au studio ?", faq_a6:"Oui, absolument. Le studio podcast accueille jusqu'à 4 personnes à la table d'enregistrement avec des places lounge supplémentaires. Le studio photo est également spacieux pour les petites équipes.",
+    cta_title:"PRÊT À<br><span>CRÉER ?</span>",
+    cta_sub:"Réservez votre session studio, pack podcast ou location DJI aujourd'hui. DM-nous sur Instagram ou cliquez ci-dessous — on répond vite.",
+    cta_ig:"DM sur Instagram", cta_services:"Voir tous les services",
+    cta_location:"Gare Makkasan · Asoke · Bangkok, Thaïlande"
+  },
+  de: {
+    nav_services:"Leistungen", nav_pricing:"Preise", nav_about:"Über uns", nav_faq:"FAQ", nav_book:"Jetzt buchen",
+    hero_badge:"Bangkok · Asoke · Makkasan",
+    hero_title:"DEIN RAUM.<br><span>DEINE VISION.</span><br>DEIN STUDIO.",
+    hero_sub:"Fotostudio, Podcast-Aufnahme & Schnitt, und DJI-Kamera- + Drohnenverleih — alles in einem kreativen Hub im Herzen von Bangkok.",
+    hero_cta_primary:"Leistungen entdecken", hero_cta_secondary:"Unsere Arbeit sehen",
+    stat_views:"Aufrufe / 30 Tage", stat_posts:"Beiträge", stat_services:"Kernleistungen", stat_location:"Makkasan / Asoke",
+    trust_label:"Warum Kreative uns wählen",
+    trust_1:"<strong>Professionelles Equipment</strong> — DJI, Studioleuchten, Mikros",
+    trust_2:"<strong>Flexible Zeiten</strong> — sessionweise buchen",
+    trust_3:"<strong>Alle Niveaus</strong> — Anfänger willkommen",
+    trust_4:"<strong>Zentral Bangkok</strong> — 5 Min. vom Asoke BTS",
+    trust_5:"<strong>Vollständiger Schnittservice</strong> — wir übernehmen die Postproduktion",
+    services_tag:"Was wir anbieten", services_title:"DREI LEISTUNGEN.<br>EIN KREATIVER HUB.",
+    services_sub:"Egal ob Produktfoto, erster Podcast oder Luftaufnahmen — wir haben den Raum, das Equipment und das Know-how.",
+    s1_for:"Für Fotografen, Marken & Content Creator", s1_title:"FOTOSTUDIO-VERLEIH",
+    s1_desc:"Ein voll ausgestattetes Fotostudio in Bangkoks Zentrum, das du stunden- oder tageweise mieten kannst. Mit Studioblitzen, Softboxen, nahtlosem Hintergrund in mehreren Farben und Lounge-Setup für Lifestyle-Shootings.",
+    s1_benefit:"Professionelles Licht + Hintergründe in Minuten bereit — kein Stress.", s1_cta:"Studio buchen",
+    s2_for:"Für Podcaster, YouTuber, Unternehmer & Talkshow-Hosts", s2_title:"PODCAST-AUFNAHME & SCHNITT",
+    s2_desc:"Nimm deinen Podcast in einem kinematografischen \"ON AIR\"-Studio auf, das für bis zu 4 Gäste ausgelegt ist. Wir filmen mit Profi-Kameras, sorgen für sauberen Ton mit professionellen Mikrofonen und übernehmen den vollständigen Schnitt.",
+    s2_benefit:"Komm mit Ideen, geh mit einer sendefertig produzierten Folge.", s2_cta:"Podcast starten",
+    s3_for:"Für Filmemacher, Immobilienmakler, Reise-Creator", s3_title:"DJI-KAMERA & DROHNEN-VERLEIH",
+    s3_desc:"Miete professionelle DJI-Kameras und Drohnen ohne die vollen Kaufkosten. Perfekt für Einzelprojekte, Reiseaufnahmen oder zum Testen vor dem Kauf. Abholung in Bangkok, fliegen überall.",
+    s3_benefit:"Kinematografische Luftaufnahmen zu einem Bruchteil der Anschaffungskosten.", s3_cta:"DJI mieten",
+    proof_tag:"Echte Ergebnisse", proof_title:"KREATIVE LIEBEN DIESEN ORT",
+    proof_sub:"Hunderte von Kreativen, Marken und Unternehmern haben Rent Me Bangkok genutzt, um zu starten, zu wachsen und ihre Geschichte zu erzählen.",
+    proof_n1:"Aufrufe in 30 Tagen", proof_n2:"Instagram-Follower", proof_n3:"Aktionswochenpreis", proof_n4:"Podcast-Gäste max.",
+    r1_text:'"Das Podcast-Studio ist unglaublich für den Preis. Das ON AIR-Setup, das Licht, die Mikros — alles war bereit als ich ankam. Zwei Folgen in einer Session aufgenommen."', r1_role:"Podcast-Host, Bangkok",
+    r2_text:'"Die DJI für ein Immobilien-Shooting in Pattaya gemietet. Alles war geladen, kalibriert und mit Kurzanleitung. Tausende gespart vs. Kauf. Komme definitiv wieder."', r2_role:"Immobilienfotograf",
+    r3_text:'"Erstes Mal in einem Profi-Studio und sie haben alles so einfach gemacht. Mehrere Hintergrundfarben, tolle Lichter, flexible Zeiten. Meine Markenfotos sehen endlich wie echte Markenfotos aus."', r3_role:"Mode-Marken-Gründerin",
+    pricing_tag:"Transparente Preise", pricing_title:"EINFACHE PREISE.<br>KEINE ÜBERRASCHUNGEN.",
+    p1_service:"Fotostudio", p1_title:"Studio-Verleih", p1_period:" / Stunde (Aktionspreis)",
+    p1_desc:"Voller Studio-Zugang mit Lichtern, Hintergründen und Lounge-Setup. Stundenbuching, kein Minimum.",
+    p1_f1:"Studioblitze + Softboxen", p1_f2:"Mehrere Hintergrundfarben", p1_f3:"Lounge-Requisiten", p1_f4:"Ringlicht + Zubehör", p1_btn:"Studio buchen",
+    p2_service:"Podcast-Paket", p2_title:"Monatlicher Podcast", p2_period:" / Monat", p2_badge:"Beliebteste Option",
+    p2_desc:"4 Sessions pro Monat (max. 2h je Session). Vollständiges Filmen, Schneiden, Color Grading und Lieferung. War ฿18.000 — spare ฿8.000.",
+    p2_f1:"Profi-Kameras & Mikros", p2_f2:"Videobearbeitung inbegriffen", p2_f3:"Videograf vor Ort", p2_f4:"Komplettes Podcast-Setup", p2_f5:"Studio-Miete inbegriffen", p2_btn:"Dieses Angebot sichern",
+    p3_service:"DJI-Verleih", p3_title:"Kamera & Drohne", p3_amount:"Auf Anfrage", p3_period:" / Tagessatz",
+    p3_desc:"Flexibler Tagesverleih für DJI-Kameras und Drohnen. Preise je nach Modell. Alles geprüft und bereit.",
+    p3_f1:"DJI-Kameras & Drohnen", p3_f2:"Geladen & kalibriert bei Abholung", p3_f3:"Kurze Einweisung", p3_f4:"Flexible Mehrtagespreise", p3_btn:"Angebot anfragen",
+    faq_tag:"FAQ", faq_title:"FRAGEN?",
+    faq_sub:"Hier sind die am häufigsten gestellten Fragen. Noch eine? Schreib uns auf Instagram.",
+    faq_ig:"@bangkok_rentme",
+    faq_q1:"Wo genau befinden Sie sich?", faq_a1:"Wir befinden uns im Bereich der Makkasan Station in Bangkok, sehr nah am BTS Asoke und MRT Phetchaburi. Von überall in der Stadt leicht erreichbar. DM uns auf Instagram für die genaue Adresse.",
+    faq_q2:"Brauche ich Erfahrung für das Fotostudio?", faq_a2:"Überhaupt nicht. Komplett Anfänger sind willkommen. Das Studio ist aufgebaut und schussbereit — bring einfach deine Kamera oder dein Handy. Wir können eine kurze Einführung in die Lichtnutzung geben.",
+    faq_q3:"Was ist im Podcast-Paket enthalten?", faq_a3:"Das Monatspaket beinhaltet 4 Sessions (bis zu 2h je), professionelle Kameraaufnahmen, Qualitätsmikrofone, einen Videografen vor Ort und vollständige Postproduktions-Bearbeitung — Color Grading, Sound-Design und Titel. Du erhältst eine sendefertige Videodatei.",
+    faq_q4:"Kann ich die DJI-Drohne ohne Erfahrung mieten?", faq_a4:"Wir bieten bei der Abholung eine kurze Einweisung an. Allerdings solltest du eine gewisse Vertrautheit mit Drohnen haben. Wenn du kompletter Anfänger bist, empfehlen wir eine Buchung mit unserem Videografen.",
+    faq_q5:"Wie buche ich eine Session?", faq_a5:"Am einfachsten per DM auf Instagram @bangkok_rentme oder über den Kontaktbutton auf dieser Seite. Nenn uns den Dienst, dein bevorzugtes Datum und die Uhrzeit, und wir bestätigen die Verfügbarkeit innerhalb weniger Stunden.",
+    faq_q6:"Kann ich mein Team oder Gäste ins Studio mitbringen?", faq_a6:"Ja, selbstverständlich. Das Podcast-Studio bietet Platz für bis zu 4 Personen am Aufnahmetisch sowie zusätzliche Lounge-Sitzplätze. Das Fotostudio ist ebenfalls geräumig für kleine Crews.",
+    cta_title:"BEREIT ZUM<br><span>ERSTELLEN?</span>",
+    cta_sub:"Buche deine Studio-Session, dein Podcast-Paket oder deinen DJI-Verleih heute. DM uns auf Instagram — wir antworten schnell.",
+    cta_ig:"DM auf Instagram", cta_services:"Alle Leistungen ansehen",
+    cta_location:"Makkasan Station · Asoke · Bangkok, Thailand"
+  },
+  ru: {
+    nav_services:"Услуги", nav_pricing:"Цены", nav_about:"О нас", nav_faq:"FAQ", nav_book:"Забронировать",
+    hero_badge:"Бангкок · Асок · Макасан",
+    hero_title:"ТВОЁ ПРОСТРАНСТВО.<br><span>ТВОЯ ИДЕЯ.</span><br>ТВОЯ СТУДИЯ.",
+    hero_sub:"Фотостудия, запись и монтаж подкастов, а также аренда камер DJI и дронов — всё в одном творческом пространстве в сердце Бангкока.",
+    hero_cta_primary:"Наши услуги", hero_cta_secondary:"Посмотреть работы",
+    stat_views:"Просмотров / 30 дней", stat_posts:"Публикаций", stat_services:"Основных услуги", stat_location:"Макасан / Асок",
+    trust_label:"Почему нас выбирают",
+    trust_1:"<strong>Профессиональное оборудование</strong> — DJI, студийный свет, микрофоны",
+    trust_2:"<strong>Гибкое время</strong> — бронирование по сессиям",
+    trust_3:"<strong>Любой уровень</strong> — новички приветствуются",
+    trust_4:"<strong>Центр Бангкока</strong> — 5 мин от BTS Асок",
+    trust_5:"<strong>Полный монтаж</strong> — мы берём постпродакшен на себя",
+    services_tag:"Что мы предлагаем", services_title:"ТРИ УСЛУГИ.<br>ОДИН ТВОРЧЕСКИЙ ХАБ.",
+    services_sub:"Съёмка продукта, первый подкаст или аэросъёмка — у нас есть пространство, оборудование и навыки.",
+    s1_for:"Для фотографов, брендов и контент-мейкеров", s1_title:"АРЕНДА ФОТОСТУДИИ",
+    s1_desc:"Полностью оснащённая фотостудия в центре Бангкока — аренда на час или день. Студийные вспышки, софтбоксы, бесшовный фон нескольких цветов, лаундж для лайфстайл-съёмок. Без скрытых платежей.",
+    s1_benefit:"Профессиональный свет и фоны готовы за минуты — никакого стресса.", s1_cta:"Забронировать студию",
+    s2_for:"Для подкастеров, YouTubers, предпринимателей и ведущих", s2_title:"СЪЁМКА И МОНТАЖ ПОДКАСТА",
+    s2_desc:"Запишите подкаст в кинематографической студии \"ON AIR\" для до 4 гостей. Мы снимаем на профкамеры, пишем чистый звук, берём на себя полный монтаж — цветокоррекция, титры, звуковой дизайн.",
+    s2_benefit:"Пришёл с идеями — ушёл с готовым к публикации эпизодом.", s2_cta:"Запустить подкаст",
+    s3_for:"Для кинематографистов, риелторов, тревел-блогеров", s3_title:"АРЕНДА КАМЕР И ДРОНОВ DJI",
+    s3_desc:"Профессиональные камеры и дроны DJI без полной стоимости покупки. Идеально для разовых проектов, съёмок в путешествиях или тестирования. Забирайте в Бангкоке, летайте везде.",
+    s3_benefit:"Кинематографические аэросъёмки за долю стоимости покупки.", s3_cta:"Арендовать DJI",
+    proof_tag:"Реальные результаты", proof_title:"СОЗДАТЕЛИ ЛЮБЯТ ЭТО МЕСТО",
+    proof_sub:"Сотни создателей контента, брендов и предпринимателей использовали Rent Me Bangkok для старта и роста.",
+    proof_n1:"Просмотров за 30 дней", proof_n2:"Подписчиков в Instagram", proof_n3:"Промо-цена недели", proof_n4:"Гостей подкаста макс.",
+    r1_text:'"Подкаст-студия невероятная за такую цену. Сетап ON AIR, свет, микрофоны — всё было готово, когда я пришёл. Записал два эпизода за одну сессию."', r1_role:"Подкастер, Бангкок",
+    r2_text:'"Арендовал DJI для съёмки недвижимости в Паттайе. Всё заряжено, откалибровано, с кратким инструктажем. Сэкономил тысячи по сравнению с покупкой."', r2_role:"Фотограф недвижимости",
+    r3_text:'"Первый раз в профессиональной студии и они сделали всё таким простым. Несколько цветов фонов, хороший свет, гибкое время. Мои фото бренда наконец выглядят как настоящие."', r3_role:"Основательница модного бренда",
+    pricing_tag:"Прозрачные цены", pricing_title:"ПРОСТЫЕ ЦЕНЫ.<br>БЕЗ СЮРПРИЗОВ.",
+    p1_service:"Фотостудия", p1_title:"Аренда студии", p1_period:" / час (промо)",
+    p1_desc:"Полный доступ к студии со светом, фонами и лаунж-декором. Почасовое бронирование без минимума.",
+    p1_f1:"Студийные вспышки + софтбоксы", p1_f2:"Несколько цветов фона", p1_f3:"Лаундж-реквизит и мебель", p1_f4:"Кольцевой свет + аксессуары", p1_btn:"Забронировать студию",
+    p2_service:"Пакет подкаста", p2_title:"Ежемесячный подкаст", p2_period:" / месяц", p2_badge:"Самый популярный",
+    p2_desc:"4 сессии в месяц (макс. 2ч каждая). Полная съёмка, монтаж, цветокоррекция и доставка. Было ฿18 000 — экономия ฿8 000.",
+    p2_f1:"Профкамеры и микрофоны", p2_f2:"Видеомонтаж включён", p2_f3:"Видеооператор на съёмке", p2_f4:"Полный сетап подкаста", p2_f5:"Аренда студии включена", p2_btn:"Получить это предложение",
+    p3_service:"Аренда DJI", p3_title:"Камера и дрон", p3_amount:"Спросите нас", p3_period:" / дневная ставка",
+    p3_desc:"Гибкая аренда на день для камер и дронов DJI. Ставки зависят от модели. Всё оборудование проверено и готово.",
+    p3_f1:"Камеры и дроны DJI", p3_f2:"Заряжены и откалиброваны при выдаче", p3_f3:"Краткий инструктаж", p3_f4:"Гибкие ставки на несколько дней", p3_btn:"Получить расчёт",
+    faq_tag:"FAQ", faq_title:"ВОПРОСЫ?",
+    faq_sub:"Вот ответы на самые частые вопросы. Остались другие? Пишите нам в Instagram.",
+    faq_ig:"@bangkok_rentme",
+    faq_q1:"Где именно вы находитесь?", faq_a1:"Мы находимся в районе станции Макасан в Бангкоке, очень близко к BTS Асок и MRT Petchaburi. Удобно добираться из любой части города. Пишите в DM в Instagram за точным адресом.",
+    faq_q2:"Нужен ли опыт для работы в фотостудии?", faq_a2:"Совсем нет. Полные новички приветствуются. Студия настроена и готова к съёмке — просто принесите камеру или телефон. Мы можем провести краткий инструктаж по использованию света.",
+    faq_q3:"Что включено в пакет подкаста?", faq_a3:"Ежемесячный пакет включает 4 сессии (до 2ч каждая), профессиональную съёмку, качественные микрофоны, видеооператора и полный постпродакшен — цветокоррекция, звуковой дизайн и титры. Вы получаете готовый к публикации видеофайл.",
+    faq_q4:"Можно ли арендовать дрон DJI без опыта?", faq_a4:"Мы проводим короткий инструктаж при выдаче. При этом вы должны иметь базовое представление об управлении дроном. Если вы полный новичок, рекомендуем взять нашего видеооператора.",
+    faq_q5:"Как забронировать сессию?", faq_a5:"Проще всего написать нам в DM в Instagram @bangkok_rentme или использовать кнопку контакта на этой странице. Укажите услугу, удобную дату и время, и мы подтвердим наличие в течение нескольких часов.",
+    faq_q6:"Могу ли я привести команду или гостей?", faq_a6:"Да, конечно. Подкаст-студия вмещает до 4 человек за столом записи с дополнительными местами в лаунж. Фотостудия также просторна для небольших съёмочных групп.",
+    cta_title:"ГОТОВ<br><span>СОЗДАВАТЬ?</span>",
+    cta_sub:"Забронируйте сессию в студии, пакет подкаста или аренду DJI сегодня. Пишите в Instagram — мы отвечаем быстро.",
+    cta_ig:"Написать в Instagram", cta_services:"Все услуги",
+    cta_location:"Станция Макасан · Асок · Бангкок, Таиланд"
+  },
+  th: {
+    nav_services:"บริการ", nav_pricing:"ราคา", nav_about:"เกี่ยวกับเรา", nav_faq:"FAQ", nav_book:"จองเลย",
+    hero_badge:"กรุงเทพฯ · อโศก · มักกะสัน",
+    hero_title:"พื้นที่ของคุณ<br><span>วิสัยทัศน์ของคุณ</span><br>สตูดิโอของคุณ",
+    hero_sub:"สตูดิโอถ่ายภาพ บันทึกและตัดต่อพอดแคสต์ และเช่ากล้อง DJI + โดรน — ทุกอย่างในที่เดียวใจกลางกรุงเทพฯ",
+    hero_cta_primary:"ดูบริการทั้งหมด", hero_cta_secondary:"ดูผลงานของเรา",
+    stat_views:"วิว / 30 วัน", stat_posts:"โพสต์", stat_services:"บริการหลัก", stat_location:"มักกะสัน / อโศก",
+    trust_label:"ทำไมครีเอเตอร์ถึงเลือกเรา",
+    trust_1:"<strong>อุปกรณ์มืออาชีพ</strong> — DJI, ไฟสตูดิโอ, ไมค์",
+    trust_2:"<strong>เวลาที่ยืดหยุ่น</strong> — จองเป็นเซสชัน",
+    trust_3:"<strong>ทุกระดับ</strong> — ยินดีต้อนรับมือใหม่",
+    trust_4:"<strong>ใจกลางกรุงเทพฯ</strong> — 5 นาทีจาก BTS อโศก",
+    trust_5:"<strong>บริการตัดต่อครบ</strong> — เราดูแล post-production ให้",
+    services_tag:"สิ่งที่เราให้บริการ", services_title:"สามบริการ<br>หนึ่งฮับครีเอทีฟ",
+    services_sub:"ไม่ว่าจะถ่ายภาพสินค้า บันทึกพอดแคสต์แรก หรือถ่ายภาพทางอากาศ — เรามีพื้นที่ อุปกรณ์ และทักษะพร้อมให้",
+    s1_for:"สำหรับช่างภาพ แบรนด์ และครีเอเตอร์", s1_title:"เช่าสตูดิโอถ่ายภาพ",
+    s1_desc:"สตูดิโอถ่ายภาพครบครันในใจกลางกรุงเทพฯ เช่าได้รายชั่วโมงหรือรายวัน พร้อมไฟสตูดิโอ ซอฟต์บ็อกซ์ ฉากหลังหลายสี และพื้นที่ไลฟ์สไตล์",
+    s1_benefit:"ไฟและฉากพร้อมใช้ภายในไม่กี่นาที — ไม่ต้องเตรียมเอง", s1_cta:"จองสตูดิโอ",
+    s2_for:"สำหรับพอดแคสเตอร์ YouTubers ผู้ประกอบการ", s2_title:"ถ่ายทำและตัดต่อพอดแคสต์",
+    s2_desc:"บันทึกพอดแคสต์ในสตูดิโอ \"ON AIR\" สไตล์ซีนีมาติกสำหรับผู้ร่วมรายการสูงสุด 4 คน เราถ่ายด้วยกล้องมืออาชีพ บันทึกเสียงคุณภาพสูง และดูแลการตัดต่อทั้งหมด",
+    s2_benefit:"เข้ามาพร้อมไอเดีย ออกไปพร้อมตอนที่พร้อมเผยแพร่", s2_cta:"เริ่มพอดแคสต์",
+    s3_for:"สำหรับผู้สร้างภาพยนตร์ นายหน้าอสังหาฯ ครีเอเตอร์ท่องเที่ยว", s3_title:"เช่ากล้องและโดรน DJI",
+    s3_desc:"เช่ากล้องและโดรน DJI มืออาชีพโดยไม่ต้องซื้อ เหมาะสำหรับโปรเจกต์ครั้งเดียว ถ่ายภาพระหว่างเดินทาง หรือทดลองก่อนซื้อ รับที่กรุงเทพฯ บินได้ทุกที่",
+    s3_benefit:"ภาพทางอากาศสไตล์ซีนีมาในราคาเพียงเศษหนึ่งของการซื้อ", s3_cta:"เช่า DJI",
+    proof_tag:"ผลลัพธ์จริง", proof_title:"ครีเอเตอร์รักพื้นที่นี้",
+    proof_sub:"ครีเอเตอร์ แบรนด์ และผู้ประกอบการหลายร้อยรายใช้ Rent Me Bangkok เพื่อเปิดตัว เติบโต และเล่าเรื่องราวของพวกเขา",
+    proof_n1:"วิวใน 30 วัน", proof_n2:"ผู้ติดตาม Instagram", proof_n3:"ราคาโปรโมชัน", proof_n4:"ผู้ร่วมพอดแคสต์สูงสุด",
+    r1_text:'"สตูดิโอพอดแคสต์น่าทึ่งมากสำหรับราคานี้ เซตอัป ON AIR แสง ไมค์ — ทุกอย่างพร้อมตอนฉันมาถึง บันทึกได้ 2 ตอนในเซสชันเดียว"', r1_role:"พอดแคสเตอร์ กรุงเทพฯ",
+    r2_text:'"เช่า DJI สำหรับถ่ายอสังหาฯ ที่พัทยา ทุกอย่างชาร์จแล้ว ปรับเทียบแล้ว มีคู่มือสั้นๆ ประหยัดเงินได้มากเมื่อเทียบกับการซื้อ จะมาเช่าอีกแน่นอน"', r2_role:"ช่างภาพอสังหาฯ",
+    r3_text:'"ครั้งแรกที่ใช้สตูดิโอมืออาชีพและพวกเขาทำให้มันง่ายมาก ฉากหลังหลายสี ไฟดี เวลาที่ยืดหยุ่น รูปภาพแบรนด์ดูเป็นมืออาชีพแล้วในที่สุด"', r3_role:"ผู้ก่อตั้งแบรนด์แฟชั่น",
+    pricing_tag:"ราคาโปร่งใส", pricing_title:"ราคาง่ายๆ<br>ไม่มีค่าใช้จ่ายซ่อนเร้น",
+    p1_service:"สตูดิโอถ่ายภาพ", p1_title:"เช่าสตูดิโอ", p1_period:" / ชั่วโมง (โปรโมชัน)",
+    p1_desc:"เข้าใช้สตูดิโอเต็มรูปแบบพร้อมไฟ ฉากหลัง และเซตอัปเลานจ์ จองรายชั่วโมง ไม่มีขั้นต่ำ",
+    p1_f1:"ไฟสตูดิโอ + ซอฟต์บ็อกซ์", p1_f2:"ฉากหลังหลายสี", p1_f3:"อุปกรณ์และเฟอร์นิเจอร์เลานจ์", p1_f4:"ไฟวงกลม + อุปกรณ์เสริม", p1_btn:"จองสตูดิโอ",
+    p2_service:"แพ็คเกจพอดแคสต์", p2_title:"พอดแคสต์รายเดือน", p2_period:" / เดือน", p2_badge:"ยอดนิยมที่สุด",
+    p2_desc:"4 เซสชันต่อเดือน (สูงสุด 2 ชม. ต่อครั้ง) ถ่ายทำ ตัดต่อ ปรับสี และส่งมอบครบ เดิม ฿18,000 — ประหยัด ฿8,000",
+    p2_f1:"กล้องและไมค์มืออาชีพ", p2_f2:"รวมการตัดต่อวิดีโอ", p2_f3:"ช่างภาพวิดีโอในเซต", p2_f4:"เซตอัปพอดแคสต์ครบ", p2_f5:"รวมค่าเช่าสตูดิโอ", p2_btn:"รับดีลนี้",
+    p3_service:"เช่า DJI", p3_title:"กล้องและโดรน", p3_amount:"สอบถามราคา", p3_period:" / อัตรารายวัน",
+    p3_desc:"เช่ากล้องและโดรน DJI รายวันที่ยืดหยุ่น ราคาแตกต่างตามรุ่น อุปกรณ์ทุกชิ้นตรวจสอบแล้วและพร้อมใช้",
+    p3_f1:"กล้องและโดรน DJI", p3_f2:"ชาร์จและปรับเทียบก่อนรับ", p3_f3:"เซสชันปฐมนิเทศสั้นๆ", p3_f4:"อัตราหลายวันที่ยืดหยุ่น", p3_btn:"ขอใบเสนอราคา",
+    faq_tag:"FAQ", faq_title:"มีคำถาม?",
+    faq_sub:"นี่คือคำตอบสำหรับคำถามที่พบบ่อยที่สุด ยังมีคำถาม? ส่งข้อความหาเราทาง Instagram",
+    faq_ig:"@bangkok_rentme",
+    faq_q1:"คุณอยู่ที่ไหนกันแน่?", faq_a1:"เราอยู่ในบริเวณสถานีมักกะสัน กรุงเทพฯ ใกล้ BTS อโศกและ MRT เพชรบุรีมาก เดินทางสะดวกจากทุกส่วนของเมือง DM หาเราบน Instagram เพื่อขอที่อยู่ที่แน่นอน",
+    faq_q2:"ฉันต้องมีประสบการณ์ในการใช้สตูดิโอถ่ายภาพไหม?", faq_a2:"ไม่เลย มือใหม่สมบูรณ์ก็ยินดีต้อนรับ สตูดิโอติดตั้งและพร้อมถ่ายแล้ว เพียงแค่นำกล้องหรือโทรศัพท์มา เราสามารถให้คำแนะนำสั้นๆ เกี่ยวกับการใช้ไฟได้",
+    faq_q3:"แพ็คเกจพอดแคสต์รวมอะไรบ้าง?", faq_a3:"แพ็คเกจรายเดือนรวม 4 เซสชัน (สูงสุด 2 ชม. ต่อครั้ง) ถ่ายด้วยกล้องมืออาชีพ ไมค์คุณภาพ ช่างภาพวิดีโอในเซต และการตัดต่อหลังการผลิตทั้งหมด คุณจะได้รับไฟล์วิดีโอที่พร้อมเผยแพร่",
+    faq_q4:"เช่าโดรน DJI โดยไม่มีประสบการณ์ได้ไหม?", faq_a4:"เราให้เซสชันปฐมนิเทศสั้นๆ เมื่อรับอุปกรณ์ อย่างไรก็ตาม คุณควรมีความคุ้นเคยกับการบินโดรนบ้าง หากคุณเป็นมือใหม่สมบูรณ์ เราแนะนำให้จองพร้อมช่างภาพวิดีโอของเรา",
+    faq_q5:"จะจองเซสชันได้อย่างไร?", faq_a5:"วิธีที่ง่ายที่สุดคือส่ง DM หาเราบน Instagram @bangkok_rentme หรือใช้ปุ่มติดต่อบนหน้านี้ บอกบริการที่ต้องการ วันและเวลาที่ต้องการ แล้วเราจะยืนยันความพร้อมภายในไม่กี่ชั่วโมง",
+    faq_q6:"พาทีมหรือแขกมายังสตูดิโอได้ไหม?", faq_a6:"ได้แน่นอน สตูดิโอพอดแคสต์จุได้ถึง 4 คนที่โต๊ะบันทึก และยังมีที่นั่งเลานจ์เพิ่มเติม สตูดิโอถ่ายภาพก็มีพื้นที่กว้างขวางสำหรับทีมเล็กๆ",
+    cta_title:"พร้อมที่จะ<br><span>สร้างสรรค์?</span>",
+    cta_sub:"จองเซสชันสตูดิโอ แพ็คเกจพอดแคสต์ หรือเช่า DJI วันนี้ DM หาเราบน Instagram หรือกดด้านล่าง — เราตอบเร็ว",
+    cta_ig:"DM บน Instagram", cta_services:"ดูบริการทั้งหมด",
+    cta_location:"สถานีมักกะสัน · อโศก · กรุงเทพฯ ประเทศไทย"
+  }
+};
+
+let currentLang = 'en';
+
+function applyTranslations(lang) {
+  const t = translations[lang];
+  if (!t) return;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key] !== undefined) el.innerHTML = t[key];
+  });
+  document.documentElement.setAttribute('lang', lang);
+}
+
+document.getElementById('lang-switcher').addEventListener('change', function() {
+  currentLang = this.value;
+  applyTranslations(currentLang);
+});
+
+// ── Scroll reveal ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── FAQ toggle ──
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+// ── Mobile nav ──
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('mobile-nav').classList.toggle('open');
+});
+function closeMobileNav() {
+  document.getElementById('mobile-nav').classList.remove('open');
+}
+
+// ── Counter animation ──
+function animateCounter(el, target, duration = 2000) {
+  let start = 0;
+  const step = target / (duration / 16);
+  const timer = setInterval(() => {
+    start += step;
+    if (start >= target) { el.textContent = target.toLocaleString(); clearInterval(timer); return; }
+    el.textContent = Math.floor(start).toLocaleString();
+  }, 16);
+}
+const heroObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      animateCounter(document.getElementById('stat1'), 141662);
+      heroObserver.disconnect();
+    }
+  });
+}, { threshold: 0.5 });
+const stat1El = document.getElementById('stat1');
+if (stat1El) heroObserver.observe(stat1El);
+
+// ── Navbar shrink on scroll ──
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  if (window.scrollY > 60) {
+    nav.style.padding = '10px 40px';
+    nav.style.borderBottomColor = 'rgba(255,255,255,0.1)';
+  } else {
+    nav.style.padding = '16px 40px';
+    nav.style.borderBottomColor = 'var(--border)';
+  }
+}, { passive: true });
+
+// ── Ambient blob animation ──
+const style = document.createElement('style');
+style.textContent = `
+  .blob { position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; animation:blobMove 12s ease-in-out infinite alternate; }
+  @keyframes blobMove { from{transform:translate(0,0) scale(1)} to{transform:translate(40px,30px) scale(1.1)} }
+`;
+document.head.appendChild(style);
+const hero = document.getElementById('hero');
+[{w:400,h:400,x:'10%',y:'20%',c:'rgba(230,57,70,0.06)',d:'0s'},{w:300,h:300,x:'70%',y:'40%',c:'rgba(29,111,206,0.05)',d:'4s'}].forEach(b => {
+  const div = document.createElement('div');
+  div.className='blob';
+  div.style.cssText=`width:${b.w}px;height:${b.h}px;left:${b.x};top:${b.y};background:${b.c};animation-delay:${b.d}`;
+  hero.querySelector('.hero-bg').appendChild(div);
+});
+</script>
+<script>
+(function(){
+  const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let miniCur=new Date(); miniCur.setDate(1);
+  function isBooked(y,m,d){return ((y*31+m*7+d*13)%10)<3;}
+  function renderMini(){
+    const y=miniCur.getFullYear(),m=miniCur.getMonth();
+    const el=document.getElementById('mini-cal-month');
+    if(el) el.textContent=MONTHS[m].slice(0,3)+' '+y;
+    const first=new Date(y,m,1).getDay();
+    const days=new Date(y,m+1,0).getDate();
+    const today=new Date();
+    let html='';
+    for(let i=0;i<first;i++) html+='<div></div>';
+    for(let d=1;d<=days;d++){
+      const past=new Date(y,m,d)<new Date(today.getFullYear(),today.getMonth(),today.getDate());
+      const booked=!past&&isBooked(y,m,d);
+      let style='padding:4px 0;border-radius:4px;font-size:.7rem;';
+      if(past) style+='color:rgba(255,255,255,.18);background:transparent;border:none;';
+      else if(booked) style+='background:rgba(230,57,70,.18);border:1px solid rgba(230,57,70,.35);color:rgba(230,57,70,.6);';
+      else style+='background:rgba(37,99,235,.15);border:1px solid rgba(37,99,235,.4);color:var(--fg);cursor:pointer;';
+      const click=(!past&&!booked)?`onclick="document.getElementById('mini-cal').style.display='none';document.getElementById('booking').scrollIntoView({behavior:'smooth'})"`:'';
+      html+=`<div ${click} style="${style}">${d}</div>`;
+    }
+    const daysEl=document.getElementById('mini-cal-days');
+    if(daysEl) daysEl.innerHTML=html;
+  }
+  window.showMiniCal=function(){
+    const c=document.getElementById('mini-cal');
+    if(c){c.style.display='block';renderMini();}
+  };
+  window.hideMiniCal=function(){
+    const c=document.getElementById('mini-cal');
+    if(c) c.style.display='none';
+  };
+  // ── Dot Grid Animation (Booking) ──
+(function(){
+  const canvas = document.getElementById('dot-grid-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const spacing = 40;
+  let W, H, dots=[], mouse={x:-999,y:-999}, raf;
+
+  function resize(){
+    const sec = document.getElementById('booking');
+    W = canvas.width = sec.offsetWidth;
+    H = canvas.height = sec.offsetHeight;
+    dots=[];
+    for(let x=spacing/2;x<W;x+=spacing)
+      for(let y=spacing/2;y<H;y+=spacing)
+        dots.push({x,y,ox:x,oy:y,vx:0,vy:0,phase:Math.random()*Math.PI*2});
+  }
+
+  document.getElementById('booking').addEventListener('mousemove',e=>{
+    const r=canvas.getBoundingClientRect();
+    mouse.x=e.clientX-r.left; mouse.y=e.clientY-r.top;
+  });
+  document.getElementById('booking').addEventListener('mouseleave',()=>{mouse.x=-999;mouse.y=-999;});
+
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    t+=0.012;
+    dots.forEach(d=>{
+      // gentle float
+      const floatY = Math.sin(t+d.phase)*3;
+      // mouse repel
+      const dx=d.ox-mouse.x, dy=d.oy-mouse.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const repel = dist<90 ? (90-dist)/90 : 0;
+      const tx = d.ox + dx/Math.max(dist,1)*repel*28;
+      const ty = d.oy + dy/Math.max(dist,1)*repel*28 + floatY;
+      d.x += (tx-d.x)*0.12;
+      d.y += (ty-d.y)*0.12;
+      // color based on mouse proximity
+      const glow = Math.max(0,1-(dist/180));
+      const baseA = 0.12;
+      const a = baseA + glow*0.35;
+      const r2=Math.floor(37+glow*193), g2=Math.floor(99+glow*0), b2=Math.floor(235-glow*165);
+      ctx.beginPath();
+      ctx.arc(d.x,d.y,1.5,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${r2},${g2},${b2},${a})`;
+      ctx.fill();
+    });
+    raf=requestAnimationFrame(draw);
+  }
+
+  resize();
+  window.addEventListener('resize',()=>{cancelAnimationFrame(raf);resize();draw();});
+  // only animate when visible
+  const obs=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting){draw();}else{cancelAnimationFrame(raf);}
+  },{threshold:0.1});
+  obs.observe(document.getElementById('booking'));
+})();
+
+window.miniCalNav=function(dir,e){
+    e.preventDefault();e.stopPropagation();
+    miniCur.setMonth(miniCur.getMonth()+dir);renderMini();
+  };
+})();
+</script>
+</body>
+</html>

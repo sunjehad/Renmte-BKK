@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Now — Rent Me Bangkok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qr-creator/dist/qr-creator.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+/* ── DESIGN TOKENS ── */
+:root{
+  --bg:#070709;--bg2:#0f0f12;--bg3:#17171c;
+  --fg:#f5f5f5;--muted:#888;
+  --red:#e63946;--blue:#2563eb;--blue-l:#60a5fa;
+  --border:rgba(255,255,255,.08);
+  --border-blue:rgba(37,99,235,.3);
+  --border-red:rgba(230,57,70,.3);
+  --radius:10px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --font-head:'Bebas Neue',sans-serif;
+  --font-body:'Inter',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;font-family:var(--font-body)}
+input,select,textarea{font-family:var(--font-body)}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:50;padding:14px 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(7,7,9,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-head);font-size:1.4rem;letter-spacing:.05em}
+.nav-logo span{color:var(--red)}
+.nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);transition:color .2s}
+.nav-back:hover{color:var(--fg)}
+.nav-back svg{transition:transform .2s}
+.nav-back:hover svg{transform:translateX(-3px)}
+
+/* ── LAYOUT ── */
+.wizard-wrap{max-width:900px;margin:0 auto;padding:40px 24px 80px}
+
+/* ── PROGRESS ── */
+.progress-bar{display:flex;align-items:center;margin-bottom:48px;gap:0}
+.step-item{display:flex;align-items:center;gap:8px;flex:1;position:relative}
+.step-item:last-child{flex:none}
+.step-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;transition:all .3s var(--ease);background:var(--bg)}
+.step-item.active .step-circle{border-color:var(--blue);color:var(--blue);background:rgba(37,99,235,.1)}
+.step-item.done .step-circle{border-color:var(--red);background:var(--red);color:#fff}
+.step-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;transition:color .3s}
+.step-item.active .step-label{color:var(--fg)}
+.step-item.done .step-label{color:var(--muted)}
+.step-line{flex:1;height:1px;background:var(--border);margin:0 12px;transition:background .3s}
+.step-item.done + .step-line{background:var(--red)}
+
+/* ── STEP PANELS ── */
+.step-panel{display:none;animation:fadeUp .4s var(--ease) both}
+.step-panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.step-heading{font-family:var(--font-head);font-size:clamp(1.8rem,4vw,2.8rem);color:var(--fg);margin-bottom:8px;line-height:1}
+.step-sub{font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.6}
+
+/* ── SERVICE CARDS ── */
+.service-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:8px}
+.svc-card{background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:28px 24px;cursor:pointer;transition:all .25s var(--ease);position:relative;overflow:hidden}
+.svc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.svc-card:hover{border-color:rgba(255,255,255,.18);background:var(--bg3)}
+.svc-card:hover::before{transform:scaleX(1)}
+.svc-card.selected{border-color:var(--blue);background:rgba(37,99,235,.08)}
+.svc-card.selected::before{background:var(--blue);transform:scaleX(1)}
+.svc-icon{font-size:2.4rem;margin-bottom:16px}
+.svc-title{font-family:var(--font-head);font-size:1.3rem;color:var(--fg);margin-bottom:6px;line-height:1}
+.svc-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.svc-price{margin-top:12px;font-size:12px;font-weight:700;color:var(--blue-l);letter-spacing:.05em}
+.check-badge{position:absolute;top:12px;right:12px;width:22px;height:22px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.svc-card.selected .check-badge{opacity:1}
+
+/* ── FORM ELEMENTS ── */
+.form-group{margin-bottom:20px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+label{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
+input[type=text],input[type=email],input[type=tel],select,textarea{
+  width:100%;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;color:var(--fg);font-size:14px;transition:border-color .2s;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+select option{background:var(--bg2)}
+textarea{resize:vertical;min-height:80px}
+
+/* ── CALENDAR ── */
+.cal-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.cal-month{font-family:var(--font-head);font-size:1.2rem;letter-spacing:.05em}
+.cal-nav{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);color:var(--fg);display:flex;align-items:center;justify-content:center;font-size:1rem;transition:.2s;cursor:pointer;background:none}
+.cal-nav:hover{border-color:var(--blue);color:var(--blue)}
+.cal-grid{padding:16px 20px}
+.cal-days-head{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:8px}
+.cal-days-head span{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;padding:4px 0}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;position:relative;border:1px solid transparent}
+.cal-day:hover:not(.disabled):not(.empty){background:rgba(37,99,235,.15);border-color:var(--border-blue);color:var(--fg)}
+.cal-day.today{border-color:rgba(255,255,255,.2)}
+.cal-day.selected{background:var(--blue);color:#fff;border-color:var(--blue)}
+.cal-day.booked{background:rgba(230,57,70,.1);color:rgba(230,57,70,.6);cursor:not-allowed}
+.cal-day.booked::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--red)}
+.cal-day.partial::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#f59e0b}
+.cal-day.disabled,.cal-day.empty{color:rgba(255,255,255,.15);cursor:not-allowed}
+.cal-day.disabled{text-decoration:line-through}
+.cal-day.in-range{background:rgba(37,99,235,.18);border-color:rgba(37,99,235,.35);color:var(--fg)}
+.cal-legend{display:flex;gap:16px;padding:12px 20px;border-top:1px solid var(--border)}
+.cal-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.cal-legend-dot{width:8px;height:8px;border-radius:2px}
+
+/* ── TIME SLOTS ── */
+.time-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-bottom:24px}
+.time-slot{padding:10px 8px;border:1px solid var(--border);border-radius:8px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s}
+.time-slot:hover:not(.booked){border-color:var(--blue-l);color:var(--fg)}
+.time-slot.selected{border-color:var(--blue);background:rgba(37,99,235,.15);color:var(--blue-l)}
+.time-slot.booked{background:rgba(230,57,70,.05);color:rgba(230,57,70,.4);cursor:not-allowed;text-decoration:line-through}
+
+/* ── DURATION CHIPS ── */
+.chip-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.chip{padding:8px 18px;border:1px solid var(--border);border-radius:100px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--blue-l);color:var(--fg)}
+.chip.selected{border-color:var(--blue);background:rgba(37,99,235,.15);color:var(--blue-l)}
+
+/* ── EQUIPMENT CARDS ── */
+.equip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.equip-card{background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s;position:relative}
+.equip-card.selected{border-color:var(--blue);background:rgba(37,99,235,.08)}
+.equip-card .equip-check{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s}
+.equip-card.selected .equip-check{opacity:1}
+.equip-name{font-family:var(--font-head);font-size:1.1rem;margin-bottom:4px}
+.equip-price{font-size:13px;color:var(--blue-l);font-weight:700}
+
+/* ── ACCOUNT CHOICE ── */
+.account-choice{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+.acc-card{background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:24px;cursor:pointer;transition:all .2s;text-align:center}
+.acc-card:hover{border-color:rgba(255,255,255,.2)}
+.acc-card.selected{border-color:var(--blue);background:rgba(37,99,235,.08)}
+.acc-card-icon{font-size:2rem;margin-bottom:10px}
+.acc-card-title{font-weight:700;font-size:14px;margin-bottom:4px}
+.acc-card-desc{font-size:12px;color:var(--muted)}
+
+/* ── INLINE LOGIN ── */
+.inline-login{background:var(--bg2);border:1px solid var(--border-blue);border-radius:12px;padding:24px;margin-bottom:24px;display:none}
+.inline-login.show{display:block}
+
+/* ── REVIEW BOX ── */
+.review-section{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:24px}
+.review-section h3{font-family:var(--font-head);font-size:1.2rem;color:var(--fg);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.review-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.review-row:last-child{border:none}
+.review-label{color:var(--muted)}
+.review-value{font-weight:600;color:var(--fg);text-align:right}
+.review-total{background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.review-total .label{font-size:13px;color:var(--muted)}
+.review-total .amount{font-family:var(--font-head);font-size:2rem;color:var(--fg)}
+
+/* ── TERMS ── */
+.terms-check{display:flex;gap:12px;align-items:flex-start;padding:16px;background:var(--bg3);border-radius:8px;margin-bottom:24px;cursor:pointer}
+.terms-check input[type=checkbox]{width:18px;height:18px;margin-top:1px;accent-color:var(--blue);flex-shrink:0;cursor:pointer}
+.terms-text{font-size:12px;color:var(--muted);line-height:1.6}
+.terms-text a{color:var(--blue-l)}
+
+/* ── BUTTONS ── */
+.btn-primary{background:var(--red);color:#fff;padding:14px 32px;border-radius:8px;font-size:14px;font-weight:700;letter-spacing:.04em;transition:opacity .2s,transform .2s var(--ease)}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-ghost{border:1px solid var(--border);color:var(--fg);padding:14px 28px;border-radius:8px;font-size:14px;font-weight:500;transition:border-color .2s,background .2s}
+.btn-ghost:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.05)}
+.btn-blue{background:var(--blue);color:#fff;padding:12px 24px;border-radius:8px;font-size:13px;font-weight:700;transition:opacity .2s}
+.btn-blue:hover{opacity:.85}
+
+.step-actions{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:32px}
+.step-actions.right{justify-content:flex-end}
+
+/* ── MSG ── */
+.msg{padding:12px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
+.msg.error{background:rgba(230,57,70,.1);border:1px solid var(--border-red);color:#ff6b6b;display:block}
+.msg.success{background:rgba(37,99,235,.1);border:1px solid var(--border-blue);color:var(--blue-l);display:block}
+
+/* ── CONFIRMATION SCREEN ── */
+#screen-confirm{display:none;text-align:center;padding:60px 24px}
+#screen-confirm.show{display:block;animation:fadeUp .5s var(--ease) both}
+.confirm-icon{font-size:64px;margin-bottom:24px}
+.confirm-ref{font-family:var(--font-head);font-size:2.5rem;color:var(--blue-l);margin-bottom:8px;letter-spacing:.1em}
+.confirm-title{font-family:var(--font-head);font-size:3rem;color:var(--fg);margin-bottom:16px;line-height:1}
+.confirm-sub{font-size:15px;color:var(--muted);max-width:480px;margin:0 auto 32px;line-height:1.7}
+.confirm-details{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:480px;margin:0 auto 32px;text-align:left}
+.confirm-details .review-row{font-size:14px}
+
+/* ── SPINNER ── */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── SECTION DIVIDER ── */
+.divider-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:24px 0 16px;display:flex;align-items:center;gap:10px}
+.divider-label::before,.divider-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── DATE RANGE PICKER ── */
+.date-range{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+input[type=date]{color-scheme:dark}
+
+/* ── PRICE SUMMARY STRIP ── */
+.price-strip{background:rgba(37,99,235,.06);border:1px solid var(--border-blue);border-radius:10px;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.price-strip .label{font-size:12px;color:var(--muted)}
+.price-strip .amount{font-family:var(--font-head);font-size:1.6rem;color:var(--fg)}
+.price-strip .discount{font-size:11px;color:#4ade80;font-weight:700;letter-spacing:.05em}
+
+/* ── PODCAST SUBCHOICE ── */
+.sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.sub-card{background:var(--bg2);border:2px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s}
+.sub-card:hover{border-color:rgba(255,255,255,.2)}
+.sub-card.selected{border-color:var(--blue);background:rgba(37,99,235,.08)}
+.sub-card-title{font-weight:700;font-size:14px;margin-bottom:4px}
+.sub-card-desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* ── PAYMENT METHODS ── */
+.payment-methods{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pay-card{background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:24px 20px;cursor:pointer;transition:all .2s var(--ease);text-align:center}
+.pay-card:hover{border-color:rgba(255,255,255,.2);background:var(--bg3)}
+.pay-card.selected{border-color:var(--blue);background:rgba(37,99,235,.08)}
+.pay-icon{font-size:2rem;margin-bottom:12px}
+.pay-title{font-weight:700;font-size:14px;margin-bottom:6px}
+.pay-desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  nav{padding:12px 16px}
+  .wizard-wrap{padding:24px 16px 60px}
+  .service-cards{grid-template-columns:1fr}
+  .equip-grid{grid-template-columns:1fr}
+  .payment-methods{grid-template-columns:1fr}
+  .account-choice{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .sub-grid{grid-template-columns:1fr}
+  .date-range{grid-template-columns:1fr}
+  .step-actions{flex-direction:column-reverse}
+  .btn-primary,.btn-ghost{width:100%;text-align:center}
+  .progress-bar{gap:0}
+  .step-label{display:none}
+  .step-line{margin:0 6px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back
+  </a>
+  <div class="nav-logo">RENT<span>ME</span> BANGKOK</div>
+  <a href="auth.html" style="font-size:13px;color:var(--muted)" id="nav-auth-link">Log In</a>
+</nav>
+
+<!-- BOOKING WIZARD -->
+<div class="wizard-wrap" id="wizard-wrap">
+
+  <!-- PROGRESS -->
+  <div class="progress-bar" id="progress-bar">
+    <div class="step-item active" id="pi-1">
+      <div class="step-circle">1</div>
+      <div class="step-label">Service</div>
+    </div>
+    <div class="step-line" id="pl-1"></div>
+    <div class="step-item" id="pi-2">
+      <div class="step-circle">2</div>
+      <div class="step-label">Details</div>
+    </div>
+    <div class="step-line" id="pl-2"></div>
+    <div class="step-item" id="pi-3">
+      <div class="step-circle">3</div>
+      <div class="step-label">Your Info</div>
+    </div>
+    <div class="step-line" id="pl-3"></div>
+    <div class="step-item" id="pi-4">
+      <div class="step-circle">4</div>
+      <div class="step-label">Confirm</div>
+    </div>
+    <div class="step-line" id="pl-4"></div>
+    <div class="step-item" id="pi-5">
+      <div class="step-circle">5</div>
+      <div class="step-label">Payment</div>
+    </div>
+  </div>
+
+  <!-- STEP 1: Choose Service -->
+  <div class="step-panel active" id="step-1">
+    <div class="step-heading">CHOOSE A SERVICE</div>
+    <div class="step-sub">Select what you'd like to book with us.</div>
+
+    <div class="service-cards">
+      <div class="svc-card" onclick="selectService('studio_rental',this)">
+        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="svc-icon">📸</div>
+        <div class="svc-title">PHOTO STUDIO RENTAL</div>
+        <div class="svc-desc">Rent our fully equipped studio by the hour. Lights, backdrops, lounge props — ready for you.</div>
+        <div class="svc-price">฿200 / hour</div>
+      </div>
+      <div class="svc-card" onclick="selectService('podcast_setup',this)" style="border-color:rgba(37,99,235,.25)">
+        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="svc-icon">🎙️</div>
+        <div class="svc-title">PODCAST STUDIO SETUP</div>
+        <div class="svc-desc">We set up everything — mics, lighting, sofa & decor. You choose your camera package.</div>
+        <div class="svc-price" style="color:var(--blue-l)">฿200/hr <span style="color:var(--muted);font-weight:400">+ ฿1,000 setup</span></div>
+      </div>
+      <div class="svc-card" onclick="selectService('podcast',this)">
+        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="svc-icon">🎬</div>
+        <div class="svc-title">FULL PODCAST SERVICE</div>
+        <div class="svc-desc">Recording with videographer, or full recording + editing package. We handle everything.</div>
+        <div class="svc-price">Contact for pricing</div>
+      </div>
+      <div class="svc-card" onclick="selectService('equipment',this)">
+        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="svc-icon">📷</div>
+        <div class="svc-title">DJI CAMERA RENTAL</div>
+        <div class="svc-desc">Rent DJI Pocket 3, Neo drone, or Osmo Nano by the day. 10% discount for 3+ days.</div>
+        <div class="svc-price">From ฿500 / day</div>
+      </div>
+    </div>
+
+    <div class="step-actions right">
+      <button class="btn-primary" onclick="goStep(2)" id="btn-step1-next" disabled>Next: Details →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Service Details -->
+  <div class="step-panel" id="step-2">
+    <div class="step-heading" id="s2-heading">BOOKING DETAILS</div>
+    <div class="step-sub" id="s2-sub">Pick your date, time, and duration.</div>
+
+    <!-- STUDIO DETAILS -->
+    <div id="details-studio">
+      <label style="margin-bottom:10px;display:block">Select Date</label>
+      <div class="cal-wrap">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="calNav(-1,'studio')">‹</button>
+          <div class="cal-month" id="cal-month-studio"></div>
+          <button class="cal-nav" onclick="calNav(1,'studio')">›</button>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-days-head">
+            <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
+          </div>
+          <div class="cal-days" id="cal-days-studio"></div>
+        </div>
+        <div class="cal-legend">
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(37,99,235,.3);border:1px solid var(--blue)"></div> Available</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(230,57,70,.2);border:1px solid var(--red)"></div> Booked</div>
+        </div>
+      </div>
+
+      <div id="studio-time-section" style="display:none">
+        <label>Select Start Time</label>
+        <div class="time-grid" id="time-slots-studio" style="margin-top:10px"></div>
+
+        <label>Duration</label>
+        <div class="chip-group" id="duration-chips">
+          <div class="chip" onclick="selectDuration(1,this)">1 hour</div>
+          <div class="chip" onclick="selectDuration(2,this)">2 hours</div>
+          <div class="chip" onclick="selectDuration(3,this)">3 hours</div>
+          <div class="chip" onclick="selectDuration(4,this)">4 hours</div>
+          <div class="chip" onclick="selectDuration(8,this)">Full day (8h)</div>
+        </div>
+
+        <div class="price-strip" id="studio-price-strip" style="display:none">
+          <div>
+            <div class="label">Estimated Total</div>
+            <div class="amount" id="studio-total-price">฿0</div>
+          </div>
+          <div style="font-size:12px;color:var(--muted)">฿200 × <span id="studio-hours">0</span>h</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PODCAST DETAILS -->
+    <div id="details-podcast" style="display:none">
+      <label style="margin-bottom:10px">Service Type</label>
+      <div class="sub-grid">
+        <div class="sub-card" onclick="selectSubtype('podcast_recording',this,'podcast')">
+          <div class="sub-card-title">🎬 Recording Only</div>
+          <div class="sub-card-desc">Use our studio and professional setup. We handle the filming. No editing included.</div>
+        </div>
+        <div class="sub-card" onclick="selectSubtype('podcast_editing',this,'podcast')">
+          <div class="sub-card-title">✂️ Recording + Editing</div>
+          <div class="sub-card-desc">Full package: filming, color grading, audio mix, titles, and delivery-ready episode.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Number of Participants</label>
+        <select id="pod-participants">
+          <option value="1">1 person</option>
+          <option value="2" selected>2 people</option>
+          <option value="3">3 people</option>
+          <option value="4">4 people (max)</option>
+        </select>
+      </div>
+
+      <label style="margin-bottom:10px;display:block">Select Date</label>
+      <div class="cal-wrap">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="calNav(-1,'podcast')">‹</button>
+          <div class="cal-month" id="cal-month-podcast"></div>
+          <button class="cal-nav" onclick="calNav(1,'podcast')">›</button>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-days-head">
+            <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
+          </div>
+          <div class="cal-days" id="cal-days-podcast"></div>
+        </div>
+        <div class="cal-legend">
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(37,99,235,.3);border:1px solid var(--blue)"></div> Available</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(230,57,70,.2);border:1px solid var(--red)"></div> Booked</div>
+        </div>
+      </div>
+
+      <div id="podcast-time-section" style="display:none">
+        <label>Select Start Time</label>
+        <div class="time-grid" id="time-slots-podcast" style="margin-top:10px"></div>
+      </div>
+
+      <div style="background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:14px 18px;font-size:13px;color:var(--blue-l);margin-top:16px">
+        💬 Pricing for podcast sessions is custom. After booking, we'll contact you within 24h to confirm details and pricing.
+      </div>
+    </div>
+
+    <!-- PODCAST STUDIO SETUP DETAILS -->
+    <div id="details-podcast-setup" style="display:none">
+      <div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.3);border-radius:10px;padding:16px 20px;margin-bottom:20px">
+        <div style="font-size:12px;font-weight:700;color:var(--blue-l);letter-spacing:.08em;margin-bottom:6px">WHAT'S INCLUDED</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:12px;color:var(--muted)">
+          <span>✓ 3 Microphones (always included)</span><span>✓ Studio lighting rig</span>
+          <span>✓ Sofa &amp; table setup</span>
+          <span>✓ Decorations &amp; design</span><span>✓ Fully customisable</span>
+        </div>
+      </div>
+      <div style="background:rgba(230,57,70,.06);border:1px solid rgba(230,57,70,.25);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">Studio rate</div>
+          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)">฿200 <span style="font-size:.7rem;color:var(--muted)">/hour</span></div>
+        </div>
+        <div style="width:1px;height:36px;background:var(--border)"></div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">One-time setup fee</div>
+          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--accent)">฿1,000</div>
+        </div>
+        <div style="width:1px;height:36px;background:var(--border)"></div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">Total (e.g. 2h)</div>
+          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)" id="ps-example-total">฿1,400</div>
+        </div>
+      </div>
+
+      <!-- CAMERA SETUP SELECTION -->
+      <div style="margin-bottom:20px">
+        <label style="display:block;margin-bottom:10px">Camera Setup</label>
+        <div class="chip-group" id="camera-chips">
+          <div class="chip selected" onclick="selectCameraSetup(1,this)">1 Camera &mdash; ฿400/hr</div>
+          <div class="chip" onclick="selectCameraSetup(2,this)">2 Cameras &mdash; ฿600/hr</div>
+          <div class="chip" onclick="selectCameraSetup(3,this)">3 Cameras &mdash; ฿900/hr</div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--muted)">
+            <input type="checkbox" id="with-videographer" onchange="toggleVideographer(this)" style="width:18px;height:18px;cursor:pointer">
+            <span>Add Videographer <span style="color:var(--accent)">+฿300/hr</span></span>
+          </label>
+        </div>
+      </div>
+
+      <label style="margin-bottom:10px;display:block">Select Date</label>
+      <div class="cal-wrap">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="calNav(-1,'podcast_setup')">‹</button>
+          <div class="cal-month" id="cal-month-podcast_setup"></div>
+          <button class="cal-nav" onclick="calNav(1,'podcast_setup')">›</button>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-days-head">
+            <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
+          </div>
+          <div class="cal-days" id="cal-days-podcast_setup"></div>
+        </div>
+        <div class="cal-legend">
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(37,99,235,.3);border:1px solid var(--blue)"></div> Available</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(230,57,70,.2);border:1px solid var(--red)"></div> Booked</div>
+        </div>
+      </div>
+
+      <div id="ps-time-section" style="display:none">
+        <label>Select Start Time</label>
+        <div class="time-grid" id="time-slots-podcast_setup" style="margin-top:10px"></div>
+      </div>
+
+      <div id="ps-duration-section" style="display:none">
+        <label style="margin-top:16px;display:block;margin-bottom:10px">Duration</label>
+        <div class="chip-group" id="ps-duration-chips">
+          <div class="chip" onclick="selectDuration(1,this,'ps')">1 hour</div>
+          <div class="chip" onclick="selectDuration(2,this,'ps')">2 hours</div>
+          <div class="chip" onclick="selectDuration(3,this,'ps')">3 hours</div>
+          <div class="chip" onclick="selectDuration(4,this,'ps')">4 hours</div>
+          <div class="chip" onclick="selectDuration(8,this,'ps')">Full day (8h)</div>
+        </div>
+        <div class="price-strip" id="ps-price-strip" style="display:none">
+          <div><div class="label">Total price</div>
+            <div class="amount" id="ps-total-price">฿0</div>
+          </div>
+          <div style="font-size:12px;color:var(--muted)" id="ps-price-breakdown">฿300 × <span id="ps-hours">0</span>h + ฿1,000 setup</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EQUIPMENT DETAILS -->
+    <div id="details-equipment" style="display:none">
+      <label style="margin-bottom:12px;display:block">Select Equipment <span style="color:var(--muted);font-weight:400">(multiple possible)</span></label>
+      <div class="equip-grid">
+        <div class="equip-card" onclick="toggleEquip('pocket3',this)">
+          <div class="equip-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div style="font-size:1.8rem;margin-bottom:8px">📷</div>
+          <div class="equip-name">DJI POCKET 3</div>
+          <div class="equip-price">฿500 / day</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">4K/120fps · 3-axis gimbal</div>
+        </div>
+        <div class="equip-card" onclick="toggleEquip('neo',this)">
+          <div class="equip-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div style="font-size:1.8rem;margin-bottom:8px">📷</div>
+          <div class="equip-name">DJI NEO DRONE</div>
+          <div class="equip-price">฿700 / day</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">4K · 135g · Palm launch</div>
+        </div>
+        <div class="equip-card" onclick="toggleEquip('nano',this)">
+          <div class="equip-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div style="font-size:1.8rem;margin-bottom:8px">🎥</div>
+          <div class="equip-name">DJI OSMO NANO</div>
+          <div class="equip-price">฿500 / day</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Action cam · Compact</div>
+        </div>
+      </div>
+
+      <!-- Range hint -->
+      <div id="equip-cal-hint" style="display:flex;align-items:center;gap:8px;margin:20px 0 12px;font-size:13px;color:var(--blue-l)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="equip-hint-text">Click a start date</span>
+      </div>
+
+      <!-- Calendar -->
+      <div class="cal-wrap">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="calNavEquip(-1)">‹</button>
+          <div class="cal-month" id="cal-month-equip"></div>
+          <button class="cal-nav" onclick="calNavEquip(1)">›</button>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-days-head">
+            <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
+          </div>
+          <div class="cal-days" id="cal-days-equip"></div>
+        </div>
+        <div class="cal-legend">
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(37,99,235,.3);border:1px solid var(--blue)"></div> Available</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(37,99,235,.6)"></div> Selected range</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(230,57,70,.2);border:1px solid var(--red)"></div> Booked</div>
+        </div>
+      </div>
+
+      <div class="price-strip" id="equip-price-strip" style="display:none">
+        <div>
+          <div class="label">Total Rental Cost</div>
+          <div class="amount" id="equip-total-price">฿0</div>
+          <div class="discount" id="equip-discount-label" style="display:none">10% discount applied!</div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:var(--muted)">
+          <div id="equip-days-label"></div>
+          <div id="equip-breakdown"></div>
+        </div>
+      </div>
+
+      <!-- Deposit notice -->
+      <div style="background:rgba(230,57,70,.07);border:1px solid rgba(230,57,70,.3);border-radius:10px;padding:16px 18px;margin-top:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span style="font-size:12px;font-weight:700;color:var(--red);letter-spacing:.08em">RENTAL REQUIREMENTS</span>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+          <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--fg-muted)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="margin-top:1px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>A <strong style="color:var(--fg)">refundable deposit of ฿1,000</strong> is required at pick-up and will be returned in full when the equipment is handed back undamaged.</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--fg-muted)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="margin-top:1px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>We will take a <strong style="color:var(--fg)">photo of your ID</strong> (passport or Thai ID card) and a <strong style="color:var(--fg)">photo of you</strong> for security purposes. This information is kept confidential.</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- T&C checkbox -->
+      <label id="equip-terms-wrap" style="display:flex;align-items:flex-start;gap:12px;margin-top:16px;cursor:pointer;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;transition:border-color .2s">
+        <input type="checkbox" id="equip-terms" onchange="document.getElementById('equip-terms-wrap').style.borderColor=this.checked?'rgba(37,99,235,.5)':'rgba(255,255,255,.08)'" style="width:16px;height:16px;accent-color:var(--blue);margin-top:1px;flex-shrink:0">
+        <span style="font-size:13px;color:var(--muted);line-height:1.5">I understand the deposit and ID photo requirements and agree to the rental terms.</span>
+      </label>
+    </div>
+
+    <div class="step-actions">
+      <button class="btn-ghost" onclick="goStep(1)">← Back</button>
+      <button class="btn-primary" onclick="validateStep2()" id="btn-step2-next">Next: Your Info →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Your Details -->
+  <div class="step-panel" id="step-3">
+    <div class="step-heading">YOUR DETAILS</div>
+    <div class="step-sub">Tell us who's booking so we can confirm everything.</div>
+
+    <div class="account-choice">
+      <div class="acc-card" onclick="chooseAccount('login',this)" id="acc-login">
+        <div class="acc-card-icon">👤</div>
+        <div class="acc-card-title">I have an account</div>
+        <div class="acc-card-desc">Log in to pre-fill your details and track bookings</div>
+      </div>
+      <div class="acc-card" onclick="chooseAccount('guest',this)" id="acc-guest">
+        <div class="acc-card-icon">⚡</div>
+        <div class="acc-card-title">Continue as guest</div>
+        <div class="acc-card-desc">No account needed — just fill in your details</div>
+      </div>
+    </div>
+
+    <!-- Inline login -->
+    <div class="inline-login" id="inline-login">
+      <div style="font-weight:700;font-size:14px;margin-bottom:16px">Log in to your account</div>
+      <div class="msg" id="inline-msg" style="display:none"></div>
+      <div class="form-group">
+        <label for="il-email">Email</label>
+        <input type="email" id="il-email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label for="il-pass">Password</label>
+        <input type="password" id="il-pass" placeholder="••••••••">
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <button class="btn-blue" onclick="doInlineLogin()">Log In</button>
+        <a href="auth.html" style="font-size:12px;color:var(--blue-l)">Create account →</a>
+      </div>
+      <div id="logged-in-notice" style="display:none;background:rgba(37,99,235,.1);border:1px solid var(--border-blue);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--blue-l);margin-top:12px">
+        ✓ Logged in as <strong id="logged-in-email"></strong> — details pre-filled below.
+      </div>
+    </div>
+
+    <!-- Guest / common form -->
+    <div id="details-form" style="display:none">
+      <div class="divider-label">Your Information</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="d-first">First Name *</label>
+          <input type="text" id="d-first" placeholder="Andy" required>
+        </div>
+        <div class="form-group">
+          <label for="d-last">Last Name *</label>
+          <input type="text" id="d-last" placeholder="Smith" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="d-phone">Phone *</label>
+          <input type="tel" id="d-phone" placeholder="+66 81 234 5678" required>
+        </div>
+        <div class="form-group">
+          <label for="d-email">Email *</label>
+          <input type="email" id="d-email" placeholder="you@example.com" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="d-notes">Special Requests (optional)</label>
+        <textarea id="d-notes" placeholder="Any notes for us? Backdrop colors, special requirements..."></textarea>
+      </div>
+    </div>
+
+    <div class="step-actions">
+      <button class="btn-ghost" onclick="goStep(2)">← Back</button>
+      <button class="btn-primary" onclick="validateStep3()">Next: Review →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Review & Confirm -->
+  <div class="step-panel" id="step-4">
+    <div class="step-heading">REVIEW & CONFIRM</div>
+    <div class="step-sub">Double-check everything before we lock in your booking.</div>
+
+    <div class="review-section">
+      <h3>📋 Booking Summary</h3>
+      <div id="review-details"></div>
+    </div>
+
+    <div class="review-section">
+      <h3>👤 Your Details</h3>
+      <div id="review-person"></div>
+    </div>
+
+    <div class="terms-check">
+      <input type="checkbox" id="terms-check" onchange="document.getElementById('btn-confirm').disabled=!this.checked">
+      <div class="terms-text">
+        I agree to the <a href="#" onclick="return false">Terms & Conditions</a> and <a href="#" onclick="return false">Cancellation Policy</a>. I understand that bookings are confirmed immediately and cancellations must be made 24h in advance.
+      </div>
+    </div>
+
+    <div class="msg" id="confirm-msg"></div>
+
+    <div class="step-actions">
+      <button class="btn-ghost" onclick="goStep(3)">← Back</button>
+      <button class="btn-primary" onclick="goToPayment()" id="btn-confirm" disabled>Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Payment -->
+  <div class="step-panel" id="step-5">
+    <div class="step-heading">PAYMENT</div>
+    <div class="step-sub">Your booking is held for 30 minutes while you complete payment.</div>
+
+    <div class="payment-methods" id="payment-methods">
+      <div class="pay-card" onclick="selectPayment('card',this)">
+        <div class="pay-icon">💳</div>
+        <div class="pay-title">Credit / Debit Card</div>
+        <div class="pay-desc">Secure checkout via Stripe — also supports Apple Pay &amp; Google Pay. Instant confirmation.</div>
+      </div>
+      <div class="pay-card" onclick="selectPayment('qr',this)">
+        <div class="pay-icon">📱</div>
+        <div class="pay-title">QR Code / Payment Link</div>
+        <div class="pay-desc">Scan with your banking app or share the link. 30 min to pay.</div>
+      </div>
+      <div class="pay-card" onclick="selectPayment('cash',this)">
+        <div class="pay-icon">💵</div>
+        <div class="pay-title">Cash on Pick-up</div>
+        <div class="pay-desc">Pay in person when you arrive. Booking is held immediately.</div>
+      </div>
+    </div>
+
+    <div id="cash-commitment" style="display:none;margin-top:20px">
+      <div class="terms-check" style="margin-bottom:0">
+        <input type="checkbox" id="cash-commit-check" onchange="document.getElementById('btn-pay').disabled=!this.checked">
+        <div class="terms-text">
+          I commit to paying <strong id="cash-amount-label" style="color:var(--fg)"></strong> in cash on arrival. I understand that no-shows or unpaid bookings may affect future bookings.
+        </div>
+      </div>
+    </div>
+
+    <div class="msg" id="payment-msg"></div>
+
+    <div class="step-actions">
+      <button class="btn-ghost" onclick="goStep(4)">← Back</button>
+      <button class="btn-primary" onclick="startPayment()" id="btn-pay" disabled>Pay Now ✓</button>
+    </div>
+  </div>
+
+</div><!-- /wizard-wrap -->
+
+<!-- QR WAITING SCREEN -->
+<div id="screen-qr" style="display:none;text-align:center;padding:60px 24px;max-width:480px;margin:0 auto">
+  <div class="step-heading" style="font-size:2rem">SCAN TO PAY</div>
+  <div class="step-sub">Booking ref <strong id="qr-ref" style="color:var(--fg)"></strong> is held for you.</div>
+  <div style="background:#fff;border-radius:14px;padding:20px;display:inline-block;margin-bottom:20px">
+    <canvas id="qr-image" width="240" height="240" style="display:block"></canvas>
+  </div>
+  <div style="margin-bottom:8px">
+    <a id="qr-link" href="#" target="_blank" style="color:var(--blue-l);font-size:13px">Open payment link →</a>
+  </div>
+  <div style="font-family:var(--font-head);font-size:1.8rem;color:var(--fg);margin:16px 0" id="qr-countdown">30:00</div>
+  <div style="font-size:13px;color:var(--muted)">
+    <span class="spinner"></span> Waiting for payment confirmation…
+  </div>
+  <div class="msg" id="qr-msg" style="margin-top:20px"></div>
+</div>
+
+<!-- CONFIRMATION SCREEN -->
+<div id="screen-confirm">
+  <div class="confirm-icon">🎉</div>
+  <div class="confirm-ref" id="conf-ref">RMB-XXXXXXXX</div>
+  <div class="confirm-title">BOOKING CONFIRMED!</div>
+  <div class="confirm-sub">
+    Thank you! Your booking is confirmed.<br>
+    <span style="color:var(--fg)">A confirmation email is on its way to <strong id="conf-email"></strong></span>
+  </div>
+  <div class="confirm-details" id="conf-details"></div>
+
+  <!-- Calendar buttons -->
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px">
+    <a id="btn-gcal" href="#" target="_blank"
+       style="display:inline-flex;align-items:center;gap:8px;padding:11px 20px;background:#fff;color:#333;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:opacity .2s"
+       onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#4285f4" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" stroke="#4285f4" stroke-width="2"/><line x1="8" y1="2" x2="8" y2="6" stroke="#4285f4" stroke-width="2"/><line x1="3" y1="10" x2="21" y2="10" stroke="#4285f4" stroke-width="2"/></svg>
+      Add to Google Calendar
+    </a>
+    <a id="btn-ics" href="#"
+       style="display:inline-flex;align-items:center;gap:8px;padding:11px 20px;background:var(--bg3);border:1px solid var(--border);color:var(--fg);border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:opacity .2s"
+       onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download .ics (Apple / Outlook)
+    </a>
+  </div>
+
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <a href="index.html" class="btn-ghost" style="display:inline-block">← Back to Home</a>
+    <a href="booking.html" class="btn-primary" style="display:inline-block">Book Again</a>
+    <a href="profile.html" class="btn-blue" style="display:inline-block">My Bookings</a>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════
+const { createClient } = supabase;
+const sb = createClient(
+  'https://nghsyxwhczvwaorssgoh.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5naHN5eHdoY3p2d2FvcnNzZ29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNDA3NDIsImV4cCI6MjA5NzYxNjc0Mn0.3EV00ggHV5domLBbJpTrdIiWatOyhNpFVJo42FqppPk'
+);
+
+// ═══════════════════════════════════════════════
+// EMAIL SETUP:
+// 1. Go to emailjs.com → free account
+// 2. Add Email Service (Gmail)
+// 3. Create 2 templates: customer_confirmation + admin_notification
+// 4. Replace values below
+// ═══════════════════════════════════════════════
+const EMAILJS_PUBLIC_KEY       = 'n-YxOGgL8mPVUaoBP';
+const EMAILJS_SERVICE_ID       = 'service_jwnx06q';
+const EMAILJS_CUSTOMER_TEMPLATE = 'template_n7rkhjd';
+const EMAILJS_ADMIN_TEMPLATE   = 'template_thqicqi';
+
+// ═══════════════════════════════════════════════
+// STRIPE
+// ═══════════════════════════════════════════════
+const STRIPE_PUBLISHABLE_KEY = 'pk_live_51TmVMSRqZTvU6gAZUfKFurZKlok39hdkXhbUyYmgiqfv6TmZh6UaGrFQzanJWdlkOmtvEKx1SQhtZt9KixbNHB5c00sZewTTo8';
+const SUPABASE_FN_URL = 'https://nghsyxwhczvwaorssgoh.supabase.co/functions/v1';
+const RESERVATION_MINUTES = 30;
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let state = {
+  step: 1,
+  service: null,        // 'studio_rental' | 'podcast' | 'equipment'
+  subtype: null,
+  date: null,           // 'YYYY-MM-DD'
+  startTime: null,
+  endTime: null,
+  duration: null,
+  equipStart: null,
+  equipEnd: null,
+  equipItems: [],
+  participants: 2,
+  cameraCount: 1,
+  withVideographer: false,
+  totalPrice: 0,
+  // person
+  firstName: '', lastName: '', phone: '', email: '', notes: '',
+  userId: null,
+  accountMode: null,    // 'login' | 'guest'
+  // payment
+  paymentMethod: null,  // 'card' | 'qr' | 'cash'
+  bookingId: null,
+  // results
+  bookingRef: null
+};
+let qrPollInterval = null;
+let qrCountdownInterval = null;
+
+// Calendar state per instance
+const calState = {
+  studio:        { cur: new Date(), bookedDates: [] },
+  podcast:       { cur: new Date(), bookedDates: [] },
+  podcast_setup: { cur: new Date(), bookedDates: [] }
+};
+
+// Equipment calendar state (range picker)
+const equipCal = { cur: new Date(), bookedDates: [], pickingEnd: false };
+
+// ═══════════════════════════════════════════════
+// AUTH CHECK
+// ═══════════════════════════════════════════════
+sb.auth.getSession().then(async ({ data }) => {
+  if (data.session) {
+    const u = data.session.user;
+    state.userId = u.id;
+    document.getElementById('nav-auth-link').textContent = 'My Profile';
+    document.getElementById('nav-auth-link').href = 'profile.html';
+
+    // Load profile
+    let { data: p } = await sb.from('profiles').select('*').eq('id', u.id).maybeSingle();
+
+    // If no profile row exists yet, create one from auth metadata
+    // (prevents the bookings.user_id foreign-key error)
+    if (!p) {
+      const meta = u.user_metadata || {};
+      const newProfile = {
+        id: u.id,
+        email: u.email,
+        first_name: meta.first_name || '',
+        last_name:  meta.last_name  || '',
+        phone:      meta.phone      || ''
+      };
+      const { data: inserted } = await sb.from('profiles').upsert(newProfile).select().maybeSingle();
+      p = inserted || newProfile;
+    }
+
+    state.firstName = p.first_name || '';
+    state.lastName  = p.last_name  || '';
+    state.phone     = p.phone      || '';
+    state.email     = p.email      || u.email;
+    prefillForm();
+  }
+});
+
+// ═══════════════════════════════════════════════
+// STEP NAVIGATION
+// ═══════════════════════════════════════════════
+function goStep(n) {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  state.step = n;
+  updateProgress(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (n === 2) setupStep2();
+  if (n === 4) buildReview();
+  if (n === 5) setupStep5();
+}
+
+function updateProgress(n) {
+  for (let i = 1; i <= 5; i++) {
+    const pi = document.getElementById('pi-' + i);
+    pi.classList.remove('active', 'done');
+    if (i < n) pi.classList.add('done');
+    else if (i === n) pi.classList.add('active');
+    // circle content
+    const c = pi.querySelector('.step-circle');
+    if (i < n) c.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+    else c.textContent = i;
+    // line
+    if (i < 5) {
+      const pl = document.getElementById('pl-' + i);
+      if (pl) pl.style.background = i < n ? 'var(--red)' : 'var(--border)';
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// STEP 1
+// ═══════════════════════════════════════════════
+function selectService(type, el) {
+  document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.service = type;
+  document.getElementById('btn-step1-next').disabled = false;
+}
+
+// ═══════════════════════════════════════════════
+// STEP 2 SETUP
+// ═══════════════════════════════════════════════
+function setupStep2() {
+  document.getElementById('details-studio').style.display        = 'none';
+  document.getElementById('details-podcast').style.display       = 'none';
+  document.getElementById('details-podcast-setup').style.display = 'none';
+  document.getElementById('details-equipment').style.display     = 'none';
+
+  if (state.service === 'studio_rental') {
+    document.getElementById('details-studio').style.display = '';
+    document.getElementById('s2-heading').textContent = 'STUDIO DETAILS';
+    document.getElementById('s2-sub').textContent = 'Pick your date, time, and how long you need.';
+    initCalendar('studio');
+  } else if (state.service === 'podcast_setup') {
+    document.getElementById('details-podcast-setup').style.display = '';
+    document.getElementById('s2-heading').textContent = 'PODCAST STUDIO SETUP';
+    document.getElementById('s2-sub').textContent = 'Choose your camera setup, date, time, and duration. From ฿300/hr + ฿1,000 one-time setup fee.';
+    // Reset camera selection UI
+    state.cameraCount = 1;
+    state.withVideographer = false;
+    const camChips = document.querySelectorAll('#camera-chips .chip');
+    camChips.forEach((c,i) => c.classList.toggle('selected', i === 0));
+    const vgCheck = document.getElementById('with-videographer');
+    if (vgCheck) vgCheck.checked = false;
+    initCalendar('podcast_setup');
+  } else if (state.service === 'podcast') {
+    document.getElementById('details-podcast').style.display = '';
+    document.getElementById('s2-heading').textContent = 'PODCAST DETAILS';
+    document.getElementById('s2-sub').textContent = 'Choose your session type, participants, and date.';
+    initCalendar('podcast');
+  } else if (state.service === 'equipment') {
+    document.getElementById('details-equipment').style.display = '';
+    document.getElementById('s2-heading').textContent = 'EQUIPMENT RENTAL';
+    document.getElementById('s2-sub').textContent = 'Select your gear and rental dates.';
+    initEquipCalendar();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════
+async function initCalendar(type) {
+  calState[type].cur = new Date();
+  // All room-based services share the same space, so count them together.
+  // Reads from the public availability view (no customer data exposed).
+  const { data } = await sb.from('availability')
+    .select('booking_date, start_time, duration_hours')
+    .in('service_type', ROOM_SERVICES);
+
+  // Count booked hours per date — only mark as fully booked if all 14 slots taken
+  const hoursByDate = {};
+  (data || []).forEach(b => {
+    const d = b.booking_date;
+    if (!d) return;
+    if (!hoursByDate[d]) hoursByDate[d] = 0;
+    hoursByDate[d] += (b.duration_hours || 1);
+  });
+
+  // A day is "fully booked" only when 14+ hours are taken (09:00–22:00)
+  calState[type].bookedDates = Object.keys(hoursByDate).filter(d => hoursByDate[d] >= 14);
+  // Days with some (but not all) hours taken get a "partial" marker
+  calState[type].partialDates = Object.keys(hoursByDate).filter(d => hoursByDate[d] > 0 && hoursByDate[d] < 14);
+  renderCalendar(type);
+}
+
+function calNav(dir, type) {
+  calState[type].cur.setMonth(calState[type].cur.getMonth() + dir);
+  renderCalendar(type);
+}
+
+function renderCalendar(type) {
+  const { cur, bookedDates } = calState[type];
+  const partialDates = calState[type].partialDates || [];
+  const year = cur.getFullYear(), month = cur.getMonth();
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-' + type).textContent = months[month] + ' ' + year;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const grid = document.getElementById('cal-days-' + type);
+  grid.innerHTML = '';
+
+  for (let i = 0; i < firstDay; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day empty';
+    grid.appendChild(d);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day';
+    d.textContent = day;
+
+    const dateObj = new Date(year, month, day);
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+    if (dateObj < today) {
+      d.classList.add('disabled');
+    } else if (bookedDates.includes(dateStr)) {
+      d.classList.add('booked');
+      d.title = 'Fully booked';
+    } else {
+      if (partialDates.includes(dateStr)) {
+        d.classList.add('partial');
+        d.title = 'Partially booked — some hours still available';
+      }
+      d.addEventListener('click', () => selectCalDate(type, dateStr, d));
+    }
+
+    // Highlight today
+    if (dateObj.getTime() === today.getTime()) d.classList.add('today');
+    const typeKey = state.service === 'studio_rental' ? 'studio' : state.service === 'podcast_setup' ? 'podcast_setup' : 'podcast';
+    if (state.date === dateStr && type === typeKey) d.classList.add('selected');
+
+    grid.appendChild(d);
+  }
+}
+
+async function selectCalDate(type, dateStr, el) {
+  state.date = dateStr;
+  document.querySelectorAll('#cal-days-' + type + ' .cal-day.selected').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+
+  if (type === 'studio') {
+    document.getElementById('studio-time-section').style.display = '';
+    await loadTimeSlots('studio', dateStr);
+  } else if (type === 'podcast_setup') {
+    document.getElementById('ps-time-section').style.display = '';
+    await loadTimeSlots('podcast_setup', dateStr);
+  } else {
+    document.getElementById('podcast-time-section').style.display = '';
+    await loadTimeSlots('podcast', dateStr);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// TIME SLOTS
+// ═══════════════════════════════════════════════
+const ALL_TIMES = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'];
+
+// Studio, podcast and podcast-setup all use the SAME physical room,
+// so a booking in any of them blocks the time for all three.
+const ROOM_SERVICES = ['studio_rental', 'podcast', 'podcast_setup'];
+
+async function loadTimeSlots(type, date) {
+  const { data } = await sb.from('availability')
+    .select('start_time, end_time, duration_hours')
+    .in('service_type', ROOM_SERVICES)
+    .eq('booking_date', date);
+
+  const bookedTimes = new Set();
+  (data || []).forEach(b => {
+    const start = parseInt(b.start_time);
+    const dur = b.duration_hours || 1;
+    for (let i = 0; i < dur; i++) {
+      bookedTimes.add(String(start + i).padStart(2,'0') + ':00');
+    }
+  });
+
+  const containerMap = { studio: 'time-slots-studio', podcast: 'time-slots-podcast', podcast_setup: 'time-slots-podcast_setup' };
+  const containerId = containerMap[type];
+  const grid = document.getElementById(containerId);
+  grid.innerHTML = '';
+  state.startTime = null;
+
+  ALL_TIMES.forEach(t => {
+    const slot = document.createElement('div');
+    slot.className = 'time-slot';
+    slot.textContent = t;
+    if (bookedTimes.has(t)) {
+      slot.classList.add('booked');
+      slot.title = 'Already booked';
+    } else {
+      slot.addEventListener('click', () => {
+        document.querySelectorAll('#' + containerId + ' .time-slot').forEach(s => s.classList.remove('selected'));
+        slot.classList.add('selected');
+        state.startTime = t;
+        limitDurations(t, type);
+        if (type === 'podcast_setup') {
+          document.getElementById('ps-duration-section').style.display = '';
+          updatePodcastSetupPrice();
+        } else {
+          updateStudioPrice();
+        }
+      });
+    }
+    grid.appendChild(slot);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// DURATION & PRICING
+// ═══════════════════════════════════════════════
+// Disable durations that would run past closing time (22:00)
+function limitDurations(startTime, type) {
+  const CLOSE = 22;
+  const startH = parseInt(startTime);
+  const maxDur = CLOSE - startH;
+  const groupId = type === 'podcast_setup' ? 'ps-duration-chips' : 'duration-chips';
+  document.querySelectorAll('#' + groupId + ' .chip').forEach(chip => {
+    const m = chip.getAttribute('onclick').match(/selectDuration\((\d+)/);
+    const dur = m ? parseInt(m[1]) : 1;
+    if (dur > maxDur) {
+      chip.classList.add('disabled');
+      chip.classList.remove('selected');
+      chip.style.pointerEvents = 'none';
+      chip.style.opacity = '.35';
+    } else {
+      chip.classList.remove('disabled');
+      chip.style.pointerEvents = '';
+      chip.style.opacity = '';
+    }
+  });
+  // Clear an out-of-range selection
+  if (state.duration && state.duration > maxDur) {
+    state.duration = null;
+    document.getElementById(type === 'podcast_setup' ? 'ps-price-strip' : 'studio-price-strip').style.display = 'none';
+  }
+}
+
+function selectDuration(h, el, context) {
+  state.duration = h;
+  if (context === 'ps') {
+    document.querySelectorAll('#ps-duration-chips .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    updatePodcastSetupPrice();
+  } else {
+    document.querySelectorAll('#duration-chips .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    updateStudioPrice();
+  }
+}
+
+function updateStudioPrice() {
+  if (!state.startTime || !state.duration) return;
+  const total = 200 * state.duration;
+  state.totalPrice = total;
+  const startH = parseInt(state.startTime);
+  state.endTime = String(startH + state.duration).padStart(2,'0') + ':00';
+  document.getElementById('studio-hours').textContent = state.duration;
+  document.getElementById('studio-total-price').textContent = '฿' + total.toLocaleString();
+  document.getElementById('studio-price-strip').style.display = '';
+}
+
+function updatePodcastSetupPrice() {
+  if (!state.startTime || !state.duration) return;
+  const cameraRates = { 1: 400, 2: 600, 3: 900 };
+  const hourlyRate = cameraRates[state.cameraCount] + (state.withVideographer ? 300 : 0);
+  const total = hourlyRate * state.duration + 1000;
+  state.totalPrice = total;
+  const startH = parseInt(state.startTime);
+  state.endTime = String(startH + state.duration).padStart(2,'0') + ':00';
+  document.getElementById('ps-hours').textContent = state.duration;
+  document.getElementById('ps-total-price').textContent = '฿' + total.toLocaleString();
+  const vgText = state.withVideographer ? ' + ฿500 videographer' : '';
+  document.getElementById('ps-price-breakdown').innerHTML = '฿' + hourlyRate + ' × <span id=ps-hours>' + state.duration + '</span>h + ฿1,000 setup' + vgText;
+  document.getElementById('ps-price-strip').style.display = '';
+}
+
+function selectCameraSetup(count, el) {
+  state.cameraCount = count;
+  document.querySelectorAll('#camera-chips .chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  updatePodcastSetupPrice();
+}
+
+function toggleVideographer(checkbox) {
+  state.withVideographer = checkbox.checked;
+  updatePodcastSetupPrice();
+}
+
+// Subtype selection
+function selectSubtype(subtype, el, context) {
+  const parent = el.parentElement;
+  parent.querySelectorAll('.sub-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.subtype = subtype;
+}
+
+// ═══════════════════════════════════════════════
+// EQUIPMENT
+// ═══════════════════════════════════════════════
+const EQUIP_PRICES = { pocket3: 500, neo: 700, nano: 500 };
+
+// ═══════════════════════════════════════════════
+// EQUIPMENT CALENDAR (range picker)
+// ═══════════════════════════════════════════════
+async function initEquipCalendar() {
+  equipCal.cur = new Date();
+  equipCal.pickingEnd = false;
+  state.equipStart = null;
+  state.equipEnd   = null;
+  const { data } = await sb.from('availability')
+    .select('equipment_start_date, equipment_end_date')
+    .eq('service_type', 'equipment');
+  // Collect all individually booked dates
+  equipCal.bookedDates = [];
+  (data || []).forEach(b => {
+    if (!b.equipment_start_date || !b.equipment_end_date) return;
+    const s = new Date(b.equipment_start_date), e = new Date(b.equipment_end_date);
+    for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
+      equipCal.bookedDates.push(d.toISOString().split('T')[0]);
+    }
+  });
+  renderEquipCalendar();
+}
+
+function calNavEquip(dir) {
+  equipCal.cur.setMonth(equipCal.cur.getMonth() + dir);
+  renderEquipCalendar();
+}
+
+function renderEquipCalendar() {
+  const { cur, bookedDates } = equipCal;
+  const year = cur.getFullYear(), month = cur.getMonth();
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-equip').textContent = months[month] + ' ' + year;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const grid = document.getElementById('cal-days-equip');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < firstDay; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day empty';
+    grid.appendChild(d);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day';
+    d.textContent = day;
+
+    const dateObj = new Date(year, month, day);
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+    if (dateObj < today) {
+      d.classList.add('disabled');
+    } else if (bookedDates.includes(dateStr)) {
+      d.classList.add('booked');
+      d.title = 'Already rented';
+    } else {
+      // Highlight selected range
+      if (state.equipStart && state.equipEnd) {
+        if (dateStr >= state.equipStart && dateStr <= state.equipEnd) d.classList.add('in-range');
+        if (dateStr === state.equipStart || dateStr === state.equipEnd) d.classList.add('selected');
+      } else if (state.equipStart && dateStr === state.equipStart) {
+        d.classList.add('selected');
+      }
+      d.addEventListener('click', () => selectEquipDate(dateStr, d));
+    }
+
+    if (dateObj.getTime() === today.getTime()) d.classList.add('today');
+    grid.appendChild(d);
+  }
+}
+
+function selectEquipDate(dateStr, el) {
+  if (!state.equipStart || (state.equipStart && state.equipEnd)) {
+    // Start fresh — pick start date
+    state.equipStart = dateStr;
+    state.equipEnd   = null;
+    equipCal.pickingEnd = true;
+    document.getElementById('equip-hint-text').textContent = 'Now click your return date';
+    document.getElementById('equip-price-strip').style.display = 'none';
+  } else {
+    // Pick end date
+    if (dateStr < state.equipStart) {
+      state.equipEnd   = state.equipStart;
+      state.equipStart = dateStr;
+    } else {
+      state.equipEnd = dateStr;
+    }
+    equipCal.pickingEnd = false;
+    document.getElementById('equip-hint-text').textContent =
+      `${state.equipStart}  →  ${state.equipEnd} (click to change)`;
+    calcEquipPrice();
+  }
+  renderEquipCalendar();
+}
+
+function toggleEquip(id, el) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    if (!state.equipItems.includes(id)) state.equipItems.push(id);
+  } else {
+    state.equipItems = state.equipItems.filter(i => i !== id);
+  }
+  calcEquipPrice();
+}
+
+function calcEquipPrice() {
+  if (!state.equipStart || !state.equipEnd || state.equipItems.length === 0) {
+    document.getElementById('equip-price-strip').style.display = 'none';
+    return;
+  }
+
+  const start = new Date(state.equipStart), end = new Date(state.equipEnd);
+  const days  = Math.max(1, Math.round((end - start) / 86400000) + 1);
+
+  const basePrice = state.equipItems.reduce((sum, id) => sum + EQUIP_PRICES[id], 0);
+  const discount  = days >= 3 ? 0.1 : 0;
+  const total     = Math.round(basePrice * days * (1 - discount));
+  state.totalPrice = total;
+
+  const strip = document.getElementById('equip-price-strip');
+  strip.style.display = '';
+  document.getElementById('equip-total-price').textContent = '฿' + total.toLocaleString();
+  document.getElementById('equip-days-label').textContent  = days + ' day' + (days > 1 ? 's' : '');
+  document.getElementById('equip-breakdown').textContent   = '฿' + basePrice + '/day × ' + days;
+  document.getElementById('equip-discount-label').style.display = discount > 0 ? '' : 'none';
+}
+
+// ═══════════════════════════════════════════════
+// STEP 2 VALIDATION
+// ═══════════════════════════════════════════════
+function validateStep2() {
+  if (state.service === 'studio_rental') {
+    if (!state.date)      return alert('Please select a date.');
+    if (!state.startTime) return alert('Please select a start time.');
+    if (!state.duration)  return alert('Please select a duration.');
+  } else if (state.service === 'podcast') {
+    if (!state.subtype)   return alert('Please choose recording type.');
+    if (!state.date)      return alert('Please select a date.');
+    if (!state.startTime) return alert('Please select a start time.');
+    state.participants = parseInt(document.getElementById('pod-participants').value);
+  } else if (state.service === 'equipment') {
+    if (state.equipItems.length === 0) return alert('Please select at least one piece of equipment.');
+    if (!state.equipStart) return alert('Please select a pick-up date.');
+    if (!state.equipEnd)   return alert('Please select a return date.');
+    if (!document.getElementById('equip-terms').checked) return alert('Please accept the rental terms to continue.');
+  }
+  goStep(3);
+}
+
+// ═══════════════════════════════════════════════
+// STEP 3 — Account / Guest
+// ═══════════════════════════════════════════════
+function chooseAccount(mode, el) {
+  document.querySelectorAll('.acc-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.accountMode = mode;
+
+  const loginBox = document.getElementById('inline-login');
+  const form     = document.getElementById('details-form');
+
+  if (mode === 'login') {
+    // Check if already logged in
+    sb.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        loginBox.classList.add('show');
+        document.getElementById('logged-in-email').textContent = data.session.user.email;
+        document.getElementById('logged-in-notice').style.display = '';
+        document.getElementById('il-email').style.display = 'none';
+        document.getElementById('il-pass').style.display  = 'none';
+        loginBox.querySelector('.btn-blue').style.display  = 'none';
+        prefillForm();
+        form.style.display = '';
+      } else {
+        loginBox.classList.add('show');
+        form.style.display = 'none';
+      }
+    });
+  } else {
+    loginBox.classList.remove('show');
+    form.style.display = '';
+    // Prefill if we have data
+    if (state.firstName) prefillForm();
+  }
+}
+
+function prefillForm() {
+  document.getElementById('d-first').value = state.firstName;
+  document.getElementById('d-last').value  = state.lastName;
+  document.getElementById('d-phone').value = state.phone;
+  document.getElementById('d-email').value = state.email;
+}
+
+async function doInlineLogin() {
+  const email = document.getElementById('il-email').value.trim();
+  const pass  = document.getElementById('il-pass').value;
+  const msgEl = document.getElementById('inline-msg');
+  msgEl.style.display = 'none';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    msgEl.textContent = error.message;
+    msgEl.className = 'msg error';
+    msgEl.style.display = '';
+    return;
+  }
+  state.userId = data.user.id;
+  // Load profile
+  const { data: p } = await sb.from('profiles').select('*').eq('id', data.user.id).single();
+  if (p) {
+    state.firstName = p.first_name || '';
+    state.lastName  = p.last_name  || '';
+    state.phone     = p.phone      || '';
+    state.email     = p.email      || data.user.email;
+  }
+  document.getElementById('logged-in-email').textContent = data.user.email;
+  document.getElementById('logged-in-notice').style.display = '';
+  document.getElementById('il-email').style.display = 'none';
+  document.getElementById('il-pass').style.display  = 'none';
+  document.getElementById('inline-login').querySelector('.btn-blue').style.display = 'none';
+  document.getElementById('details-form').style.display = '';
+  prefillForm();
+}
+
+function validateStep3() {
+  if (!state.accountMode) return alert('Please choose how to continue.');
+
+  const first = document.getElementById('d-first').value.trim();
+  const last  = document.getElementById('d-last').value.trim();
+  const phone = document.getElementById('d-phone').value.trim();
+  const email = document.getElementById('d-email').value.trim();
+
+  if (!first || !last || !phone || !email) return alert('Please fill in all required fields.');
+  if (!/\S+@\S+\.\S+/.test(email)) return alert('Please enter a valid email.');
+
+  state.firstName = first;
+  state.lastName  = last;
+  state.phone     = phone;
+  state.email     = email;
+  state.notes     = document.getElementById('d-notes').value.trim();
+
+  goStep(4);
+}
+
+// ═══════════════════════════════════════════════
+// STEP 4 — REVIEW
+// ═══════════════════════════════════════════════
+function buildReview() {
+  // Booking details
+  let detailRows = '';
+  if (state.service === 'studio_rental') {
+    detailRows = `
+      <div class="review-row"><span class="review-label">Service</span><span class="review-value">Photo Studio Rental</span></div>
+      <div class="review-row"><span class="review-label">Date</span><span class="review-value">${formatDate(state.date)}</span></div>
+      <div class="review-row"><span class="review-label">Time</span><span class="review-value">${state.startTime} – ${state.endTime}</span></div>
+      <div class="review-row"><span class="review-label">Duration</span><span class="review-value">${state.duration} hour${state.duration > 1 ? 's' : ''}</span></div>
+      <div class="review-total"><span class="label">Total</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
+  } else if (state.service === 'podcast') {
+    const subLabel = state.subtype === 'podcast_recording' ? 'Recording Only' : 'Recording + Editing';
+    detailRows = `
+      <div class="review-row"><span class="review-label">Service</span><span class="review-value">Podcast ${subLabel}</span></div>
+      <div class="review-row"><span class="review-label">Participants</span><span class="review-value">${state.participants}</span></div>
+      <div class="review-row"><span class="review-label">Date</span><span class="review-value">${formatDate(state.date)}</span></div>
+      <div class="review-row"><span class="review-label">Start Time</span><span class="review-value">${state.startTime}</span></div>
+      <div class="review-row"><span class="review-label">Pricing</span><span class="review-value" style="color:var(--blue-l)">We'll contact you with a quote</span></div>`;
+  } else if (state.service === 'equipment') {
+    const days = Math.round((new Date(state.equipEnd) - new Date(state.equipStart)) / 86400000) + 1;
+    const equipNames = { pocket3: 'DJI Pocket 3', neo: 'DJI Neo', nano: 'DJI Osmo Nano' };
+    detailRows = `
+      <div class="review-row"><span class="review-label">Service</span><span class="review-value">Equipment Rental</span></div>
+      <div class="review-row"><span class="review-label">Equipment</span><span class="review-value">${state.equipItems.map(i => equipNames[i]).join(', ')}</span></div>
+      <div class="review-row"><span class="review-label">Pick-up</span><span class="review-value">${formatDate(state.equipStart)}</span></div>
+      <div class="review-row"><span class="review-label">Return</span><span class="review-value">${formatDate(state.equipEnd)}</span></div>
+      <div class="review-row"><span class="review-label">Rental Days</span><span class="review-value">${days} day${days > 1 ? 's' : ''}</span></div>
+      <div class="review-total"><span class="label">Total${days >= 3 ? ' (10% discount applied)' : ''}</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
+  }
+  document.getElementById('review-details').innerHTML = detailRows;
+
+  // Person details
+  document.getElementById('review-person').innerHTML = `
+    <div class="review-row"><span class="review-label">Name</span><span class="review-value">${state.firstName} ${state.lastName}</span></div>
+    <div class="review-row"><span class="review-label">Phone</span><span class="review-value">${state.phone}</span></div>
+    <div class="review-row"><span class="review-label">Email</span><span class="review-value">${state.email}</span></div>
+    ${state.notes ? `<div class="review-row"><span class="review-label">Notes</span><span class="review-value">${state.notes}</span></div>` : ''}`;
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+// ═══════════════════════════════════════════════
+// STEP 4 → 5: CREATE PENDING BOOKING, GO TO PAYMENT
+// ═══════════════════════════════════════════════
+function bookingPayload() {
+  const days = state.service === 'equipment'
+    ? Math.round((new Date(state.equipEnd) - new Date(state.equipStart)) / 86400000) + 1
+    : null;
+  return {
+    user_id:              state.userId || null,
+    guest_name:           !state.userId ? `${state.firstName} ${state.lastName}` : null,
+    guest_email:          !state.userId ? state.email : null,
+    guest_phone:          !state.userId ? state.phone : null,
+    service_type:         state.service,
+    service_subtype:      state.subtype,
+    booking_date:         state.service !== 'equipment' ? state.date : null,
+    start_time:           state.startTime,
+    end_time:             state.endTime,
+    duration_hours:       state.duration,
+    equipment_start_date: state.equipStart || null,
+    equipment_end_date:   state.equipEnd   || null,
+    rental_days:          days,
+    equipment_items:      state.equipItems.length > 0 ? state.equipItems : null,
+    participant_count:    state.participants || null,
+    total_price:          state.totalPrice || null,
+    notes:                state.notes ? state.notes + (state.service === 'podcast_setup' ? ' | Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') : '') : (state.service === 'podcast_setup' ? 'Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') : null),
+    source:               'website',
+    payment_method:       null,
+    booking_status:       state.totalPrice ? 'pending_payment' : 'confirmed',
+    status:                state.totalPrice ? 'pending' : 'confirmed'
+  };
+}
+
+async function goToPayment() {
+  const btn = document.getElementById('btn-confirm');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Please wait…';
+
+  // Podcast (custom quote) has no upfront price — confirm immediately, no payment step.
+  if (state.service === 'podcast' || !state.totalPrice) {
+    await finalizeBooking(bookingPayload());
+    return;
+  }
+
+  if (!state.bookingId) {
+    const expiresAt = new Date(Date.now() + RESERVATION_MINUTES * 60000).toISOString();
+    const payload = { ...bookingPayload(), reservation_expires_at: expiresAt };
+    const { data, error } = await sb.rpc('create_booking', { payload });
+    if (error) {
+      const msgEl = document.getElementById('confirm-msg');
+      msgEl.textContent = 'Error: ' + error.message;
+      msgEl.className = 'msg error';
+      btn.disabled = false;
+      btn.innerHTML = 'Continue →';
+      return;
+    }
+    state.bookingId  = data.id;
+    state.bookingRef = data.booking_ref;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Continue →';
+  goStep(5);
+}
+
+// ═══════════════════════════════════════════════
+// STEP 5: PAYMENT METHOD SELECTION
+// ═══════════════════════════════════════════════
+function setupStep5() {
+  document.getElementById('cash-amount-label').textContent = '฿' + (state.totalPrice || 0).toLocaleString();
+}
+
+function selectPayment(method, el) {
+  document.querySelectorAll('.pay-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.paymentMethod = method;
+  const cashBox = document.getElementById('cash-commitment');
+  const btn = document.getElementById('btn-pay');
+  if (method === 'cash') {
+    cashBox.style.display = '';
+    btn.disabled = !document.getElementById('cash-commit-check').checked;
+    btn.innerHTML = 'Confirm Cash Booking ✓';
+  } else {
+    cashBox.style.display = 'none';
+    btn.disabled = false;
+    btn.innerHTML = method === 'card' ? 'Pay with Card →' : 'Get QR Code →';
+  }
+}
+
+async function startPayment() {
+  const btn = document.getElementById('btn-pay');
+  const msgEl = document.getElementById('payment-msg');
+  msgEl.style.display = 'none';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Processing…';
+
+  try {
+    if (state.paymentMethod === 'cash') {
+      const { data, error } = await sb.rpc('update_booking_payment', { p_booking_id: state.bookingId, p_payment_method: 'cash' });
+      if (error || !data) throw new Error(error?.message || 'Could not confirm booking.');
+      await finalizeBooking(null, data);
+    } else if (state.paymentMethod === 'card') {
+      const res = await fetch(`${SUPABASE_FN_URL}/stripe-checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId: state.bookingId,
+          bookingRef: state.bookingRef,
+          amount: state.totalPrice,
+          customerName: `${state.firstName} ${state.lastName}`,
+          customerEmail: state.email,
+          description: `Rent Me Bangkok — ${state.service}`,
+          customerEmail: state.email,
+          customerName: state.name,
+          successUrl: `${location.origin}${location.pathname}?payment=success&booking=${state.bookingId}`,
+          cancelUrl: `${location.origin}${location.pathname}?payment=cancelled&booking=${state.bookingId}`
+        })
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || 'Could not start checkout.');
+      // The Stripe redirect is a full page navigation — this in-memory `state`
+      // would otherwise be lost, so stash what we need to show the confirmation.
+      localStorage.setItem('rentme_pending_booking_' + state.bookingId, JSON.stringify(state));
+      window.location.href = json.url;
+    } else if (state.paymentMethod === 'qr') {
+      const res = await fetch(`${SUPABASE_FN_URL}/stripe-paymentlink`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId: state.bookingId,
+          bookingRef: state.bookingRef,
+          amount: state.totalPrice,
+          description: `Rent Me Bangkok — ${state.service}`,
+          customerEmail: state.email,
+          customerName: state.name
+        })
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || 'Could not create payment link.');
+      showQRScreen(json.qrRawData);
+    }
+  } catch (err) {
+    msgEl.textContent = 'Error: ' + err.message;
+    msgEl.className = 'msg error';
+    btn.disabled = false;
+    btn.innerHTML = state.paymentMethod === 'card' ? 'Pay with Card →' : state.paymentMethod === 'qr' ? 'Get QR Code →' : 'Confirm Cash Booking ✓';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// QR PAYMENT FLOW
+// ═══════════════════════════════════════════════
+function showQRScreen(qrRawData) {
+  document.getElementById('wizard-wrap').style.display = 'none';
+  document.getElementById('qr-ref').textContent = state.bookingRef;
+  // Draw QR code on canvas using qr-creator library
+  const canvas = document.getElementById('qr-image');
+  QrCreator.render({ text: qrRawData, radius: 0, ecLevel: 'M', fill: '#000', background: '#fff', size: 240 }, canvas);
+  document.getElementById('qr-link').style.display = 'none';
+  document.getElementById('screen-qr').style.display = '';
+
+  let secondsLeft = RESERVATION_MINUTES * 60;
+  updateQRCountdown(secondsLeft);
+  qrCountdownInterval = setInterval(() => {
+    secondsLeft--;
+    updateQRCountdown(secondsLeft);
+    if (secondsLeft <= 0) {
+      clearInterval(qrCountdownInterval);
+      clearInterval(qrPollInterval);
+      const msgEl = document.getElementById('qr-msg');
+      msgEl.textContent = 'This payment link has expired. Please start a new booking.';
+      msgEl.className = 'msg error';
+    }
+  }, 1000);
+
+  qrPollInterval = setInterval(async () => {
+    const { data } = await sb.rpc('get_booking_payment_status', { p_booking_id: state.bookingId });
+    const row = Array.isArray(data) ? data[0] : data;
+    if (row && row.booking_status === 'paid') {
+      clearInterval(qrPollInterval);
+      clearInterval(qrCountdownInterval);
+      document.getElementById('screen-qr').style.display = 'none';
+      await finalizeBooking(null, syntheticBookingFromState(), true);
+    } else if (row && ['cancelled', 'failed'].includes(row.booking_status)) {
+      clearInterval(qrPollInterval);
+      clearInterval(qrCountdownInterval);
+      const msgEl = document.getElementById('qr-msg');
+      msgEl.textContent = 'Payment failed or expired. Please start a new booking.';
+      msgEl.className = 'msg error';
+    }
+  }, 5000);
+}
+
+// Builds a booking-shaped object from local state when we can't (or don't
+// need to) re-read the row via Supabase — guests can't SELECT their own
+// row directly (see RLS notes in stripe-migration.sql), and we already
+// know every field we submitted.
+function syntheticBookingFromState() {
+  const days = state.service === 'equipment'
+    ? Math.round((new Date(state.equipEnd) - new Date(state.equipStart)) / 86400000) + 1
+    : null;
+  return {
+    id: state.bookingId,
+    booking_ref: state.bookingRef,
+    guest_name: `${state.firstName} ${state.lastName}`,
+    guest_email: state.email,
+    guest_phone: state.phone,
+    service_type: state.service,
+    booking_date: state.service !== 'equipment' ? state.date : null,
+    start_time: state.startTime,
+    end_time: state.endTime,
+    duration_hours: state.duration,
+    equipment_start_date: state.equipStart || null,
+    equipment_end_date: state.equipEnd || null,
+    rental_days: days,
+    total_price: state.totalPrice || null
+  };
+}
+
+function updateQRCountdown(seconds) {
+  const m = Math.max(0, Math.floor(seconds / 60));
+  const s = Math.max(0, seconds % 60);
+  document.getElementById('qr-countdown').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+// ═══════════════════════════════════════════════
+// STRIPE REDIRECT HANDLING (on page load)
+// ═══════════════════════════════════════════════
+(async function handleStripeRedirect() {
+  const params = new URLSearchParams(location.search);
+  const paymentStatus = params.get('payment');
+  const bookingId = params.get('booking');
+  if (!paymentStatus || !bookingId) return;
+
+  // Restore the in-memory state that was stashed before the redirect to Stripe.
+  const stashKey = 'rentme_pending_booking_' + bookingId;
+  const stashed = localStorage.getItem(stashKey);
+  if (stashed) Object.assign(state, JSON.parse(stashed));
+
+  if (paymentStatus === 'success') {
+    // Webhook may take a moment — poll briefly for the booking to flip to "paid".
+    for (let i = 0; i < 10; i++) {
+      const { data } = await sb.rpc('get_booking_payment_status', { p_booking_id: bookingId });
+      const row = Array.isArray(data) ? data[0] : data;
+      if (row && row.booking_status === 'paid') {
+        state.bookingId  = row.id;
+        state.bookingRef = row.booking_ref;
+        localStorage.removeItem(stashKey);
+        await finalizeBooking(null, syntheticBookingFromState(), true);
+        return;
+      }
+      await new Promise(r => setTimeout(r, 1500));
+    }
+  }
+  // Cancelled, or webhook hasn't landed yet — clean the URL and let the user retry.
+  localStorage.removeItem(stashKey);
+  history.replaceState({}, '', location.pathname);
+})();
+
+// ═══════════════════════════════════════════════
+// FINALIZE: SHOW CONFIRMATION SCREEN
+// ═══════════════════════════════════════════════
+async function finalizeBooking(payload, existingBooking, skipEmail) {
+  const equipNames = { pocket3: 'DJI Pocket 3', neo: 'DJI Neo', nano: 'DJI Osmo Nano' };
+  let data = existingBooking;
+  if (!data) {
+    const { data: rpcData, error } = await sb.rpc('create_booking', { payload });
+    if (error) {
+      const msgEl = document.getElementById('confirm-msg');
+      msgEl.textContent = 'Error: ' + error.message;
+      msgEl.className = 'msg error';
+      const btn = document.getElementById('btn-confirm');
+      btn.disabled = false;
+      btn.innerHTML = 'Continue →';
+      return;
+    }
+    data = rpcData;
+  }
+
+  state.bookingRef = data.booking_ref;
+
+  // Send emails (non-blocking)
+  if (!skipEmail) sendEmails(data).catch(() => {});
+
+  // Build calendar links
+  buildCalendarLinks(data);
+
+  // Show confirmation screen
+  document.getElementById('wizard-wrap').style.display = 'none';
+  document.getElementById('screen-qr').style.display = 'none';
+  const confScreen = document.getElementById('screen-confirm');
+  confScreen.classList.add('show');
+
+  document.getElementById('conf-ref').textContent = data.booking_ref;
+  document.getElementById('conf-email').textContent = state.email;
+
+  const svcLabel = {
+    studio_rental: 'Photo Studio Rental',
+    podcast: 'Podcast Session',
+    equipment: 'Equipment Rental'
+  };
+
+  let confRows = `<div class="review-row"><span class="review-label">Reference</span><span class="review-value" style="color:var(--blue-l)">${data.booking_ref}</span></div>`;
+  confRows += `<div class="review-row"><span class="review-label">Service</span><span class="review-value">${svcLabel[state.service]}</span></div>`;
+  if (state.service !== 'equipment') {
+    confRows += `<div class="review-row"><span class="review-label">Date</span><span class="review-value">${formatDate(state.date)}</span></div>`;
+    confRows += `<div class="review-row"><span class="review-label">Time</span><span class="review-value">${state.startTime}${state.endTime ? ' – ' + state.endTime : ''}</span></div>`;
+  } else {
+    confRows += `<div class="review-row"><span class="review-label">Dates</span><span class="review-value">${formatDate(state.equipStart)} – ${formatDate(state.equipEnd)}</span></div>`;
+    confRows += `<div class="review-row"><span class="review-label">Gear</span><span class="review-value">${state.equipItems.map(i => equipNames[i]).join(', ')}</span></div>`;
+  }
+  if (state.totalPrice) {
+    confRows += `<div class="review-row"><span class="review-label">Total</span><span class="review-value">฿${state.totalPrice.toLocaleString()}</span></div>`;
+  }
+
+  document.getElementById('conf-details').innerHTML = confRows;
+
+  // Deposit reminder for equipment
+  if (state.service === 'equipment') {
+    const notice = document.createElement('div');
+    notice.style.cssText = 'background:rgba(230,57,70,.07);border:1px solid rgba(230,57,70,.3);border-radius:10px;padding:16px 18px;max-width:480px;margin:0 auto 24px;text-align:left';
+    notice.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span style="font-size:12px;font-weight:700;color:#e63946;letter-spacing:.08em">REMINDER FOR PICK-UP</span>
+      </div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#888">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="margin-top:1px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Bring <strong style="color:#f5f5f5">฿1,000 cash deposit</strong> — returned in full when equipment is handed back undamaged.</span>
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#888">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="margin-top:1px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Bring your <strong style="color:#f5f5f5">ID</strong> (passport or Thai ID card) — we will take a photo of your ID and of you for security.</span>
+        </li>
+      </ul>`;
+    document.getElementById('conf-details').after(notice);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// CALENDAR BUTTONS
+// ═══════════════════════════════════════════════
+function buildCalendarLinks(booking) {
+  const svcLabel = {
+    studio_rental:  'Photo Studio – Rent Me Bangkok',
+    podcast:        'Podcast Session – Rent Me Bangkok',
+    podcast_setup:  'Podcast Studio Setup – Rent Me Bangkok',
+    equipment:      'Equipment Rental – Rent Me Bangkok'
+  };
+
+  const name    = booking.guest_name || `${state.firstName} ${state.lastName}`;
+  const title   = encodeURIComponent(`${svcLabel[booking.service_type] || booking.service_type} (${name})`);
+  const loc     = encodeURIComponent('51 Kamphaeng Phet 7 Rd, Makkasan, Bangkok 10400');
+  const details = encodeURIComponent(`Ref: ${booking.booking_ref}\nPhone: ${booking.guest_phone || state.phone}\nEmail: ${booking.guest_email || state.email}`);
+
+  let dtStart, dtEnd;
+  if (booking.service_type === 'equipment') {
+    dtStart = (booking.equipment_start_date || '').replace(/-/g,'') + 'T090000';
+    dtEnd   = (booking.equipment_end_date   || '').replace(/-/g,'') + 'T180000';
+  } else {
+    const d  = (booking.booking_date || '').replace(/-/g,'');
+    const sh = booking.start_time ? booking.start_time.replace(':','') + '00' : '090000';
+    const eh = booking.end_time   ? booking.end_time.replace(':','')   + '00' : '110000';
+    dtStart  = d + 'T' + sh;
+    dtEnd    = d + 'T' + eh;
+  }
+
+  // Google Calendar URL
+  const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dtStart}/${dtEnd}&details=${details}&location=${loc}`;
+  document.getElementById('btn-gcal').href = gcalUrl;
+
+  // ICS download
+  document.getElementById('btn-ics').addEventListener('click', e => {
+    e.preventDefault();
+    generateICS(booking, dtStart, dtEnd, decodeURIComponent(title));
+  });
+}
+
+// ICS CALENDAR FILE
+// ═══════════════════════════════════════════════
+function generateICS(booking, dtStart, dtEnd, summary) {
+  try {
+    const uid  = booking.booking_ref + '@rentmebangkok.com';
+    const desc = `Booking Ref: ${booking.booking_ref}\\nPhone: ${booking.guest_phone || state.phone}\\nEmail: ${booking.guest_email || state.email}`;
+
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Rent Me Bangkok//Booking//EN',
+      'BEGIN:VEVENT',
+      'UID:' + uid,
+      'SUMMARY:' + summary,
+      'DTSTART:' + dtStart,
+      'DTEND:' + dtEnd,
+      'DESCRIPTION:' + desc,
+      'LOCATION:51 Kamphaeng Phet 7 Rd\\, Makkasan\\, Bangkok 10400',
+      'BEGIN:VALARM',
+      'TRIGGER:-PT24H',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:Reminder – 24h until your booking',
+      'END:VALARM',
+      'BEGIN:VALARM',
+      'TRIGGER:-PT1H',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:Reminder – 1h until your booking',
+      'END:VALARM',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `rentme-booking-${booking.booking_ref}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    console.warn('ICS generation failed:', e);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// EMAILJS
+// ═══════════════════════════════════════════════
+async function sendEmails(booking) {
+  if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') return; // Not configured
+
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+
+  const svcLabel = {
+    studio_rental: 'Photo Studio Rental',
+    podcast: 'Podcast Session',
+    equipment: 'Equipment Rental'
+  };
+
+  const customerName  = booking.guest_name  || `${state.firstName} ${state.lastName}`;
+  const customerEmail = booking.guest_email || state.email;
+  const customerPhone = booking.guest_phone || state.phone;
+
+  // Build Google Calendar link for admin
+  const gcalTitle   = encodeURIComponent(`${svcLabel[booking.service_type] || booking.service_type} – ${customerName}`);
+  const gcalDetails = encodeURIComponent(`Ref: ${booking.booking_ref}\nPhone: ${customerPhone}\nEmail: ${customerEmail}`);
+  const gcalLoc     = encodeURIComponent('51 Kamphaeng Phet 7 Rd, Makkasan, Bangkok 10400');
+  let gcalDates;
+  if (booking.service_type === 'equipment') {
+    const s = (booking.equipment_start_date || '').replace(/-/g,'');
+    const e = (booking.equipment_end_date   || '').replace(/-/g,'');
+    gcalDates = `${s}T090000/${e}T180000`;
+  } else {
+    const d  = (booking.booking_date || '').replace(/-/g,'');
+    const sh = booking.start_time ? booking.start_time.replace(':','') + '00' : '090000';
+    const eh = booking.end_time   ? booking.end_time.replace(':','')   + '00' : '110000';
+    gcalDates = `${d}T${sh}/${d}T${eh}`;
+  }
+  const gcalLink = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${gcalTitle}&dates=${gcalDates}&details=${gcalDetails}&location=${gcalLoc}`;
+
+  const params = {
+    booking_ref:    booking.booking_ref,
+    customer_name:  customerName,
+    customer_email: customerEmail,
+    customer_phone: customerPhone,
+    service:        svcLabel[booking.service_type] || booking.service_type,
+    booking_date:   booking.booking_date || booking.equipment_start_date || '',
+    start_time:     booking.start_time || 'See booking details',
+    source:         booking.source || 'website',
+    gcal_link:      gcalLink
+  };
+
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CUSTOMER_TEMPLATE, params);
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_ADMIN_TEMPLATE, params);
+    console.log('Emails sent successfully');
+  } catch (err) {
+    console.error('EmailJS error:', err);
+  }
+}
+</script>
+</body>
+</html>
