@@ -734,7 +734,12 @@ input[type=date]{color-scheme:dark}
   <!-- STEP 5: Payment -->
   <div class="step-panel" id="step-5">
     <div class="step-heading">PAYMENT</div>
-    <div class="step-sub">Your booking is held for 30 minutes while you complete payment.</div>
+    <div class="step-sub" id="pay-sub">Your booking is held for 30 minutes while you complete payment.</div>
+
+    <div id="deposit-banner" style="display:none;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.4);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#fbbf24">
+      <strong style="display:block;margin-bottom:4px">฿1,000 Deposit Required</strong>
+      A non-refundable deposit of ฿1,000 is required to confirm your booking. The remaining balance (<span id="deposit-remaining"></span>) is paid on the day at the studio.
+    </div>
 
     <div class="payment-methods" id="payment-methods">
       <div class="pay-card" onclick="selectPayment('card',this)">
@@ -1646,7 +1651,23 @@ async function goToPayment() {
 // STEP 5: PAYMENT METHOD SELECTION
 // ═══════════════════════════════════════════════
 function setupStep5() {
-  document.getElementById('cash-amount-label').textContent = '฿' + (state.totalPrice || 0).toLocaleString();
+  const isSetup = state.service === 'podcast_setup';
+  const chargeAmount = isSetup ? 1000 : state.totalPrice;
+  state.depositAmount = chargeAmount;
+
+  document.getElementById('cash-amount-label').textContent = '฿' + chargeAmount.toLocaleString();
+  document.getElementById('deposit-banner').style.display = isSetup ? '' : 'none';
+  if (isSetup) {
+    document.getElementById('deposit-remaining').textContent = '฿' + (state.totalPrice - 1000).toLocaleString();
+  }
+
+  // Disable cash for podcast_setup — deposit must be paid online
+  const cashCard = document.querySelector('.pay-card:nth-child(3)');
+  if (cashCard) {
+    cashCard.style.opacity = isSetup ? '.35' : '';
+    cashCard.style.pointerEvents = isSetup ? 'none' : '';
+    cashCard.title = isSetup ? 'Cash not available — deposit required' : '';
+  }
 }
 
 function selectPayment(method, el) {
@@ -1679,17 +1700,20 @@ async function startPayment() {
       if (error || !data) throw new Error(error?.message || 'Could not confirm booking.');
       await finalizeBooking(null, data);
     } else if (state.paymentMethod === 'card') {
+      const chargeAmount = state.depositAmount || state.totalPrice;
+      const desc = state.service === 'podcast_setup'
+        ? `Rent Me Bangkok — Podcast Setup Deposit (฿${chargeAmount} of ฿${state.totalPrice} total)`
+        : `Rent Me Bangkok — ${state.service}`;
       const res = await fetch(`${SUPABASE_FN_URL}/stripe-checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bookingId: state.bookingId,
           bookingRef: state.bookingRef,
-          amount: state.totalPrice,
+          amount: chargeAmount,
           customerName: `${state.firstName} ${state.lastName}`,
           customerEmail: state.email,
-          description: `Rent Me Bangkok — ${state.service}`,
-          customerEmail: state.email,
+          description: desc,
           customerName: state.name,
           successUrl: `${location.origin}${location.pathname}?payment=success&booking=${state.bookingId}`,
           cancelUrl: `${location.origin}${location.pathname}?payment=cancelled&booking=${state.bookingId}`
@@ -1702,13 +1726,14 @@ async function startPayment() {
       localStorage.setItem('rentme_pending_booking_' + state.bookingId, JSON.stringify(state));
       window.location.href = json.url;
     } else if (state.paymentMethod === 'qr') {
+      const chargeAmount = state.depositAmount || state.totalPrice;
       const res = await fetch(`${SUPABASE_FN_URL}/stripe-paymentlink`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bookingId: state.bookingId,
           bookingRef: state.bookingRef,
-          amount: state.totalPrice,
+          amount: chargeAmount,
           description: `Rent Me Bangkok — ${state.service}`,
           customerEmail: state.email,
           customerName: state.name
