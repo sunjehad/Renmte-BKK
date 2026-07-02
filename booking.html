@@ -1612,9 +1612,12 @@ async function goToPayment() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Please wait…';
 
-  // Podcast (custom quote) has no upfront price — confirm immediately, no payment step.
   if (!state.totalPrice) {
-    await finalizeBooking(bookingPayload());
+    const msgEl = document.getElementById('confirm-msg');
+    msgEl.textContent = 'Error: No price calculated. Please go back and complete all steps.';
+    msgEl.className = 'msg error';
+    btn.disabled = false;
+    btn.innerHTML = 'Continue →';
     return;
   }
 
