@@ -427,10 +427,22 @@ input[type=date]{color-scheme:dark}
       <div id="podcast-time-section" style="display:none">
         <label>Select Start Time</label>
         <div class="time-grid" id="time-slots-podcast" style="margin-top:10px"></div>
+
+        <label style="margin-top:16px;display:block">Duration</label>
+        <div class="chip-group" id="pod-duration-chips">
+          <div class="chip" onclick="selectDuration(1,this,'pod')">1 hour</div>
+          <div class="chip" onclick="selectDuration(2,this,'pod')">2 hours</div>
+          <div class="chip" onclick="selectDuration(3,this,'pod')">3 hours</div>
+          <div class="chip" onclick="selectDuration(4,this,'pod')">4 hours</div>
+          <div class="chip" onclick="selectDuration(8,this,'pod')">Full day (8h)</div>
+        </div>
       </div>
 
-      <div style="background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:14px 18px;font-size:13px;color:var(--blue-l);margin-top:16px">
-        💬 Pricing for podcast sessions is custom. After booking, we'll contact you within 24h to confirm details and pricing.
+      <div id="pod-price-strip" style="display:none;background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:14px 18px;margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:13px;color:var(--blue-l)" id="pod-price-breakdown">฿200/hr × 1h + ฿1,000 setup</div>
+          <div style="font-size:18px;font-weight:700;color:var(--fg)" id="pod-total-price">฿1,200</div>
+        </div>
       </div>
     </div>
 
@@ -1145,6 +1157,8 @@ async function loadTimeSlots(type, date) {
         if (type === 'podcast_setup') {
           document.getElementById('ps-duration-section').style.display = '';
           updatePodcastSetupPrice();
+        } else if (type === 'podcast') {
+          updatePodcastPrice();
         } else {
           updateStudioPrice();
         }
@@ -1162,7 +1176,7 @@ function limitDurations(startTime, type) {
   const CLOSE = 22;
   const startH = parseInt(startTime);
   const maxDur = CLOSE - startH;
-  const groupId = type === 'podcast_setup' ? 'ps-duration-chips' : 'duration-chips';
+  const groupId = type === 'podcast_setup' ? 'ps-duration-chips' : type === 'podcast' ? 'pod-duration-chips' : 'duration-chips';
   document.querySelectorAll('#' + groupId + ' .chip').forEach(chip => {
     const m = chip.getAttribute('onclick').match(/selectDuration\((\d+)/);
     const dur = m ? parseInt(m[1]) : 1;
@@ -1180,7 +1194,7 @@ function limitDurations(startTime, type) {
   // Clear an out-of-range selection
   if (state.duration && state.duration > maxDur) {
     state.duration = null;
-    document.getElementById(type === 'podcast_setup' ? 'ps-price-strip' : 'studio-price-strip').style.display = 'none';
+    document.getElementById(type === 'podcast_setup' ? 'ps-price-strip' : type === 'podcast' ? 'pod-price-strip' : 'studio-price-strip').style.display = 'none';
   }
 }
 
@@ -1190,11 +1204,26 @@ function selectDuration(h, el, context) {
     document.querySelectorAll('#ps-duration-chips .chip').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
     updatePodcastSetupPrice();
+  } else if (context === 'pod') {
+    document.querySelectorAll('#duration-chips .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    updatePodcastPrice();
   } else {
     document.querySelectorAll('#duration-chips .chip').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
     updateStudioPrice();
   }
+}
+
+function updatePodcastPrice() {
+  if (!state.startTime || !state.duration) return;
+  const total = 200 * state.duration + 1000;
+  state.totalPrice = total;
+  const startH = parseInt(state.startTime);
+  state.endTime = String(startH + state.duration).padStart(2,'0') + ':00';
+  document.getElementById('pod-price-breakdown').textContent = '฿200/hr × ' + state.duration + 'h + ฿1,000 setup';
+  document.getElementById('pod-total-price').textContent = '฿' + total.toLocaleString();
+  document.getElementById('pod-price-strip').style.display = '';
 }
 
 function updateStudioPrice() {
@@ -1211,15 +1240,15 @@ function updateStudioPrice() {
 function updatePodcastSetupPrice() {
   if (!state.startTime || !state.duration) return;
   const cameraRates = { 1: 400, 2: 600, 3: 900 };
-  const hourlyRate = cameraRates[state.cameraCount] + (state.withVideographer ? 300 : 0);
+  const hourlyRate = 200 + cameraRates[state.cameraCount] + (state.withVideographer ? 300 : 0);
   const total = hourlyRate * state.duration + 1000;
   state.totalPrice = total;
   const startH = parseInt(state.startTime);
   state.endTime = String(startH + state.duration).padStart(2,'0') + ':00';
   document.getElementById('ps-hours').textContent = state.duration;
   document.getElementById('ps-total-price').textContent = '฿' + total.toLocaleString();
-  const vgText = state.withVideographer ? ' + ฿500 videographer' : '';
-  document.getElementById('ps-price-breakdown').innerHTML = '฿' + hourlyRate + ' × <span id=ps-hours>' + state.duration + '</span>h + ฿1,000 setup' + vgText;
+  const vgText = state.withVideographer ? ' + ฿300/hr videographer' : '';
+  document.getElementById('ps-price-breakdown').innerHTML = '฿' + hourlyRate + '/hr × <span id=ps-hours>' + state.duration + '</span>h + ฿1,000 setup' + vgText;
   document.getElementById('ps-price-strip').style.display = '';
 }
 
@@ -1392,6 +1421,7 @@ function validateStep2() {
     if (!state.subtype)   return alert('Please choose recording type.');
     if (!state.date)      return alert('Please select a date.');
     if (!state.startTime) return alert('Please select a start time.');
+    if (!state.duration)  return alert('Please select a duration.');
     state.participants = parseInt(document.getElementById('pod-participants').value);
   } else if (state.service === 'equipment') {
     if (state.equipItems.length === 0) return alert('Please select at least one piece of equipment.');
@@ -1515,8 +1545,9 @@ function buildReview() {
       <div class="review-row"><span class="review-label">Service</span><span class="review-value">Podcast ${subLabel}</span></div>
       <div class="review-row"><span class="review-label">Participants</span><span class="review-value">${state.participants}</span></div>
       <div class="review-row"><span class="review-label">Date</span><span class="review-value">${formatDate(state.date)}</span></div>
-      <div class="review-row"><span class="review-label">Start Time</span><span class="review-value">${state.startTime}</span></div>
-      <div class="review-row"><span class="review-label">Pricing</span><span class="review-value" style="color:var(--blue-l)">We'll contact you with a quote</span></div>`;
+      <div class="review-row"><span class="review-label">Time</span><span class="review-value">${state.startTime} – ${state.endTime}</span></div>
+      <div class="review-row"><span class="review-label">Duration</span><span class="review-value">${state.duration} hour${state.duration > 1 ? 's' : ''}</span></div>
+      <div class="review-total"><span class="label">Total</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
   } else if (state.service === 'equipment') {
     const days = Math.round((new Date(state.equipEnd) - new Date(state.equipStart)) / 86400000) + 1;
     const equipNames = { pocket3: 'DJI Pocket 3', neo: 'DJI Neo', nano: 'DJI Osmo Nano' };
@@ -1582,7 +1613,7 @@ async function goToPayment() {
   btn.innerHTML = '<span class="spinner"></span>Please wait…';
 
   // Podcast (custom quote) has no upfront price — confirm immediately, no payment step.
-  if (state.service === 'podcast' || !state.totalPrice) {
+  if (!state.totalPrice) {
     await finalizeBooking(bookingPayload());
     return;
   }
