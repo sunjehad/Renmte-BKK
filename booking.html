@@ -318,6 +318,13 @@ input[type=date]{color-scheme:dark}
         <div class="svc-desc">Recording with videographer, or full recording + editing package. We handle everything.</div>
         <div class="svc-price">Contact for pricing</div>
       </div>
+      <div class="svc-card" onclick="selectService('reel',this)">
+        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="svc-icon">📱</div>
+        <div class="svc-title">REEL EDITING</div>
+        <div class="svc-desc">Instagram, TikTok or YouTube Short. Send raw footage — we cut, grade & deliver.</div>
+        <div class="svc-price">From ฿200 / reel</div>
+      </div>
       <div class="svc-card" onclick="selectService('equipment',this)">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="svc-icon">📷</div>
@@ -634,6 +641,37 @@ input[type=date]{color-scheme:dark}
     </div>
   </div>
 
+  <!-- REEL DETAILS -->
+  <div id="details-reel" style="display:none;padding:0 0 16px">
+    <div style="background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.25);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--fg-muted)">
+      📱 Send us your raw footage via Google Drive or WeTransfer after booking. We cut, color grade, add music & captions, and deliver within 48h.
+    </div>
+    <label style="margin-bottom:10px;display:block">Select Package</label>
+    <div class="sub-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="sub-card" onclick="selectReelPackage(1,200,this)">
+        <div class="sub-card-title">📱 1 Reel</div>
+        <div class="sub-card-desc">Single Instagram, TikTok or YouTube Short</div>
+        <div style="margin-top:8px;font-size:16px;font-weight:700;color:var(--fg)">฿200</div>
+      </div>
+      <div class="sub-card" onclick="selectReelPackage(5,1000,this)">
+        <div class="sub-card-title">📦 5 Reels</div>
+        <div class="sub-card-desc">5-reel package — save ฿0 per reel</div>
+        <div style="margin-top:8px;font-size:16px;font-weight:700;color:var(--fg)">฿1,000</div>
+      </div>
+      <div class="sub-card" onclick="selectReelPackage(10,2000,this)">
+        <div class="sub-card-title">🚀 10 Reels</div>
+        <div class="sub-card-desc">Best value — 10 reels at ฿200 each</div>
+        <div style="margin-top:8px;font-size:16px;font-weight:700;color:var(--accent)">฿2,000</div>
+      </div>
+    </div>
+    <div id="reel-price-strip" style="display:none;background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:14px 18px;margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:13px;color:var(--blue-l)" id="reel-price-breakdown"></div>
+        <div style="font-size:18px;font-weight:700;color:var(--fg)" id="reel-total-price"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- STEP 3: Your Details -->
   <div class="step-panel" id="step-3">
     <div class="step-heading">YOUR DETAILS</div>
@@ -882,6 +920,7 @@ let state = {
   participants: 2,
   cameraCount: 1,
   withVideographer: false,
+  reelCount: 0,
   totalPrice: 0,
   // person
   firstName: '', lastName: '', phone: '', email: '', notes: '',
@@ -993,6 +1032,7 @@ function setupStep2() {
   document.getElementById('details-podcast').style.display       = 'none';
   document.getElementById('details-podcast-setup').style.display = 'none';
   document.getElementById('details-equipment').style.display     = 'none';
+  document.getElementById('details-reel').style.display          = 'none';
 
   if (state.service === 'studio_rental') {
     document.getElementById('details-studio').style.display = '';
@@ -1018,6 +1058,8 @@ function setupStep2() {
     initCalendar('podcast');
   } else if (state.service === 'equipment') {
     document.getElementById('details-equipment').style.display = '';
+  } else if (state.service === 'reel') {
+    document.getElementById('details-reel').style.display = '';
     document.getElementById('s2-heading').textContent = 'EQUIPMENT RENTAL';
     document.getElementById('s2-sub').textContent = 'Select your gear and rental dates.';
     initEquipCalendar();
@@ -1326,6 +1368,16 @@ function selectSubtype(subtype, el, context) {
   }
 }
 
+function selectReelPackage(count, price, el) {
+  document.querySelectorAll('#details-reel .sub-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.totalPrice = price;
+  state.reelCount = count;
+  document.getElementById('reel-price-breakdown').textContent = count + ' reel' + (count > 1 ? 's' : '') + ' × ฿' + (price / count) + '/reel';
+  document.getElementById('reel-total-price').textContent = '฿' + price.toLocaleString();
+  document.getElementById('reel-price-strip').style.display = '';
+}
+
 function selectEditingEpisodes(n, el) {
   document.querySelectorAll('#editing-episodes .chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
@@ -1475,6 +1527,11 @@ function calcEquipPrice() {
 // STEP 2 VALIDATION
 // ═══════════════════════════════════════════════
 function validateStep2() {
+  if (state.service === 'reel') {
+    if (!state.totalPrice) return alert('Please select a reel package.');
+    goStep(3);
+    return;
+  }
   if (state.service === 'studio_rental') {
     if (!state.date)      return alert('Please select a date.');
     if (!state.startTime) return alert('Please select a start time.');
@@ -1618,6 +1675,12 @@ function buildReview() {
       <div class="review-row"><span class="review-label">Duration</span><span class="review-value">${state.duration} hour${state.duration > 1 ? 's' : ''}</span></div>
       `}
       <div class="review-total"><span class="label">Total</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
+  } else if (state.service === 'reel') {
+    detailRows = `
+      <div class="review-row"><span class="review-label">Service</span><span class="review-value">Reel Editing</span></div>
+      <div class="review-row"><span class="review-label">Package</span><span class="review-value">${state.reelCount} reel${state.reelCount > 1 ? 's' : ''}</span></div>
+      <div class="review-row"><span class="review-label">Platform</span><span class="review-value">Instagram / TikTok / YouTube Short</span></div>
+      <div class="review-total"><span class="label">Total</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
   } else if (state.service === 'equipment') {
     const days = Math.round((new Date(state.equipEnd) - new Date(state.equipStart)) / 86400000) + 1;
     const equipNames = { pocket3: 'DJI Pocket 3', neo: 'DJI Neo', nano: 'DJI Osmo Nano' };
@@ -1669,7 +1732,7 @@ function bookingPayload() {
     equipment_items:      state.equipItems.length > 0 ? state.equipItems : null,
     participant_count:    state.participants || null,
     total_price:          state.totalPrice || null,
-    notes:                state.notes ? state.notes + (state.service === 'podcast_setup' ? ' | Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') : '') : (state.service === 'podcast_setup' ? 'Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') : null),
+    notes:                state.service === 'reel' ? `Reel package: ${state.reelCount} reel(s)${state.notes ? ' | ' + state.notes : ''}` : state.notes ? state.notes + (state.service === 'podcast_setup' ? ' | Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') : '') : (state.service === 'podcast_setup' ? 'Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') : null),
     source:               'website',
     payment_method:       null,
     booking_status:       state.totalPrice ? 'pending_payment' : 'confirmed',
