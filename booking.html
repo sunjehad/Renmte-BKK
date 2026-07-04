@@ -318,13 +318,6 @@ input[type=date]{color-scheme:dark}
         <div class="svc-desc">Recording with videographer, or full recording + editing package. We handle everything.</div>
         <div class="svc-price">Contact for pricing</div>
       </div>
-      <div class="svc-card" onclick="selectService('reel',this)">
-        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="svc-icon">📱</div>
-        <div class="svc-title">REEL EDITING</div>
-        <div class="svc-desc">Instagram, TikTok or YouTube Short. Send raw footage — we cut, grade & deliver.</div>
-        <div class="svc-price">From ฿200 / reel</div>
-      </div>
       <div class="svc-card" onclick="selectService('equipment',this)">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="svc-icon">📷</div>
@@ -473,7 +466,7 @@ input[type=date]{color-scheme:dark}
       <div style="background:rgba(230,57,70,.06);border:1px solid rgba(230,57,70,.25);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
         <div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:2px">Studio rate</div>
-          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)">฿200 <span style="font-size:.7rem;color:var(--muted)">/hour</span></div>
+          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)"><span id="ps-hourly-rate">฿600</span> <span style="font-size:.7rem;color:var(--muted)">/hour</span></div>
         </div>
         <div style="width:1px;height:36px;background:var(--border)"></div>
         <div>
@@ -482,8 +475,8 @@ input[type=date]{color-scheme:dark}
         </div>
         <div style="width:1px;height:36px;background:var(--border)"></div>
         <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">Total (e.g. 2h)</div>
-          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)" id="ps-example-total">฿1,400</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px" id="ps-example-label">Total (e.g. 2h)</div>
+          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)" id="ps-example-total">฿2,200</div>
         </div>
       </div>
 
@@ -1056,7 +1049,7 @@ function setupStep2() {
   } else if (state.service === 'podcast_setup') {
     document.getElementById('details-podcast-setup').style.display = '';
     document.getElementById('s2-heading').textContent = 'PODCAST STUDIO SETUP';
-    document.getElementById('s2-sub').textContent = 'Choose your camera setup, date, time, and duration. From ฿300/hr + ฿1,000 one-time setup fee.';
+    document.getElementById('s2-sub').textContent = 'Choose your camera setup, date, time, and duration. From ฿600/hr + ฿1,000 one-time setup fee.';
     // Reset camera selection UI
     state.cameraCount = 1;
     state.withVideographer = false;
@@ -1068,6 +1061,7 @@ function setupStep2() {
     if (vgCheck) vgCheck.checked = false;
     const reelChips = document.querySelectorAll('#reel-chips .chip');
     reelChips.forEach((c,i) => c.classList.toggle('selected', i === 0));
+    updatePodcastSetupStrip();
     initCalendar('podcast_setup');
   } else if (state.service === 'podcast') {
     document.getElementById('details-podcast').style.display = '';
@@ -1317,7 +1311,32 @@ function updateStudioPrice() {
   document.getElementById('studio-price-strip').style.display = '';
 }
 
+function psHourlyRate() {
+  const cameraRates = { 1: 400, 2: 600, 3: 900 };
+  return 200 + cameraRates[state.cameraCount] + (state.withVideographer ? 300 : 0);
+}
+
+function updatePodcastSetupStrip() {
+  const hourlyRate = psHourlyRate();
+  const rateEl = document.getElementById('ps-hourly-rate');
+  if (rateEl) rateEl.textContent = '฿' + hourlyRate;
+  const exLabel = document.getElementById('ps-example-label');
+  const exTotal = document.getElementById('ps-example-total');
+  if (state.duration) {
+    // real configured total
+    const total = hourlyRate * state.duration + 1000 + state.reelAddonPrice;
+    if (exLabel) exLabel.textContent = 'Total (' + state.duration + 'h)';
+    if (exTotal) exTotal.textContent = '฿' + total.toLocaleString();
+  } else {
+    // 2h example
+    const example = hourlyRate * 2 + 1000 + state.reelAddonPrice;
+    if (exLabel) exLabel.textContent = 'Total (e.g. 2h)';
+    if (exTotal) exTotal.textContent = '฿' + example.toLocaleString();
+  }
+}
+
 function updatePodcastSetupPrice() {
+  updatePodcastSetupStrip();
   if (!state.startTime || !state.duration) return;
   const cameraRates = { 1: 400, 2: 600, 3: 900 };
   const hourlyRate = 200 + cameraRates[state.cameraCount] + (state.withVideographer ? 300 : 0);
