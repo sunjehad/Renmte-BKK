@@ -393,6 +393,13 @@ input[type=date]{color-scheme:dark}
           <div class="sub-card-title">✂️ Recording + Editing</div>
           <div class="sub-card-desc">Full package: filming, color grading, audio mix, titles, and delivery-ready episode.</div>
         </div>
+        <div class="sub-card" onclick="selectSubtype('editing_only',this,'podcast')">
+          <div class="sub-card-title">🎞️ Editing Only</div>
+          <div class="sub-card-desc" style="display:flex;flex-direction:column;gap:4px">
+            <span>Send us your raw footage — we handle color grading, audio mix, titles & delivery.</span>
+            <span style="color:var(--accent);font-weight:600">฿1,000/hr episode <span style="text-decoration:line-through;color:var(--fg-muted);font-weight:400">฿2,000</span> promo</span>
+          </div>
+        </div>
       </div>
 
       <div class="form-group">
@@ -1221,12 +1228,20 @@ function selectDuration(h, el, context) {
 }
 
 function updatePodcastPrice() {
-  if (!state.startTime || !state.duration) return;
-  const total = 200 * state.duration + 1000;
+  if (!state.duration) return;
+  let total, breakdown;
+  if (state.subtype === 'editing_only') {
+    total = 1000 * state.duration;
+    breakdown = '฿1,000/hr × ' + state.duration + ' episode(s) — promo (was ฿2,000/hr)';
+  } else {
+    if (!state.startTime) return;
+    total = 200 * state.duration + 1000;
+    breakdown = '฿200/hr × ' + state.duration + 'h + ฿1,000 setup';
+    const startH = parseInt(state.startTime);
+    state.endTime = String(startH + state.duration).padStart(2,'0') + ':00';
+  }
   state.totalPrice = total;
-  const startH = parseInt(state.startTime);
-  state.endTime = String(startH + state.duration).padStart(2,'0') + ':00';
-  document.getElementById('pod-price-breakdown').textContent = '฿200/hr × ' + state.duration + 'h + ฿1,000 setup';
+  document.getElementById('pod-price-breakdown').textContent = breakdown;
   document.getElementById('pod-total-price').textContent = '฿' + total.toLocaleString();
   document.getElementById('pod-price-strip').style.display = '';
 }
@@ -1275,6 +1290,48 @@ function selectSubtype(subtype, el, context) {
   parent.querySelectorAll('.sub-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   state.subtype = subtype;
+
+  if (context === 'podcast') {
+    const timeSection = document.getElementById('podcast-time-section');
+    const durationLabel = timeSection ? timeSection.querySelector('label:last-of-type') : null;
+    if (subtype === 'editing_only') {
+      // No time slot needed — just episodes count
+      if (timeSection) timeSection.style.display = 'none';
+      document.getElementById('pod-price-strip').style.display = 'none';
+      // Show episode selector
+      let epBox = document.getElementById('editing-episodes');
+      if (!epBox) {
+        epBox = document.createElement('div');
+        epBox.id = 'editing-episodes';
+        epBox.style.cssText = 'margin-top:16px';
+        epBox.innerHTML = `<label style="display:block;margin-bottom:10px">Number of Episodes</label>
+          <div class="chip-group">
+            <div class="chip selected" onclick="selectEditingEpisodes(1,this)">1 episode</div>
+            <div class="chip" onclick="selectEditingEpisodes(2,this)">2 episodes</div>
+            <div class="chip" onclick="selectEditingEpisodes(3,this)">3 episodes</div>
+            <div class="chip" onclick="selectEditingEpisodes(4,this)">4 episodes</div>
+          </div>`;
+        timeSection.parentNode.insertBefore(epBox, timeSection.nextSibling);
+        state.duration = 1;
+        updatePodcastPrice();
+      }
+      epBox.style.display = '';
+    } else {
+      if (timeSection) timeSection.style.display = state.startTime ? '' : 'none';
+      const epBox = document.getElementById('editing-episodes');
+      if (epBox) epBox.style.display = 'none';
+      state.duration = null;
+      document.getElementById('pod-price-strip').style.display = 'none';
+    }
+  }
+}
+
+function selectEditingEpisodes(n, el) {
+  document.querySelectorAll('#editing-episodes .chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.duration = n;
+  state.startTime = state.startTime || '00:00';
+  updatePodcastPrice();
 }
 
 // ═══════════════════════════════════════════════
@@ -1424,9 +1481,11 @@ function validateStep2() {
     if (!state.duration)  return alert('Please select a duration.');
   } else if (state.service === 'podcast') {
     if (!state.subtype)   return alert('Please choose recording type.');
-    if (!state.date)      return alert('Please select a date.');
-    if (!state.startTime) return alert('Please select a start time.');
-    if (!state.duration)  return alert('Please select a duration.');
+    if (state.subtype !== 'editing_only') {
+      if (!state.date)      return alert('Please select a date.');
+      if (!state.startTime) return alert('Please select a start time.');
+      if (!state.duration)  return alert('Please select a duration.');
+    }
     state.participants = parseInt(document.getElementById('pod-participants').value);
   } else if (state.service === 'equipment') {
     if (state.equipItems.length === 0) return alert('Please select at least one piece of equipment.');
@@ -1547,11 +1606,17 @@ function buildReview() {
   } else if (state.service === 'podcast') {
     const subLabel = state.subtype === 'podcast_recording' ? 'Recording Only' : 'Recording + Editing';
     detailRows = `
+      ${state.subtype === 'editing_only' ? `
+      <div class="review-row"><span class="review-label">Service</span><span class="review-value">Editing Only (Promo)</span></div>
+      <div class="review-row"><span class="review-label">Episodes</span><span class="review-value">${state.duration} episode${state.duration > 1 ? 's' : ''}</span></div>
+      <div class="review-row"><span class="review-label">Rate</span><span class="review-value">฿1,000/episode (was ฿2,000)</span></div>
+      ` : `
       <div class="review-row"><span class="review-label">Service</span><span class="review-value">Podcast ${subLabel}</span></div>
       <div class="review-row"><span class="review-label">Participants</span><span class="review-value">${state.participants}</span></div>
       <div class="review-row"><span class="review-label">Date</span><span class="review-value">${formatDate(state.date)}</span></div>
       <div class="review-row"><span class="review-label">Time</span><span class="review-value">${state.startTime} – ${state.endTime}</span></div>
       <div class="review-row"><span class="review-label">Duration</span><span class="review-value">${state.duration} hour${state.duration > 1 ? 's' : ''}</span></div>
+      `}
       <div class="review-total"><span class="label">Total</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
   } else if (state.service === 'equipment') {
     const days = Math.round((new Date(state.equipEnd) - new Date(state.equipStart)) / 86400000) + 1;
