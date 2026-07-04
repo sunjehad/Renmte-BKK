@@ -503,6 +503,18 @@ input[type=date]{color-scheme:dark}
         </div>
       </div>
 
+      <!-- REEL EDITING ADD-ON -->
+      <div style="margin-bottom:20px">
+        <label style="display:block;margin-bottom:4px">Reel Editing <span style="color:var(--muted);font-weight:400;font-size:13px">— optional add-on</span></label>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Instagram, TikTok &amp; YouTube Shorts — cut, color, captions, music.</div>
+        <div class="chip-group" id="reel-chips">
+          <div class="chip selected" onclick="selectReelAddon(0,0,this)">None</div>
+          <div class="chip" onclick="selectReelAddon(1,200,this)">1 Reel &mdash; ฿200</div>
+          <div class="chip" onclick="selectReelAddon(5,1000,this)">5 Reels &mdash; ฿1,000</div>
+          <div class="chip" onclick="selectReelAddon(10,2000,this)">10 Reels &mdash; ฿2,000</div>
+        </div>
+      </div>
+
       <label style="margin-bottom:10px;display:block">Select Date</label>
       <div class="cal-wrap">
         <div class="cal-header">
@@ -921,6 +933,8 @@ let state = {
   cameraCount: 1,
   withVideographer: false,
   reelCount: 0,
+  reelAddonCount: 0,
+  reelAddonPrice: 0,
   totalPrice: 0,
   // person
   firstName: '', lastName: '', phone: '', email: '', notes: '',
@@ -1046,10 +1060,14 @@ function setupStep2() {
     // Reset camera selection UI
     state.cameraCount = 1;
     state.withVideographer = false;
+    state.reelAddonCount = 0;
+    state.reelAddonPrice = 0;
     const camChips = document.querySelectorAll('#camera-chips .chip');
     camChips.forEach((c,i) => c.classList.toggle('selected', i === 0));
     const vgCheck = document.getElementById('with-videographer');
     if (vgCheck) vgCheck.checked = false;
+    const reelChips = document.querySelectorAll('#reel-chips .chip');
+    reelChips.forEach((c,i) => c.classList.toggle('selected', i === 0));
     initCalendar('podcast_setup');
   } else if (state.service === 'podcast') {
     document.getElementById('details-podcast').style.display = '';
@@ -1303,14 +1321,15 @@ function updatePodcastSetupPrice() {
   if (!state.startTime || !state.duration) return;
   const cameraRates = { 1: 400, 2: 600, 3: 900 };
   const hourlyRate = 200 + cameraRates[state.cameraCount] + (state.withVideographer ? 300 : 0);
-  const total = hourlyRate * state.duration + 1000;
+  const total = hourlyRate * state.duration + 1000 + state.reelAddonPrice;
   state.totalPrice = total;
   const startH = parseInt(state.startTime);
   state.endTime = String(startH + state.duration).padStart(2,'0') + ':00';
   document.getElementById('ps-hours').textContent = state.duration;
   document.getElementById('ps-total-price').textContent = '฿' + total.toLocaleString();
   const vgText = state.withVideographer ? ' + ฿300/hr videographer' : '';
-  document.getElementById('ps-price-breakdown').innerHTML = '฿' + hourlyRate + '/hr × <span id=ps-hours>' + state.duration + '</span>h + ฿1,000 setup' + vgText;
+  const reelText = state.reelAddonPrice ? ' + ฿' + state.reelAddonPrice.toLocaleString() + ' (' + state.reelAddonCount + ' reel' + (state.reelAddonCount > 1 ? 's' : '') + ')' : '';
+  document.getElementById('ps-price-breakdown').innerHTML = '฿' + hourlyRate + '/hr × <span id=ps-hours>' + state.duration + '</span>h + ฿1,000 setup' + vgText + reelText;
   document.getElementById('ps-price-strip').style.display = '';
 }
 
@@ -1323,6 +1342,14 @@ function selectCameraSetup(count, el) {
 
 function toggleVideographer(checkbox) {
   state.withVideographer = checkbox.checked;
+  updatePodcastSetupPrice();
+}
+
+function selectReelAddon(count, price, el) {
+  state.reelAddonCount = count;
+  state.reelAddonPrice = price;
+  document.querySelectorAll('#reel-chips .chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
   updatePodcastSetupPrice();
 }
 
@@ -1732,7 +1759,7 @@ function bookingPayload() {
     equipment_items:      state.equipItems.length > 0 ? state.equipItems : null,
     participant_count:    state.participants || null,
     total_price:          state.totalPrice || null,
-    notes:                state.service === 'reel' ? `Reel package: ${state.reelCount} reel(s)${state.notes ? ' | ' + state.notes : ''}` : state.notes ? state.notes + (state.service === 'podcast_setup' ? ' | Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') : '') : (state.service === 'podcast_setup' ? 'Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') : null),
+    notes:                state.service === 'reel' ? `Reel package: ${state.reelCount} reel(s)${state.notes ? ' | ' + state.notes : ''}` : state.notes ? state.notes + (state.service === 'podcast_setup' ? ' | Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : '') : (state.service === 'podcast_setup' ? 'Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : null),
     source:               'website',
     payment_method:       null,
     booking_status:       state.totalPrice ? 'pending_payment' : 'confirmed',
