@@ -525,6 +525,10 @@ textarea{resize:vertical;min-height:80px}
     <div class="modal-body">
       <div class="msg" id="edit-msg" style="display:none"></div>
       <input type="hidden" id="edit-id">
+      <div id="edit-features" style="background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.25);border-radius:10px;padding:14px 16px;margin-bottom:18px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue-l,#60a5fa);margin-bottom:8px">Booked Features</div>
+        <div id="edit-features-body" style="font-size:13px;line-height:1.7;color:var(--fg)"></div>
+      </div>
       <div class="form-row">
         <div class="form-group"><label>Booking Date</label><input type="date" id="edit-date"></div>
         <div class="form-group">
@@ -728,7 +732,7 @@ async function loadAllBookings() {
 }
 
 // ── STATS ──
-const SVC_NAMES = { studio_rental:'Studio Rental', podcast:'Podcast', equipment:'Equipment' };
+const SVC_NAMES = { studio_rental:'Studio Rental', podcast_setup:'Podcast Setup/Service', podcast:'Podcast', reel:'Reel Editing', equipment:'Equipment' };
 
 function renderStats() {
   const today = new Date().toISOString().split('T')[0];
@@ -788,7 +792,7 @@ function renderTable() {
           + ' → ' + new Date(b.equipment_end_date+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'})
         : '—';
     const time   = b.start_time ? b.start_time + (b.end_time ? '–'+b.end_time : '') : '';
-    const cls    = b.service_type === 'studio_rental' ? 'studio' : b.service_type === 'podcast' ? 'podcast' : 'equipment';
+    const cls    = b.service_type === 'studio_rental' ? 'studio' : (b.service_type === 'podcast' || b.service_type === 'podcast_setup') ? 'podcast' : 'equipment';
     const status = b.status || 'confirmed';
     const bookingStatus = b.booking_status || 'confirmed';
     const paymentMethod = b.payment_method || '—';
@@ -863,6 +867,16 @@ function openEdit(id) {
   document.getElementById('edit-booking-status').value  = b.booking_status  || 'pending_payment';
   document.getElementById('edit-payment-method').value  = b.payment_method  || '';
   document.getElementById('edit-admin-notes').value = b.admin_notes  || '';
+  // Booked features (what the customer selected)
+  const rows = [];
+  rows.push('<div><strong>Service:</strong> ' + (SVC_NAMES[b.service_type] || b.service_type) + '</div>');
+  if (b.service_subtype) rows.push('<div><strong>Package:</strong> ' + b.service_subtype.replace(/_/g,' ') + '</div>');
+  if (b.duration_hours)  rows.push('<div><strong>Duration:</strong> ' + b.duration_hours + 'h</div>');
+  if (b.participant_count) rows.push('<div><strong>Participants:</strong> ' + b.participant_count + '</div>');
+  if (b.equipment_items && b.equipment_items.length) rows.push('<div><strong>Equipment:</strong> ' + b.equipment_items.join(', ') + '</div>');
+  if (b.notes) rows.push('<div><strong>Options / Notes:</strong> ' + b.notes + '</div>');
+  if (b.total_price) rows.push('<div><strong>Total:</strong> ฿' + b.total_price.toLocaleString() + '</div>');
+  document.getElementById('edit-features-body').innerHTML = rows.length ? rows.join('') : '<span style="color:var(--muted)">No details recorded</span>';
   document.getElementById('edit-msg').style.display = 'none';
   openModal('edit-modal');
 }
@@ -1008,7 +1022,7 @@ function renderCalendar() {
     cell.className = 'cal-cell'+(ds===today?' today':'');
     cell.innerHTML = `<div class="cal-day-num">${d}</div>`;
     allBookings.filter(b => (b.booking_date===ds||b.equipment_start_date===ds) && b.status!=='cancelled').forEach(b => {
-      const cls = b.service_type==='studio_rental'?'studio':b.service_type==='podcast'?'podcast':'equipment';
+      const cls = b.service_type==='studio_rental'?'studio':(b.service_type==='podcast'||b.service_type==='podcast_setup')?'podcast':'equipment';
       const name = (b.guest_name||'').split(' ')[0];
       const ev = document.createElement('div');
       ev.className = 'cal-event '+cls;

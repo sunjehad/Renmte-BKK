@@ -307,16 +307,9 @@ input[type=date]{color-scheme:dark}
       <div class="svc-card" onclick="selectService('podcast_setup',this)" style="border-color:rgba(37,99,235,.25)">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="svc-icon">🎙️</div>
-        <div class="svc-title">PODCAST STUDIO SETUP</div>
-        <div class="svc-desc">We set up everything — mics, lighting, sofa & decor. You choose your camera package.</div>
+        <div class="svc-title">PODCAST SETUP / SERVICE</div>
+        <div class="svc-desc">We set up everything — mics, lighting, sofa & decor. Choose your camera package, videographer & reel editing.</div>
         <div class="svc-price" style="color:var(--blue-l)">฿200/hr <span style="color:var(--muted);font-weight:400">+ ฿1,000 setup</span></div>
-      </div>
-      <div class="svc-card" onclick="selectService('podcast',this)">
-        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="svc-icon">🎬</div>
-        <div class="svc-title">FULL PODCAST SERVICE</div>
-        <div class="svc-desc">Recording with videographer, or full recording + editing package. We handle everything.</div>
-        <div class="svc-price">Contact for pricing</div>
       </div>
       <div class="svc-card" onclick="selectService('equipment',this)">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -1048,7 +1041,7 @@ function setupStep2() {
     initCalendar('studio');
   } else if (state.service === 'podcast_setup') {
     document.getElementById('details-podcast-setup').style.display = '';
-    document.getElementById('s2-heading').textContent = 'PODCAST STUDIO SETUP';
+    document.getElementById('s2-heading').textContent = 'PODCAST SETUP / SERVICE';
     document.getElementById('s2-sub').textContent = 'Choose your camera setup, date, time, and duration. From ฿600/hr + ฿1,000 one-time setup fee.';
     // Reset camera selection UI
     state.cameraCount = 1;
