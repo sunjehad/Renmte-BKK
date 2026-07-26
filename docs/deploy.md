@@ -69,8 +69,13 @@ f462aa8 docs: Projektdoku, Pruefwerkzeug und Aufraeumen        ← ungepusht
 cf51d6c  = origin/main = LIVE
 ```
 
-Die Historie ist **linear** (`0 3` gegen `origin/main`), kein Konflikt. Ein
-einziger `git push` schaltet alle drei auf einmal live.
+Die Historie ist **linear**, kein Konflikt. Ein einziger `git push` würde alles
+auf einmal live schalten — **nur darf Andys Konto nicht pushen.**
+
+> 🔴 **Der Push scheitert mit 403.** `monkeydrufyyy99` hat auf
+> `sunjehad/Renmte-BKK` nur Leserechte (`push: false`, per GitHub-API
+> bestätigt). Solange das so ist, ist der Deploy blockiert — unabhängig von
+> allem anderen in diesem Dokument. Wege aus der Sache: `todo.md` T-4.
 
 ---
 

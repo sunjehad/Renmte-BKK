@@ -75,14 +75,40 @@ enthalten. Einzelheiten in `docs/deploy.md`.
 
 **Weiter offen:** Domain-Registrar und Eigentümer des Vercel-Kontos.
 
-### [x] T-4 — Wem gehört `github.com/sunjehad/Renmte-BKK`? — **beantwortet**
+### [ ] T-4 — 🔴 Andys GitHub-Konto darf nicht in das Repo schreiben
 
-**2026-07-27 (Andy):** Sun ist der Eigentümer, Andy ist Manager. Das Repo ist
-richtig so. Der Remote steht damit nicht mehr in Frage.
+**2026-07-27, beim ersten Push aufgelaufen:**
 
-Offen bleibt nur die Freigabe für den einzelnen Vorgang: **ein Commit wartet
-seit dem 21.07.** (`57ebc3c`), und die Änderungen vom 27.07. liegen ebenfalls
-im Arbeitsbaum. Gepusht wird auf Ansage, nicht von allein (R-005).
+```
+remote: Permission to sunjehad/Renmte-BKK.git denied to monkeydrufyyy99.
+fatal: … The requested URL returned error: 403
+```
+
+Die GitHub-API bestätigt es für das hinterlegte Konto `monkeydrufyyy99`:
+
+```json
+{"permissions": {"admin": false, "maintain": false,
+                 "pull": true, "push": false, "triage": false}}
+```
+
+**Lesen ja, schreiben nein.** Sun ist Eigentümer, Andy inhaltlich Manager —
+aber auf GitHub ist das nicht abgebildet. Alle bisherigen Commits sind zwar
+von `Andy Pokorny` verfasst, gepusht hat sie offenbar jemand anders.
+
+**Folge: Der Deploy ist blockiert.** Vier Commits liegen lokal, davon die
+**Reparatur der unbuchbaren DJI-Ausleihe**.
+
+**Drei Wege, in der Reihenfolge meiner Empfehlung:**
+
+1. **Sun trägt `monkeydrufyyy99` als Collaborator mit „Write" ein**
+   (Repo → Settings → Collaborators). Danach genügt `git push`. Sauberste
+   Lösung, deckt sich mit der Rolle, die Andy ohnehin hat.
+2. **Fork + Pull Request** — Andy pusht in einen eigenen Fork, Sun führt
+   zusammen. Funktioniert ohne Rechteänderung, kostet aber bei jeder Änderung
+   einen Zwischenschritt.
+3. **Sun pusht selbst** — dann muss er die Commits bei sich haben.
+
+Bis dahin ist alles lokal gesichert; nichts geht verloren.
 
 ### [ ] T-5 — Kann `~/rentme/` weg?
 
