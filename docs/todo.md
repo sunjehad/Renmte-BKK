@@ -62,11 +62,18 @@ Braucht Andys Supabase-Zugang — von hier aus nicht feststellbar.
 
 ## Offen — braucht eine Antwort von Andy
 
-### [ ] T-3 — Wie kommt das Frontend auf den Server?
+### [x] T-3 — Wie kommt das Frontend auf den Server? — **beantwortet**
 
-Im Repo steht keine Deploy-Konfiguration. Unbekannt ist damit auch, ob die
-öffentliche Fassung dem Stand vom 6. Juli entspricht. Einziger Hinweis auf die
-Domain: `rentme-bkk.com`, und der stammt aus einer veralteten Datei.
+**2026-07-27:** **`www.rentme-bkk.com` auf Vercel**, angebunden an
+`github.com/sunjehad/Renmte-BKK`. **Ein Push auf `main` spielt automatisch
+aus** — `git push` *ist* der Deploy. Dass keine `vercel.json` im Repo liegt,
+ist bei Vercel normal; die Konfiguration steht im Dashboard.
+
+Nachgeprüft: `rentme-bkk.com` → 308 → `www.rentme-bkk.com`, Antwortköpfe
+`server: Vercel`. Live steht `cf51d6c`; der Drohnen-Dienst ist dort **nicht**
+enthalten. Einzelheiten in `docs/deploy.md`.
+
+**Weiter offen:** Domain-Registrar und Eigentümer des Vercel-Kontos.
 
 ### [x] T-4 — Wem gehört `github.com/sunjehad/Renmte-BKK`? — **beantwortet**
 

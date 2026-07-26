@@ -17,11 +17,14 @@ Daraus folgt alles Weitere.
 
 ## Niemals ohne ausdrückliche Freigabe
 
-- **Kein Deploy.** Weder `supabase functions deploy` noch das Hochladen von
-  Frontend-Dateien.
-- **Kein `git push` ohne Ansage.** Der Remote `github.com/sunjehad/Renmte-BKK`
-  ist richtig — **Sun ist Eigentümer, Andy ist Manager** (bestätigt 2026-07-27).
-  Die Freigabe gilt trotzdem je Vorgang, nicht ein für alle Mal.
+- **Kein `git push`.** ⚠️ **`git push` IST der Deploy** — Vercel hängt am Repo
+  `github.com/sunjehad/Renmte-BKK` und spielt jeden Push auf `main`
+  automatisch auf `www.rentme-bkk.com` aus (geklärt 2026-07-27,
+  `docs/deploy.md`). Es gibt keinen Schritt dazwischen. Wer hier pusht,
+  veröffentlicht — auch versehentlich.
+  Der Remote selbst ist richtig: Sun ist Eigentümer, Andy ist Manager. Die
+  Freigabe gilt trotzdem **je Vorgang**, nicht ein für alle Mal.
+- **Kein `supabase functions deploy`.**
 - **Keine SQL-Migration ausführen.** Die `.sql`-Dateien sind Dokumentation
   dessen, was einmal ausgeführt wurde; sie erneut laufen zu lassen ist kein
   harmloser Vorgang.

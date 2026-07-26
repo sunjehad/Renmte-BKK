@@ -9,36 +9,68 @@ Was **nicht** feststellbar war, steht ausdrücklich als solches darin.
 
 | Teil | Wo | Stand im Repo | Deployed? |
 |---|---|---|---|
-| Frontend (HTML) | öffentliche Live-Adresse | 6. Juli | **unbekannt** |
+| Frontend (HTML) | **www.rentme-bkk.com**, Vercel | 27. Juli | **= `origin/main`**, automatisch |
 | Supabase-Projekt | `nghsyxwhczvwaorssgoh` | — | läuft |
 | Stripe-Functions | Supabase Edge Functions | 1. Juli | **unbekannt — und das ist das Risiko** |
 | Datenbankschema | Supabase | `*.sql`, Juni | vermutlich angewandt |
 
 ---
 
-## Die Live-Adresse steht nicht im Ordner
+## ⚠️ Die eine Regel, die alles andere überlagert
 
-Gesucht wurde nach Domains, `CNAME`, Vercel-/Netlify-/Firebase-Konfiguration und
-fest verdrahteten URLs. Ergebnis:
+> ## `git push` **ist** der Deploy.
 
-- **Das Frontend verrät seine eigene Adresse nicht.** `booking.html` baut die
-  Rücksprungadressen für Stripe aus `location.origin` — die Seite funktioniert
-  unter jeder Domain und nennt keine.
-- Es gibt **keine** Deploy-Konfiguration im Repo. Kein `vercel.json`, kein
-  `netlify.toml`, kein `CNAME`, kein GitHub-Actions-Workflow.
-- Zwei Domainnamen kommen überhaupt vor, beide **ohne** Beweiskraft:
-  - `rentmebangkok.com` — nur als Bestandteil einer Kalender-Kennung
-    (`booking.html`: `booking_ref + '@rentmebangkok.com'`)
-  - `rentme-bkk.com` — in der **alten**, nicht mehr maßgeblichen Fassung von
-    `stripe-paymentlink` als Rücksprungadresse (Stand 28. Juni, siehe unten)
+Vercel hängt an `github.com/sunjehad/Renmte-BKK` und spielt **jeden Push auf
+`main` automatisch aus**. Es gibt keinen zweiten, bewussten Schritt dazwischen —
+kein Freigabeknopf, keine Vorschau, die erst bestätigt werden müsste.
 
-**`rentme-bkk.com` ist der einzige Hinweis darauf, unter welcher Domain die
-Seite einmal lief.** Bestätigt ist er nicht.
+**Damit ist „nicht pushen ohne Freigabe" keine Formalie, sondern die
+Deploy-Sperre selbst** (`decisions.md` R-005).
 
-Wie das Frontend auf den Server kommt — von Hand, per FTP, über einen Hoster mit
-Git-Anbindung — ist aus dem Ordner **nicht** erkennbar. Das ist der Grund,
-warum unklar bleibt, ob die öffentliche Fassung dem Stand vom 6. Juli
-entspricht.
+Was auf `origin/main` liegt, ist live. Was lokal liegt, ist es nicht.
+
+---
+
+## Frontend — geklärt am 2026-07-27
+
+**Adresse:** `rentme-bkk.com` leitet per **308** auf **`www.rentme-bkk.com`**
+um. Nachgeprüft mit `curl`.
+
+**Hoster: Vercel.** Nachgeprüft an den Antwortköpfen: `server: Vercel`,
+`x-vercel-id: fra1::…`, `x-vercel-cache: HIT`.
+
+**Weg:** Vercels Git-Anbindung am Repo `github.com/sunjehad/Renmte-BKK`. Ein
+Push auf `main` löst den Deploy aus, ohne weiteres Zutun.
+
+**Warum im Repo nichts davon steht:** Bei Vercel liegt die Konfiguration im
+Dashboard-Projekt, nicht im Repo. Das Fehlen von `vercel.json` ist daher
+normal und kein Hinweis auf einen anderen Weg.
+
+**Warum die Seite ihre Adresse nicht nennt:** `booking.html` baut die
+Rücksprungadressen für Stripe aus `location.origin`. Das ist richtig so — die
+Seite funktioniert dadurch unter jeder Domain und auch lokal.
+
+**Noch offen:** Wo die Domain registriert ist und wem das Vercel-Konto gehört.
+Das DNS zeigt faktisch auf Vercel, sonst kämen die Kopfzeilen nicht.
+
+### Was jetzt live ist
+
+`origin/main` steht auf **`cf51d6c`** — das ist der öffentliche Stand.
+Gegenprobe am 2026-07-27: `booking.html` auf `www.rentme-bkk.com` enthält
+**keinen** Drohnen-Dienst (`selectService('drone'` → 0 Treffer). Der neue
+Dienst ist also **nicht** live.
+
+**Drei Commits liegen lokal und nicht auf `origin`:**
+
+```
+7fea6bc feat: Drohnenflug als Dienst + zwei Fehlerbehebungen   ← ungepusht
+f462aa8 docs: Projektdoku, Pruefwerkzeug und Aufraeumen        ← ungepusht
+57ebc3c chore: .gitignore ergaenzen, Studio-Foto aufnehmen     ← ungepusht (seit 21.07.)
+cf51d6c  = origin/main = LIVE
+```
+
+Die Historie ist **linear** (`0 3` gegen `origin/main`), kein Konflikt. Ein
+einziger `git push` schaltet alle drei auf einmal live.
 
 ---
 
@@ -85,6 +117,15 @@ bleibt für andere buchbar.
 Geld und Kundenvertrauen kostet.**
 
 ---
+
+## Die richtige Reihenfolge
+
+1. **Erst Supabase prüfen** (unten), ob die aktuelle `stripe-webhook`-Fassung
+   deployed ist.
+2. **Dann `git push`** — das ist der Frontend-Deploy.
+
+Andersherum ginge ein Frontend live, dessen PromptPay-Weg auf einen Webhook
+trifft, der ihn nicht kennt.
 
 ## Wie Andy es prüft
 
