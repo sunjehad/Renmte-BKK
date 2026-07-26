@@ -97,6 +97,10 @@ section{padding:100px 40px}
 /* ── SERVICES ── */
 #services{background:var(--bg)}
 .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+/* Vier Karten in drei Spalten lassen die vierte allein links stehen.
+   Mittig gesetzt wirkt sie gewollt statt vergessen. Gilt nur ab der
+   dreispaltigen Breite -- darunter ist das Raster einspaltig. */
+.services-grid > .service-card:nth-child(4){grid-column:2}
 .service-card{background:var(--bg-card);padding:48px 36px;position:relative;overflow:hidden;transition:background .3s var(--ease);cursor:pointer}
 .service-card:hover{background:var(--bg-elevated)}
 .service-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease)}
@@ -241,6 +245,7 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
 /* ── RESPONSIVE ── */
 @media(max-width:1024px){
   .services-grid{grid-template-columns:1fr}
+  .services-grid > .service-card:nth-child(4){grid-column:auto}
   .pricing-grid{grid-template-columns:1fr}
   .proof-grid{grid-template-columns:1fr}
   .faq-layout{grid-template-columns:1fr;gap:40px}
@@ -357,7 +362,7 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
   <div class="container">
     <div class="section-header reveal">
       <div class="section-tag" data-i18n="services_tag">What We Offer</div>
-      <h2 class="section-title" data-i18n="services_title">THREE SERVICES.<br>ONE CREATIVE HUB.</h2>
+      <h2 class="section-title" data-i18n="services_title">FOUR SERVICES.<br>ONE CREATIVE HUB.</h2>
       <p class="section-sub" data-i18n="services_sub">Whether you're shooting a product, recording your first podcast, or filming aerial footage — we have the space, gear, and skills to make it happen.</p>
     </div>
   </div>
@@ -437,6 +442,37 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
       </div>
       <a href="booking.html" class="service-cta">
         <span data-i18n="s3_cta">Rent a DJI</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
+    <!-- SERVICE 4: Aerial / Drone Filming -->
+    <div class="service-card reveal reveal-delay-3">
+      <div class="service-num">04</div>
+      <div class="service-images single">
+        <img src="images/dji-neo.png" alt="DJI Neo drone used for aerial filming of buildings and events in Bangkok">
+      </div>
+      <div class="service-icon" style="background:rgba(37,99,235,.12);border-color:rgba(37,99,235,.25)">
+        <svg width="24" height="24" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--blue-l)">
+          <rect x="18" y="19" width="12" height="10" rx="3"/>
+          <circle cx="24" cy="24" r="2.2"/>
+          <line x1="18" y1="19" x2="12" y2="13"/><line x1="30" y1="19" x2="36" y2="13"/>
+          <line x1="18" y1="29" x2="12" y2="35"/><line x1="30" y1="29" x2="36" y2="35"/>
+          <circle cx="11" cy="12" r="5.5" opacity=".75"/><circle cx="37" cy="12" r="5.5" opacity=".75"/>
+          <circle cx="11" cy="36" r="5.5" opacity=".75"/><circle cx="37" cy="36" r="5.5" opacity=".75"/>
+          <line x1="6.5" y1="12" x2="15.5" y2="12" opacity=".45"/><line x1="32.5" y1="12" x2="41.5" y2="12" opacity=".45"/>
+          <line x1="6.5" y1="36" x2="15.5" y2="36" opacity=".45"/><line x1="32.5" y1="36" x2="41.5" y2="36" opacity=".45"/>
+        </svg>
+      </div>
+      <div class="service-for" data-i18n="s4_for">For property agents, venues, event organisers & brands</div>
+      <h3 class="service-title" data-i18n="s4_title">AERIAL / DRONE FILMING</h3>
+      <p class="service-desc" data-i18n="s4_desc">You don't fly — we do. We come to your building, venue or event, film it from the air, and hand you the footage. Add editing and you get a finished film instead: cut, colour graded, with music and titles. We check the airspace rules for your location before we quote, so you don't have to.</p>
+      <div class="service-benefit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span data-i18n="s4_benefit">A finished aerial film of your property — you just pick the day.</span>
+      </div>
+      <a href="booking.html?service=drone" class="service-cta">
+        <span data-i18n="s4_cta">Get a Quote</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
@@ -952,7 +988,7 @@ const translations = {
     trust_3:"<strong>All skill levels</strong> — beginners welcome",
     trust_4:"<strong>Central Bangkok</strong> — 5 min from Asoke BTS",
     trust_5:"<strong>Full editing service</strong> — we handle post-production",
-    services_tag:"What We Offer", services_title:"THREE SERVICES.<br>ONE CREATIVE HUB.",
+    services_tag:"What We Offer", services_title:"FOUR SERVICES.<br>ONE CREATIVE HUB.",
     services_sub:"Whether you're shooting a product, recording your first podcast, or filming aerial footage — we have the space, gear, and skills to make it happen.",
     s1_for:"For photographers, brands & content creators", s1_title:"PHOTO STUDIO RENTAL",
     s1_desc:"A fully equipped photography studio in central Bangkok you can rent by the hour or day. Comes with studio strobe lights, softboxes, seamless backdrop in multiple colors, and a lounge setup for lifestyle shoots. No hidden fees — just show up and shoot.",
@@ -963,6 +999,9 @@ const translations = {
     s3_for:"For filmmakers, real estate agents, travel content creators", s3_title:"DJI CAMERA & DRONE RENTAL",
     s3_desc:"Rent professional DJI cameras and drones without the full purchase price. Perfect for one-off projects, travel shoots, or testing before you buy. Pick up in Bangkok, fly anywhere. All gear comes checked, charged, and ready to use.",
     s3_benefit:"Cinematic aerial shots at a fraction of the ownership cost.", s3_cta:"Rent a DJI",
+    s4_for:"For property agents, venues, event organisers & brands", s4_title:"AERIAL / DRONE FILMING",
+    s4_desc:"You don't fly — we do. We come to your building, venue or event, film it from the air, and hand you the footage. Add editing and you get a finished film instead: cut, colour graded, with music and titles. We check the airspace rules for your location before we quote, so you don't have to.",
+    s4_benefit:"A finished aerial film of your property — you just pick the day.", s4_cta:"Get a Quote",
     proof_tag:"Real Results", proof_title:"CREATORS LOVE THIS SPACE",
     proof_sub:"Hundreds of creators, brands, and entrepreneurs have used Rent Me Bangkok to launch, grow, and tell their story.",
     proof_n1:"Views in 30 days", proof_n2:"IG Followers", proof_n3:"Promo week rate", proof_n4:"Guest podcast setups",
@@ -1012,7 +1051,7 @@ const translations = {
     trust_3:"<strong>Tous niveaux</strong> — débutants bienvenus",
     trust_4:"<strong>Centre de Bangkok</strong> — 5 min du BTS Asoke",
     trust_5:"<strong>Service montage complet</strong> — on gère la post-prod",
-    services_tag:"Ce que nous offrons", services_title:"TROIS SERVICES.<br>UN SEUL HUB CRÉATIF.",
+    services_tag:"Ce que nous offrons", services_title:"QUATRE SERVICES.<br>UN SEUL HUB CRÉATIF.",
     services_sub:"Que vous photographiez un produit, enregistriez votre premier podcast, ou filmiez des prises de vue aériennes — nous avons l'espace, le matériel et les compétences pour le réaliser.",
     s1_for:"Pour photographes, marques et créateurs de contenu", s1_title:"LOCATION DE STUDIO PHOTO",
     s1_desc:"Un studio photo entièrement équipé au centre de Bangkok que vous pouvez louer à l'heure ou à la journée. Fourni avec éclairages stroboscopiques, boîtes à lumière, fonds sans couture en plusieurs couleurs et décor lounge pour shootings lifestyle.",
@@ -1023,6 +1062,9 @@ const translations = {
     s3_for:"Pour cinéastes, agents immobiliers, créateurs voyage", s3_title:"LOCATION CAMÉRAS & DRONES DJI",
     s3_desc:"Louez des caméras et drones DJI professionnels sans le coût d'achat total. Parfait pour les projets ponctuels, shootings voyage ou tests avant achat. Retrait à Bangkok, vol partout.",
     s3_benefit:"Des prises de vue aériennes cinématographiques à une fraction du coût.", s3_cta:"Louer un DJI",
+    s4_for:"Pour agents immobiliers, lieux, organisateurs d'événements & marques", s4_title:"TOURNAGE AÉRIEN / DRONE",
+    s4_desc:"Vous ne pilotez pas — c'est nous. Nous venons sur votre bâtiment, votre lieu ou votre événement, filmons depuis les airs et vous remettons les images. Ajoutez le montage et vous obtenez un film fini : monté, étalonné, avec musique et titres. Nous vérifions les règles de l'espace aérien pour votre site avant de vous faire une offre.",
+    s4_benefit:"Un film aérien fini de votre bien — vous choisissez seulement le jour.", s4_cta:"Demander un devis",
     proof_tag:"Résultats réels", proof_title:"LES CRÉATEURS ADORENT CET ESPACE",
     proof_sub:"Des centaines de créateurs, marques et entrepreneurs ont utilisé Rent Me Bangkok pour lancer, grandir et raconter leur histoire.",
     proof_n1:"Vues en 30 jours", proof_n2:"Abonnés Instagram", proof_n3:"Tarif promo semaine", proof_n4:"Invités podcast max",
@@ -1066,7 +1108,7 @@ const translations = {
     trust_3:"<strong>Alle Niveaus</strong> — Anfänger willkommen",
     trust_4:"<strong>Zentral Bangkok</strong> — 5 Min. vom Asoke BTS",
     trust_5:"<strong>Vollständiger Schnittservice</strong> — wir übernehmen die Postproduktion",
-    services_tag:"Was wir anbieten", services_title:"DREI LEISTUNGEN.<br>EIN KREATIVER HUB.",
+    services_tag:"Was wir anbieten", services_title:"VIER LEISTUNGEN.<br>EIN KREATIVER HUB.",
     services_sub:"Egal ob Produktfoto, erster Podcast oder Luftaufnahmen — wir haben den Raum, das Equipment und das Know-how.",
     s1_for:"Für Fotografen, Marken & Content Creator", s1_title:"FOTOSTUDIO-VERLEIH",
     s1_desc:"Ein voll ausgestattetes Fotostudio in Bangkoks Zentrum, das du stunden- oder tageweise mieten kannst. Mit Studioblitzen, Softboxen, nahtlosem Hintergrund in mehreren Farben und Lounge-Setup für Lifestyle-Shootings.",
@@ -1077,6 +1119,9 @@ const translations = {
     s3_for:"Für Filmemacher, Immobilienmakler, Reise-Creator", s3_title:"DJI-KAMERA & DROHNEN-VERLEIH",
     s3_desc:"Miete professionelle DJI-Kameras und Drohnen ohne die vollen Kaufkosten. Perfekt für Einzelprojekte, Reiseaufnahmen oder zum Testen vor dem Kauf. Abholung in Bangkok, fliegen überall.",
     s3_benefit:"Kinematografische Luftaufnahmen zu einem Bruchteil der Anschaffungskosten.", s3_cta:"DJI mieten",
+    s4_for:"Für Makler, Locations, Eventveranstalter & Marken", s4_title:"LUFTAUFNAHMEN / DROHNENFLUG",
+    s4_desc:"Sie fliegen nicht — wir. Wir kommen zu Ihrem Gebäude, Ihrer Location oder Ihrem Event, filmen aus der Luft und übergeben Ihnen das Material. Mit Schnitt wird daraus ein fertiger Film: geschnitten, farbkorrigiert, mit Musik und Titeln. Die Luftraumregeln für Ihren Standort prüfen wir vor dem Angebot.",
+    s4_benefit:"Ein fertiger Luftfilm Ihrer Immobilie — Sie wählen nur den Tag.", s4_cta:"Angebot anfordern",
     proof_tag:"Echte Ergebnisse", proof_title:"KREATIVE LIEBEN DIESEN ORT",
     proof_sub:"Hunderte von Kreativen, Marken und Unternehmern haben Rent Me Bangkok genutzt, um zu starten, zu wachsen und ihre Geschichte zu erzählen.",
     proof_n1:"Aufrufe in 30 Tagen", proof_n2:"Instagram-Follower", proof_n3:"Aktionswochenpreis", proof_n4:"Podcast-Gäste max.",
@@ -1120,7 +1165,7 @@ const translations = {
     trust_3:"<strong>Любой уровень</strong> — новички приветствуются",
     trust_4:"<strong>Центр Бангкока</strong> — 5 мин от BTS Асок",
     trust_5:"<strong>Полный монтаж</strong> — мы берём постпродакшен на себя",
-    services_tag:"Что мы предлагаем", services_title:"ТРИ УСЛУГИ.<br>ОДИН ТВОРЧЕСКИЙ ХАБ.",
+    services_tag:"Что мы предлагаем", services_title:"ЧЕТЫРЕ УСЛУГИ.<br>ОДИН ТВОРЧЕСКИЙ ХАБ.",
     services_sub:"Съёмка продукта, первый подкаст или аэросъёмка — у нас есть пространство, оборудование и навыки.",
     s1_for:"Для фотографов, брендов и контент-мейкеров", s1_title:"АРЕНДА ФОТОСТУДИИ",
     s1_desc:"Полностью оснащённая фотостудия в центре Бангкока — аренда на час или день. Студийные вспышки, софтбоксы, бесшовный фон нескольких цветов, лаундж для лайфстайл-съёмок. Без скрытых платежей.",
@@ -1131,6 +1176,9 @@ const translations = {
     s3_for:"Для кинематографистов, риелторов, тревел-блогеров", s3_title:"АРЕНДА КАМЕР И ДРОНОВ DJI",
     s3_desc:"Профессиональные камеры и дроны DJI без полной стоимости покупки. Идеально для разовых проектов, съёмок в путешествиях или тестирования. Забирайте в Бангкоке, летайте везде.",
     s3_benefit:"Кинематографические аэросъёмки за долю стоимости покупки.", s3_cta:"Арендовать DJI",
+    s4_for:"Для риелторов, площадок, организаторов мероприятий и брендов", s4_title:"АЭРОСЪЁМКА С ДРОНА",
+    s4_desc:"Летаете не вы — летаем мы. Мы приезжаем к вашему зданию, площадке или мероприятию, снимаем с воздуха и передаём вам материал. Добавьте монтаж — и получите готовый фильм: смонтированный, с цветокоррекцией, музыкой и титрами. Правила воздушного пространства для вашего объекта мы проверяем до расчёта.",
+    s4_benefit:"Готовый аэрофильм вашего объекта — вы выбираете только день.", s4_cta:"Запросить расчёт",
     proof_tag:"Реальные результаты", proof_title:"СОЗДАТЕЛИ ЛЮБЯТ ЭТО МЕСТО",
     proof_sub:"Сотни создателей контента, брендов и предпринимателей использовали Rent Me Bangkok для старта и роста.",
     proof_n1:"Просмотров за 30 дней", proof_n2:"Подписчиков в Instagram", proof_n3:"Промо-цена недели", proof_n4:"Гостей подкаста макс.",
@@ -1174,7 +1222,7 @@ const translations = {
     trust_3:"<strong>ทุกระดับ</strong> — ยินดีต้อนรับมือใหม่",
     trust_4:"<strong>ใจกลางกรุงเทพฯ</strong> — 5 นาทีจาก BTS อโศก",
     trust_5:"<strong>บริการตัดต่อครบ</strong> — เราดูแล post-production ให้",
-    services_tag:"สิ่งที่เราให้บริการ", services_title:"สามบริการ<br>หนึ่งฮับครีเอทีฟ",
+    services_tag:"สิ่งที่เราให้บริการ", services_title:"สี่บริการ<br>หนึ่งฮับครีเอทีฟ",
     services_sub:"ไม่ว่าจะถ่ายภาพสินค้า บันทึกพอดแคสต์แรก หรือถ่ายภาพทางอากาศ — เรามีพื้นที่ อุปกรณ์ และทักษะพร้อมให้",
     s1_for:"สำหรับช่างภาพ แบรนด์ และครีเอเตอร์", s1_title:"เช่าสตูดิโอถ่ายภาพ",
     s1_desc:"สตูดิโอถ่ายภาพครบครันในใจกลางกรุงเทพฯ เช่าได้รายชั่วโมงหรือรายวัน พร้อมไฟสตูดิโอ ซอฟต์บ็อกซ์ ฉากหลังหลายสี และพื้นที่ไลฟ์สไตล์",
@@ -1185,6 +1233,9 @@ const translations = {
     s3_for:"สำหรับผู้สร้างภาพยนตร์ นายหน้าอสังหาฯ ครีเอเตอร์ท่องเที่ยว", s3_title:"เช่ากล้องและโดรน DJI",
     s3_desc:"เช่ากล้องและโดรน DJI มืออาชีพโดยไม่ต้องซื้อ เหมาะสำหรับโปรเจกต์ครั้งเดียว ถ่ายภาพระหว่างเดินทาง หรือทดลองก่อนซื้อ รับที่กรุงเทพฯ บินได้ทุกที่",
     s3_benefit:"ภาพทางอากาศสไตล์ซีนีมาในราคาเพียงเศษหนึ่งของการซื้อ", s3_cta:"เช่า DJI",
+    s4_for:"สำหรับนายหน้าอสังหาฯ สถานที่จัดงาน ผู้จัดอีเวนต์ และแบรนด์", s4_title:"ถ่ายทำทางอากาศ / โดรน",
+    s4_desc:"คุณไม่ต้องบินเอง — เราบินให้ เราไปที่อาคาร สถานที่ หรืออีเวนต์ของคุณ ถ่ายจากมุมสูง แล้วส่งไฟล์ให้คุณ เพิ่มบริการตัดต่อ คุณจะได้หนังที่เสร็จสมบูรณ์ ทั้งตัดต่อ ปรับสี ใส่เพลงและตัวอักษร เราตรวจสอบกฎการบินของพื้นที่ให้ก่อนเสนอราคา",
+    s4_benefit:"หนังทางอากาศที่เสร็จสมบูรณ์ของอสังหาฯ คุณ — คุณแค่เลือกวัน", s4_cta:"ขอใบเสนอราคา",
     proof_tag:"ผลลัพธ์จริง", proof_title:"ครีเอเตอร์รักพื้นที่นี้",
     proof_sub:"ครีเอเตอร์ แบรนด์ และผู้ประกอบการหลายร้อยรายใช้ Rent Me Bangkok เพื่อเปิดตัว เติบโต และเล่าเรื่องราวของพวกเขา",
     proof_n1:"วิวใน 30 วัน", proof_n2:"ผู้ติดตาม Instagram", proof_n3:"ราคาโปรโมชัน", proof_n4:"ผู้ร่วมพอดแคสต์สูงสุด",

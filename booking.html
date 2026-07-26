@@ -318,6 +318,24 @@ input[type=date]{color-scheme:dark}
         <div class="svc-desc">Rent DJI Pocket 3, Neo drone, or Osmo Nano by the day. 10% discount for 3+ days.</div>
         <div class="svc-price">From ฿500 / day</div>
       </div>
+      <div class="svc-card" onclick="selectService('drone',this)">
+        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="svc-icon">
+          <svg width="30" height="30" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--blue-l)">
+            <rect x="18" y="19" width="12" height="10" rx="3"/>
+            <circle cx="24" cy="24" r="2.2"/>
+            <line x1="18" y1="19" x2="12" y2="13"/><line x1="30" y1="19" x2="36" y2="13"/>
+            <line x1="18" y1="29" x2="12" y2="35"/><line x1="30" y1="29" x2="36" y2="35"/>
+            <circle cx="11" cy="12" r="5.5" opacity=".75"/><circle cx="37" cy="12" r="5.5" opacity=".75"/>
+            <circle cx="11" cy="36" r="5.5" opacity=".75"/><circle cx="37" cy="36" r="5.5" opacity=".75"/>
+            <line x1="6.5" y1="12" x2="15.5" y2="12" opacity=".45"/><line x1="32.5" y1="12" x2="41.5" y2="12" opacity=".45"/>
+            <line x1="6.5" y1="36" x2="15.5" y2="36" opacity=".45"/><line x1="32.5" y1="36" x2="41.5" y2="36" opacity=".45"/>
+          </svg>
+        </div>
+        <div class="svc-title">AERIAL / DRONE FILMING</div>
+        <div class="svc-desc">We fly to your location — buildings, venues, events — film it from the air and edit it into a finished video.</div>
+        <div class="svc-price" style="color:var(--blue-l)">Request a quote</div>
+      </div>
     </div>
 
     <div class="step-actions right">
@@ -633,6 +651,48 @@ input[type=date]{color-scheme:dark}
       </label>
     </div>
 
+  <!-- DRONE DETAILS -->
+  <!-- Anfrage, keine Buchung: kein Datum, keine Zahlung. Termin und Endpreis
+       werden persoenlich abgestimmt, weil Flugzeit, Anfahrt und Genehmigungs-
+       lage je Objekt verschieden sind. -->
+  <div id="details-drone" style="display:none;padding:0 0 16px">
+    <div style="background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:10px;padding:16px 20px;margin-bottom:22px;font-size:13px;color:var(--fg-muted)">
+      🚁 <strong style="color:var(--fg)">This is an enquiry, not an instant booking.</strong>
+      Tell us about the location and what you need. We check the airspace rules for
+      your site, confirm the date and send you a fixed quote — usually within 24h.
+      <span style="color:var(--blue-l)">No payment now.</span>
+    </div>
+
+    <label style="margin-bottom:10px;display:block">Choose a package <span style="color:var(--muted);font-weight:400">(you can change this later)</span></label>
+    <div class="sub-grid" id="drone-packages" style="grid-template-columns:repeat(3,1fr)"></div>
+
+    <div style="margin-top:22px">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:14px 16px;border:1px solid var(--border);border-radius:10px">
+        <input type="checkbox" id="drone-editing" style="margin-top:3px" onchange="updateDroneSummary()">
+        <span>
+          <span style="display:block;font-weight:600;text-transform:none;letter-spacing:0;font-size:14px;color:var(--fg)">Add editing</span>
+          <span style="display:block;font-size:13px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;line-height:1.5">
+            We cut the aerial footage into a finished film — colour graded, music, titles.
+            Without this you receive the raw footage.
+            <span id="drone-editing-price"></span>
+          </span>
+        </span>
+      </label>
+    </div>
+
+    <div style="margin-top:22px">
+      <label for="drone-location">Where should we fly? <span style="color:var(--accent)">*</span></label>
+      <input type="text" id="drone-location" placeholder="Address, building or venue name — e.g. Asoke, Sukhumvit 21">
+    </div>
+
+    <div style="margin-top:18px">
+      <label for="drone-brief">What do you need? <span style="color:var(--accent)">*</span></label>
+      <textarea id="drone-brief" rows="4" placeholder="e.g. Exterior shots of a 12-storey condo for a sales listing. Roof and pool area. Preferably a weekday morning."></textarea>
+    </div>
+
+    <div id="drone-summary" style="display:none;background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:14px 18px;margin-top:20px;font-size:13px;color:var(--blue-l)"></div>
+  </div>
+
     <div class="step-actions">
       <button class="btn-ghost" onclick="goStep(1)">← Back</button>
       <button class="btn-primary" onclick="validateStep2()" id="btn-step2-next">Next: Your Info →</button>
@@ -842,8 +902,8 @@ input[type=date]{color-scheme:dark}
 <div id="screen-confirm">
   <div class="confirm-icon">🎉</div>
   <div class="confirm-ref" id="conf-ref">RMB-XXXXXXXX</div>
-  <div class="confirm-title">BOOKING CONFIRMED!</div>
-  <div class="confirm-sub">
+  <div class="confirm-title" id="conf-title">BOOKING CONFIRMED!</div>
+  <div class="confirm-sub" id="conf-subtext">
     Thank you! Your booking is confirmed.<br>
     <span style="color:var(--fg)">A confirmation email is on its way to <strong id="conf-email"></strong></span>
   </div>
@@ -902,12 +962,40 @@ const SUPABASE_FN_URL = 'https://nghsyxwhczvwaorssgoh.supabase.co/functions/v1';
 const RESERVATION_MINUTES = 30;
 
 // ═══════════════════════════════════════════════
+// DRONE / AERIAL FILMING — die einzige Stelle mit Preisen
+// ═══════════════════════════════════════════════
+//
+// Der Dienst ist eine **Anfrage**, keine Sofortbuchung (Andys Entscheidung
+// 2026-07-27): Flugzeit, Anfahrt und Genehmigungslage sind je Objekt
+// verschieden, ein fester Preis im Voraus waere geraten.
+//
+// `price: null` heisst "auf Anfrage" und wird auch so angezeigt. Sobald die
+// Zahlen feststehen, hier eintragen -- **nur hier**, sonst nirgends.
+const DRONE_PACKAGES = [
+  { key: 'basic',    icon: '🚁', name: 'BASIC',    scope: 'Up to 1 hour on site', desc: 'One building or a single location. Raw footage.',            price: null },
+  { key: 'standard', icon: '🎬', name: 'STANDARD', scope: 'Up to 3 hours on site', desc: 'Several angles, interior surroundings, golden-hour option.', price: null },
+  { key: 'premium',  icon: '🏙️', name: 'PREMIUM',  scope: 'Half day on site',      desc: 'Large sites or events. Multiple flights across the day.',    price: null }
+];
+
+//: Aufpreis fuer den Schnitt. `null` = auf Anfrage.
+const DRONE_EDITING_PRICE = null;
+
+/** Ein Preis als Text -- ohne Zahl wird daraus ehrlich "on request". */
+function dronePriceLabel(price) {
+  return price == null ? 'Price on request' : '฿' + price.toLocaleString('en-US');
+}
+
+// ═══════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════
 let state = {
   step: 1,
-  service: null,        // 'studio_rental' | 'podcast' | 'equipment'
+  service: null,        // 'studio_rental' | 'podcast_setup' | 'equipment' | 'drone'
   subtype: null,
+  dronePackage: null,   // Schluessel aus DRONE_PACKAGES
+  droneEditing: false,
+  droneLocation: '',
+  droneBrief: '',
   date: null,           // 'YYYY-MM-DD'
   startTime: null,
   endTime: null,
@@ -1025,6 +1113,73 @@ function selectService(type, el) {
 }
 
 // ═══════════════════════════════════════════════
+// DRONE / AERIAL FILMING
+// ═══════════════════════════════════════════════
+
+/** Baut die Paketkarten aus DRONE_PACKAGES -- ein Ort, eine Wahrheit. */
+function renderDronePackages() {
+  const grid = document.getElementById('drone-packages');
+  if (!grid) return;
+  grid.innerHTML = DRONE_PACKAGES.map(p => `
+    <div class="sub-card" onclick="selectDronePackage('${p.key}',this)">
+      <div class="sub-card-title">${p.icon} ${p.name}</div>
+      <div class="sub-card-desc">${p.scope} — ${p.desc}</div>
+      <div style="margin-top:8px;font-size:15px;font-weight:700;color:${p.price == null ? 'var(--blue-l)' : 'var(--fg)'}">${dronePriceLabel(p.price)}</div>
+    </div>`).join('');
+
+  const hinweis = document.getElementById('drone-editing-price');
+  if (hinweis) {
+    hinweis.textContent = DRONE_EDITING_PRICE == null
+      ? ' Price quoted with your offer.'
+      : ' +฿' + DRONE_EDITING_PRICE.toLocaleString('en-US') + '.';
+  }
+  // Auswahl beim Betreten des Schritts zuruecksetzen -- sonst bleibt eine
+  // frueher gewaehlte Karte markiert, ohne dass state sie noch fuehrt.
+  state.dronePackage = null;
+  state.droneEditing = false;
+  const box = document.getElementById('drone-editing');
+  if (box) box.checked = false;
+  updateDroneSummary();
+}
+
+function selectDronePackage(key, el) {
+  document.querySelectorAll('#drone-packages .sub-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.dronePackage = key;
+  updateDroneSummary();
+}
+
+function updateDroneSummary() {
+  const box = document.getElementById('drone-editing');
+  state.droneEditing = !!(box && box.checked);
+
+  const strip = document.getElementById('drone-summary');
+  if (!strip) return;
+  const paket = DRONE_PACKAGES.find(p => p.key === state.dronePackage);
+  if (!paket) { strip.style.display = 'none'; return; }
+
+  strip.style.display = '';
+  strip.innerHTML = `<strong>${paket.name}</strong> · ${paket.scope}`
+    + (state.droneEditing ? ' · with editing' : ' · raw footage')
+    + ` — <span style="color:var(--fg)">${dronePriceLabel(paket.price)}</span>`
+    + `<br><span style="color:var(--muted)">We confirm the final price and date by email. Nothing is charged now.</span>`;
+}
+
+/** Was in `notes` der Buchung landet -- die Anfrage steckt vollstaendig darin. */
+function droneNotes() {
+  const paket = DRONE_PACKAGES.find(p => p.key === state.dronePackage);
+  const teile = [
+    'ENQUIRY — Aerial/Drone filming',
+    'Package: ' + (paket ? `${paket.name} (${paket.scope})` : '—'),
+    'Editing: ' + (state.droneEditing ? 'yes' : 'no — raw footage'),
+    'Location: ' + (state.droneLocation || '—'),
+    'Brief: ' + (state.droneBrief || '—')
+  ];
+  if (state.notes) teile.push('Notes: ' + state.notes);
+  return teile.join(' | ');
+}
+
+// ═══════════════════════════════════════════════
 // STEP 2 SETUP
 // ═══════════════════════════════════════════════
 function setupStep2() {
@@ -1062,12 +1217,24 @@ function setupStep2() {
     document.getElementById('s2-sub').textContent = 'Choose your session type, participants, and date.';
     initCalendar('podcast');
   } else if (state.service === 'equipment') {
+    // Ueberschrift, Untertitel und Kalender standen bis 2026-07-27 im
+    // 'reel'-Zweig darunter -- der aber nie erreicht wird, weil state.service
+    // nirgends auf 'reel' gesetzt wird. Folge: Die Geraeteausleihe zeigte
+    // einen leeren Kalender, es liess sich kein Datum waehlen, und Schritt 2
+    // war nicht zu verlassen.
     document.getElementById('details-equipment').style.display = '';
-  } else if (state.service === 'reel') {
-    document.getElementById('details-reel').style.display = '';
     document.getElementById('s2-heading').textContent = 'EQUIPMENT RENTAL';
     document.getElementById('s2-sub').textContent = 'Select your gear and rental dates.';
     initEquipCalendar();
+  } else if (state.service === 'reel') {
+    document.getElementById('details-reel').style.display = '';
+    document.getElementById('s2-heading').textContent = 'REEL EDITING';
+    document.getElementById('s2-sub').textContent = 'Choose your package — send us the footage after booking.';
+  } else if (state.service === 'drone') {
+    document.getElementById('details-drone').style.display = '';
+    document.getElementById('s2-heading').textContent = 'AERIAL / DRONE FILMING';
+    document.getElementById('s2-sub').textContent = 'Tell us about the location — we send you a quote, no payment now.';
+    renderDronePackages();
   }
 }
 
@@ -1571,6 +1738,17 @@ function validateStep2() {
     goStep(3);
     return;
   }
+  if (state.service === 'drone') {
+    // Anfrage: kein Datum, kein Preis. Ohne Ort und Beschreibung ist sie
+    // allerdings wertlos -- daraus liesse sich kein Angebot machen.
+    if (!state.dronePackage) return alert('Please choose a package.');
+    state.droneLocation = document.getElementById('drone-location').value.trim();
+    state.droneBrief    = document.getElementById('drone-brief').value.trim();
+    if (!state.droneLocation) return alert('Please tell us where we should fly.');
+    if (!state.droneBrief)    return alert('Please describe what you need — it lets us quote properly.');
+    goStep(3);
+    return;
+  }
   if (state.service === 'studio_rental') {
     if (!state.date)      return alert('Please select a date.');
     if (!state.startTime) return alert('Please select a start time.');
@@ -1692,7 +1870,16 @@ function validateStep3() {
 function buildReview() {
   // Booking details
   let detailRows = '';
-  if (state.service === 'studio_rental') {
+  if (state.service === 'drone') {
+    const paket = DRONE_PACKAGES.find(p => p.key === state.dronePackage);
+    detailRows = `
+      <div class="review-row"><span class="review-label">Service</span><span class="review-value">Aerial / Drone Filming</span></div>
+      <div class="review-row"><span class="review-label">Package</span><span class="review-value">${paket ? paket.name + ' — ' + paket.scope : '—'}</span></div>
+      <div class="review-row"><span class="review-label">Editing</span><span class="review-value">${state.droneEditing ? 'Yes — finished film' : 'No — raw footage'}</span></div>
+      <div class="review-row"><span class="review-label">Location</span><span class="review-value">${state.droneLocation}</span></div>
+      <div class="review-row"><span class="review-label">Brief</span><span class="review-value">${state.droneBrief}</span></div>
+      <div class="review-total"><span class="label">Price</span><span class="amount" style="color:var(--blue-l)">${paket ? dronePriceLabel(paket.price) : 'On request'}</span></div>`;
+  } else if (state.service === 'studio_rental') {
     detailRows = `
       <div class="review-row"><span class="review-label">Service</span><span class="review-value">Photo Studio Rental</span></div>
       <div class="review-row"><span class="review-label">Date</span><span class="review-value">${formatDate(state.date)}</span></div>
@@ -1734,6 +1921,18 @@ function buildReview() {
   document.getElementById('review-details').innerHTML = detailRows;
 
   // Person details
+  // Eine Anfrage ist keine Buchung -- Knopf und Zustimmungstext duerfen nicht
+  // behaupten, es werde jetzt verbindlich gebucht.
+  const istAnfrage = state.service === 'drone';
+  const confBtn = document.getElementById('btn-confirm');
+  if (confBtn) confBtn.innerHTML = istAnfrage ? 'Send Enquiry &rarr;' : 'Continue &rarr;';
+  const termsEl = document.querySelector('#step-4 .terms-text');
+  if (termsEl) {
+    termsEl.innerHTML = istAnfrage
+      ? 'I agree to be contacted about this enquiry. <strong>No booking is made and nothing is charged</strong> — we reply with a quote and a proposed date.'
+      : 'I agree to the <a href="#" onclick="return false">Terms &amp; Conditions</a> and <a href="#" onclick="return false">Cancellation Policy</a>. I understand that bookings are confirmed immediately and cancellations must be made 24h in advance.';
+  }
+
   document.getElementById('review-person').innerHTML = `
     <div class="review-row"><span class="review-label">Name</span><span class="review-value">${state.firstName} ${state.lastName}</span></div>
     <div class="review-row"><span class="review-label">Phone</span><span class="review-value">${state.phone}</span></div>
@@ -1760,8 +1959,9 @@ function bookingPayload() {
     guest_email:          !state.userId ? state.email : null,
     guest_phone:          !state.userId ? state.phone : null,
     service_type:         state.service,
-    service_subtype:      state.subtype,
-    booking_date:         state.service !== 'equipment' ? state.date : null,
+    service_subtype:      state.service === 'drone' ? state.dronePackage : state.subtype,
+    // Eine Anfrage hat noch kein Datum -- der Termin wird abgestimmt.
+    booking_date:         (state.service === 'equipment' || state.service === 'drone') ? null : state.date,
     start_time:           state.startTime,
     end_time:             state.endTime,
     duration_hours:       state.duration,
@@ -1771,11 +1971,17 @@ function bookingPayload() {
     equipment_items:      state.equipItems.length > 0 ? state.equipItems : null,
     participant_count:    state.participants || null,
     total_price:          state.totalPrice || null,
-    notes:                state.service === 'reel' ? `Reel package: ${state.reelCount} reel(s)${state.notes ? ' | ' + state.notes : ''}` : state.notes ? state.notes + (state.service === 'podcast_setup' ? ' | Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : '') : (state.service === 'podcast_setup' ? 'Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : null),
+    notes:                state.service === 'drone' ? droneNotes() : state.service === 'reel' ? `Reel package: ${state.reelCount} reel(s)${state.notes ? ' | ' + state.notes : ''}` : state.notes ? state.notes + (state.service === 'podcast_setup' ? ' | Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : '') : (state.service === 'podcast_setup' ? 'Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : null),
     source:               'website',
     payment_method:       null,
-    booking_status:       state.totalPrice ? 'pending_payment' : 'confirmed',
-    status:                state.totalPrice ? 'pending' : 'confirmed'
+    // Eine Drohnen-Anfrage ist **weder** bezahlt **noch** bestaetigt -- ohne
+    // eigenen Status stuende sie sonst als `confirmed` in der Verwaltung, weil
+    // sie keinen Preis hat. Genau das darf sie nicht: Termin und Preis sind
+    // noch offen.
+    booking_status:       state.service === 'drone' ? 'enquiry'
+                          : state.totalPrice ? 'pending_payment' : 'confirmed',
+    status:               state.service === 'drone' ? 'pending'
+                          : state.totalPrice ? 'pending' : 'confirmed'
   };
 }
 
@@ -1783,6 +1989,14 @@ async function goToPayment() {
   const btn = document.getElementById('btn-confirm');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Please wait…';
+
+  // Drohnen-Anfrage: kein Preis, also auch kein Zahlschritt. Sie wird
+  // angelegt und bestaetigt sich selbst -- die Pruefung unten wuerde sie
+  // sonst mit "No price calculated" abweisen.
+  if (state.service === 'drone') {
+    await finalizeBooking(bookingPayload());
+    return;
+  }
 
   if (!state.totalPrice) {
     const msgEl = document.getElementById('confirm-msg');
@@ -1881,7 +2095,6 @@ async function startPayment() {
           customerName: `${state.firstName} ${state.lastName}`,
           customerEmail: state.email,
           description: desc,
-          customerName: state.name,
           successUrl: `${location.origin}${location.pathname}?payment=success&booking=${state.bookingId}`,
           cancelUrl: `${location.origin}${location.pathname}?payment=cancelled&booking=${state.bookingId}`
         })
@@ -1903,7 +2116,7 @@ async function startPayment() {
           amount: chargeAmount,
           description: `Rent Me Bangkok — ${state.service}`,
           customerEmail: state.email,
-          customerName: state.name
+          customerName: `${state.firstName} ${state.lastName}`
         })
       });
       const json = await res.json();
@@ -1997,6 +2210,25 @@ function updateQRCountdown(seconds) {
 // ═══════════════════════════════════════════════
 // STRIPE REDIRECT HANDLING (on page load)
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// DIENST AUS DER ADRESSE VORWAEHLEN
+// ═══════════════════════════════════════════════
+//
+// `booking.html?service=drone` springt gleich in den passenden Dienst. Die
+// Startseite verlinkt so seit jeher (`?service=podcast_setup` im Preisteil) --
+// ausgewertet wurde der Parameter bisher **nicht**, der Link landete einfach
+// auf Schritt 1 ohne Auswahl.
+(function preselectServiceFromUrl() {
+  const gewuenscht = new URLSearchParams(location.search).get('service');
+  if (!gewuenscht) return;
+  // Nur Dienste, fuer die es auch eine Karte gibt -- sonst stuende der Nutzer
+  // in einem Schritt 2 ohne Inhalt.
+  const karte = document.querySelector(`.svc-card[onclick*="'${gewuenscht}'"]`);
+  if (!karte) return;
+  selectService(gewuenscht, karte);
+  goStep(2);
+})();
+
 (async function handleStripeRedirect() {
   const params = new URLSearchParams(location.search);
   const paymentStatus = params.get('payment');
@@ -2065,10 +2297,36 @@ async function finalizeBooking(payload, existingBooking, skipEmail) {
   document.getElementById('conf-ref').textContent = data.booking_ref;
   document.getElementById('conf-email').textContent = state.email;
 
+  // Eine Anfrage darf sich nicht als bestaetigte Buchung ausgeben. Ohne das
+  // stuende hier "BOOKING CONFIRMED!", obwohl weder Termin noch Preis
+  // feststehen -- und die Kalenderknoepfe trugen ein Datum, das es nicht gibt.
+  if (state.service === 'drone') {
+    const titel = document.getElementById('conf-title');
+    const text  = document.getElementById('conf-subtext');
+    if (titel) titel.textContent = 'ENQUIRY RECEIVED';
+    if (text) {
+      text.innerHTML = 'Thanks! We have your request and will check the airspace '
+        + 'rules for your location.<br><span style="color:var(--fg)">You will get a '
+        + 'quote and a proposed date at <strong>' + state.email + '</strong>, usually '
+        + 'within 24h.</span><br><span style="color:var(--muted)">Nothing has been '
+        + 'charged.</span>';
+    }
+    const gcal = document.getElementById('btn-gcal');
+    const ics  = document.getElementById('btn-ics');
+    if (gcal && gcal.parentElement) gcal.parentElement.style.display = 'none';
+    if (ics && !gcal) ics.style.display = 'none';
+  }
+
+  // podcast_setup, reel und drone fehlten hier bis 2026-07-27 -- die
+  // Bestaetigung zeigte fuer sie "undefined" als Service. Dieser Block steht
+  // zweimal in der Datei; beide Stellen sind gleich gepflegt.
   const svcLabel = {
     studio_rental: 'Photo Studio Rental',
     podcast: 'Podcast Session',
-    equipment: 'Equipment Rental'
+    podcast_setup: 'Podcast Setup / Service',
+    equipment: 'Equipment Rental',
+    reel: 'Reel Editing',
+    drone: 'Aerial / Drone Filming'
   };
 
   let confRows = `<div class="review-row"><span class="review-label">Reference</span><span class="review-value" style="color:var(--blue-l)">${data.booking_ref}</span></div>`;
@@ -2203,10 +2461,16 @@ async function sendEmails(booking) {
 
   emailjs.init(EMAILJS_PUBLIC_KEY);
 
+  // podcast_setup, reel und drone fehlten hier bis 2026-07-27 -- die
+  // Bestaetigung zeigte fuer sie "undefined" als Service. Dieser Block steht
+  // zweimal in der Datei; beide Stellen sind gleich gepflegt.
   const svcLabel = {
     studio_rental: 'Photo Studio Rental',
     podcast: 'Podcast Session',
-    equipment: 'Equipment Rental'
+    podcast_setup: 'Podcast Setup / Service',
+    equipment: 'Equipment Rental',
+    reel: 'Reel Editing',
+    drone: 'Aerial / Drone Filming'
   };
 
   const customerName  = booking.guest_name  || `${state.firstName} ${state.lastName}`;

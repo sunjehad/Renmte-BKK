@@ -327,6 +327,7 @@ textarea{resize:vertical;min-height:80px}
         <select id="filter-service" onchange="filterBookings()">
           <option value="">All Services</option>
           <option value="studio_rental">Studio Rental</option>
+          <option value="drone">Drone Filming</option>
           <option value="podcast">Podcast</option>
           <option value="equipment">Equipment</option>
         </select>
@@ -732,7 +733,7 @@ async function loadAllBookings() {
 }
 
 // ── STATS ──
-const SVC_NAMES = { studio_rental:'Studio Rental', podcast_setup:'Podcast Setup/Service', podcast:'Podcast', reel:'Reel Editing', equipment:'Equipment' };
+const SVC_NAMES = { studio_rental:'Studio Rental', podcast_setup:'Podcast Setup/Service', podcast:'Podcast', reel:'Reel Editing', equipment:'Equipment', drone:'Drone Filming' };
 
 function renderStats() {
   const today = new Date().toISOString().split('T')[0];
