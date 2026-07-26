@@ -12,3 +12,6 @@
 # Umgebung / Geheimnisse
 .env
 .env.local
+
+# Sicherungskopien — Git ist die Versionierung (docs/decisions.md R-004)
+*.backup

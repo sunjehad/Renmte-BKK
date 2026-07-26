@@ -1,0 +1,20 @@
+# Bekannte, bewusst geduldete Befunde der Seitenpruefung.
+# Format: datei:art:meldung  (ohne Zeilennummer -- sonst zaehlt jede
+# eingefuegte Zeile darueber als neuer Befund).
+#
+# Ein Eintrag hier ist kein Freibrief, sondern eine Notiz: "gesehen,
+# bewertet, bewusst nicht jetzt". Wird einer behoben, gehoert er geloescht.
+
+# --- Mini-Kalender in index.html (Zeilen 1307-1345) ---------------------------
+# Unerreichbarer Code: `showMiniCal`/`hideMiniCal` haengen am window-Objekt,
+# werden aber nirgends aufgerufen, und das Element `mini-cal` existiert im
+# ganzen Dokument nicht. Der Block laeuft also nie.
+#
+# ACHTUNG beim Aufraeumen: Er enthaelt `isBooked()`, das die Belegung aus
+# einer Hash-Formel **erfindet** ((y*31+m*7+d*13)%10 < 3). Wuerde der Block je
+# wieder verdrahtet, zeigte die Startseite frei erfundene ausgebuchte Tage.
+# Empfehlung: ersatzlos entfernen (docs/todo.md T-9) -- nicht wiederbeleben.
+index.html:TOT:getElementById('mini-cal-month') -- kein Element mit dieser id (abgesichert, also toter Code)
+index.html:TOT:getElementById('mini-cal-days') -- kein Element mit dieser id (abgesichert, also toter Code)
+index.html:TOT:getElementById('mini-cal') -- kein Element mit dieser id (abgesichert, also toter Code)
+index.html:ID:getElementById('mini-cal') -- kein Element mit dieser id und das Ergebnis wird ungeprueft benutzt
