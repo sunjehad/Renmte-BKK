@@ -179,3 +179,50 @@ Startseite verlinkte seit jeher so (`?service=podcast_setup` im Preisteil) —
 **ausgewertet wurde der Parameter nie**, der Link landete auf Schritt 1 ohne
 Auswahl. Jetzt wird er ausgewertet, aber nur für Dienste, zu denen es auch
 eine Karte gibt; sonst stünde der Nutzer in einem leeren Schritt 2.
+
+---
+
+## R-010 — Den Preis bestimmt der Server, und zwar aus dem Umfang
+
+**2026-07-27** — Antwort auf T-1.
+
+`stripe-checkout` und `stripe-paymentlink` nahmen den zu zahlenden Betrag
+unbesehen aus dem Request-Body. Wer die Anfrage abfing und `amount` auf `1`
+setzte, buchte für ein Baht; der Webhook bestätigte danach als `paid`.
+
+**Der naheliegende Fix wäre falsch gewesen.** `todo.md` T-1 schlug vor,
+`total_price` aus der Datenbank zu lesen. Das hätte die Lücke **nicht**
+geschlossen: Der Buchungssatz entsteht über die RPC `create_booking`
+(`stripe-migration.sql` Z. 79 ff.), die `SECURITY DEFINER` läuft, für `anon`
+freigegeben ist und `payload->>'total_price'` wortwörtlich übernimmt. Der Wert
+in der Datenbank ist genauso vom Browser gesetzt wie der im Body — nur einen
+Schritt früher.
+
+**Entschieden:** Der Betrag wird in `supabase/functions/_shared/preise.ts` aus
+dem **reservierten Umfang** neu berechnet — Dienst, Unterart, Dauer, Miettage,
+Geräte. Das sind die Felder, die bestimmen, was der Kunde bekommt und was der
+Kalender sperrt. Wer sie fälscht, fälscht seine eigene Buchung mit und bekommt
+wirklich nur die eine Stunde, für die er zahlt. Damit hängt der Preis an der
+Leistung, und das ist die Eigenschaft, auf die es ankommt.
+
+**Fail-closed.** Lässt sich kein Betrag sicher bestimmen, wird abgelehnt —
+kein Rückfall auf den Browser-Wert. Betroffen sind heute Drohne (Preise
+unbekannt, T-10) und `reel` (Paketgröße steht nur in `notes`, in keiner
+Spalte). Eine Buchung, die nicht zustande kommt, ist behebbar; eine Buchung
+über 10 THB ist es nicht.
+
+**Zweiter Befund, gleich mitbehoben:** Auch `currency` kam aus dem Body. Ein
+serverseitig korrekt errechneter Betrag von 800 hätte als 800 IDR eingezogen
+werden können — rund 1,70 THB. Die Währung ist jetzt fest (`WAEHRUNG`).
+
+**Das Frontend wurde nicht angefasst.** Es schickt `amount` weiterhin mit; der
+Wert wird nur noch verglichen und bei Abweichung protokolliert. Das ist
+Absicht: So bleibt eine Spur, an der sich ein Manipulationsversuch erkennen
+lässt, und `booking.html` musste für einen Sicherheitsfix nicht angerührt
+werden (R-007).
+
+**Preistafel doppelt geführt.** Die Zahlen stehen jetzt in `booking.html`
+**und** in `preise.ts` — T-8 wird dadurch schlimmer, nicht besser. Bewusst in
+Kauf genommen: Die Alternative wäre, die Preise erst zusammenzuführen und die
+Lücke so lange offen zu lassen. `preise.test.ts` nagelt jede Zahl fest, damit
+ein Auseinanderlaufen auffällt.

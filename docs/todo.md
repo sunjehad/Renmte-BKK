@@ -27,36 +27,63 @@ Eintragen in `booking.html`, Konstante `DRONE_PACKAGES` bzw.
 
 ## Dringend — betrifft Geld
 
-### [ ] T-1 — Der zu zahlende Betrag kommt aus dem Browser
+### [~] T-1 — Der Zahlbetrag kam aus dem Browser — **behoben, nicht ausgespielt**
 
-**Befund (verifiziert 2026-07-27):** `stripe-checkout` und `stripe-paymentlink`
-übernehmen `amount` unbesehen aus dem Request-Body:
+**Code fertig am 2026-07-27** (`supabase/functions/_shared/preise.ts`, R-010).
+🔴 **Wirksam wird er erst mit `supabase functions deploy` — bis dahin ist die
+Lücke live offen.** Der Push hat nur das Frontend ausgespielt; Edge-Functions
+hängen nicht an Git (`docs/deploy.md`).
 
-```ts
-const { bookingId, bookingRef, amount, … } = body;
-…
-unit_amount: Math.round(amount * 100)
-```
+**Der ursprünglich hier vorgeschlagene Fix wäre wirkungslos gewesen.** Er
+lautete: `select total_price from bookings where id = bookingId`. Aber
+`total_price` ist **genauso vom Browser gesetzt** — der Buchungssatz entsteht
+über die RPC `create_booking` (`stripe-migration.sql` Z. 79 ff.), die
+`SECURITY DEFINER` läuft, für `anon` freigegeben ist und
+`payload->>'total_price'` wortwörtlich übernimmt. Der Angreifer hätte
+denselben Betrag einen Schritt früher gefälscht.
 
-**Keine** der drei Functions liest den Buchungssatz aus der Datenbank, bevor sie
-den Betrag an Stripe gibt. Wer die Anfrage im Browser abfängt und `amount` auf
-`1` setzt, bucht für ein Baht — und der Webhook bestätigt die Buchung
-anschließend als `paid`, weil er nur auf das Stripe-Ereignis schaut.
+**Stattdessen umgesetzt:** Der Betrag wird aus dem **reservierten Umfang** neu
+berechnet (Dienst, Unterart, Dauer, Miettage, Geräte) — also aus den Feldern,
+die auch bestimmen, was der Kunde bekommt und was der Kalender sperrt.
+Fail-closed: kein Preis sicher ermittelbar → HTTP 422, **kein** Rückfall auf
+den Browser-Wert. `amount` und `currency` aus dem Body werden nicht mehr
+benutzt.
 
-**Zu tun:** Die Function holt den Betrag selbst:
-`select total_price, deposit_amount from bookings where id = bookingId` und
-rechnet damit. Der Wert aus dem Body wird höchstens noch zum Vergleich benutzt.
+**Gleich mitbehoben:** `currency` kam ebenfalls aus dem Body — 800 THB hätten
+als 800 IDR (~1,70 THB) eingezogen werden können.
 
-*Keine Aussage darüber, ob das je ausgenutzt wurde — dafür bräuchte es einen
-Blick in die Stripe-Zahlungen.*
+**Geprüft:** 21 Tests in `preise.test.ts`, dazu eine statische Wache in
+`tools/pruefe.py`, die anschlägt, sobald ein Betrag oder eine Währung an
+Stripe nicht aus der Preisquelle stammt. Beides an künstlich eingebauten
+Fehlern nachgewiesen.
 
-### [ ] T-2 — Deploy-Wahrheit der Stripe-Functions klären
+### [~] T-2 — Deploy-Wahrheit der Functions — **sehr wahrscheinlich geklärt**
 
-Ob bei Supabase die Fassung vom 1. Juli oder die vom 28. Juni läuft, ist
-ungeklärt. Läuft die alte, bleiben per PromptPay bezahlte Buchungen auf
-`pending` stehen. Prüfweg und Hintergrund: **`docs/deploy.md`**.
+**2026-07-27 aus den Spuren der Supabase-CLI erhoben**
+(`~/.supabase/traces/*.ndjson`), ohne einen einzigen Zugriff auf Supabase:
 
-Braucht Andys Supabase-Zugang — von hier aus nicht feststellbar.
+Der letzte `functions deploy` überhaupt lief am **2026-07-01 um 08:27:57 UTC**
+— sechs Sekunden nach dem letzten Schreiben von `stripe-webhook/index.ts` im
+Repo und unmittelbar nach einem `link` auf Projekt `nghsyxwhczvwaorssgoh` aus
+**diesem** Verzeichnis. Danach wurde die CLI nie wieder benutzt. Die alte
+Fassung vom 28. Juni war einmal live, ist aber überschrieben worden.
+
+**Also läuft mit hoher Wahrscheinlichkeit die Fassung vom 1. Juli** — die
+befürchtete Lage (PromptPay-Zahlungen bleiben auf `pending`) wird nicht
+gestützt. Beweiskette und die Grenzen dieser Aussage: `docs/deploy.md`.
+
+**Offen bleibt der Beweis** (ein Befehl, sobald jemand angemeldet ist) und die
+Frage, ob Stripe `payment_intent.succeeded` überhaupt abonniert hat.
+
+### [ ] T-11 — Wurde die Preislücke je ausgenutzt?
+
+Neu am 2026-07-27. Solange T-1 offen war, konnte jeder den Betrag frei setzen.
+Ob das geschehen ist, sagt nur das **Stripe-Dashboard**: unter *Payments* nach
+ungewöhnlich kleinen Beträgen sehen — alles unter **฿200** ist verdächtig, denn
+das ist der niedrigste reguläre Preis (eine Stunde Studio).
+
+Braucht Andys Stripe-Zugang; von hier aus nicht feststellbar, und ein Aufruf
+dorthin ist gesperrt.
 
 ---
 
@@ -70,51 +97,38 @@ aus** — `git push` *ist* der Deploy. Dass keine `vercel.json` im Repo liegt,
 ist bei Vercel normal; die Konfiguration steht im Dashboard.
 
 Nachgeprüft: `rentme-bkk.com` → 308 → `www.rentme-bkk.com`, Antwortköpfe
-`server: Vercel`. Live steht `cf51d6c`; der Drohnen-Dienst ist dort **nicht**
-enthalten. Einzelheiten in `docs/deploy.md`.
+`server: Vercel`. **Live steht seit dem Push vom 2026-07-27 `0e76917`** —
+Drohnen-Dienst und die Reparatur der DJI-Ausleihe sind enthalten und wurden an
+der laufenden Seite gegengeprüft. Einzelheiten in `docs/deploy.md`.
+
+⚠️ **Gilt nur fürs Frontend.** Die Edge-Functions hängen **nicht** an Git; sie
+gehen nur über `supabase functions deploy` live (siehe T-1).
 
 **Weiter offen:** Domain-Registrar und Eigentümer des Vercel-Kontos.
 
-### [ ] T-4 — 🔴 Andys GitHub-Konto darf nicht in das Repo schreiben
+### [x] T-4 — GitHub-Schreibrechte — **erledigt am 2026-07-27**
 
-**2026-07-27, beim ersten Push aufgelaufen:**
+Der erste Push scheiterte mit **403**: `monkeydrufyyy99` hatte auf
+`sunjehad/Renmte-BKK` nur Leserechte (`push: false`, per GitHub-API belegt).
 
-```
-remote: Permission to sunjehad/Renmte-BKK.git denied to monkeydrufyyy99.
-fatal: … The requested URL returned error: 403
-```
+**Gelöst auf dem empfohlenen Weg:** Sun hat eine Collaborator-Einladung mit
+`write` geschickt; sie war noch offen, wurde angenommen, danach ging der Push
+durch — **`cf51d6c..0e76917`, fünf Commits.** Vercel hat automatisch
+ausgespielt.
 
-Die GitHub-API bestätigt es für das hinterlegte Konto `monkeydrufyyy99`:
+Sun bleibt Eigentümer, Andy Manager. **Gepusht wird weiterhin nur auf Ansage** —
+in ein fremdes Repo schiebt man nicht nebenbei (R-005).
 
-```json
-{"permissions": {"admin": false, "maintain": false,
-                 "pull": true, "push": false, "triage": false}}
-```
+### [ ] T-5 — Kann `~/rentme/` weg? — **noch nicht**
 
-**Lesen ja, schreiben nein.** Sun ist Eigentümer, Andy inhaltlich Manager —
-aber auf GitHub ist das nicht abgebildet. Alle bisherigen Commits sind zwar
-von `Andy Pokorny` verfasst, gepusht hat sie offenbar jemand anders.
+Dort liegen zwei ältere Kopien der Stripe-Functions. **Neu am 2026-07-27:** Die
+dortige Webhook-Fassung *war* nachweislich einmal ausgespielt (Deploy am
+28.06. um 15:21:24 UTC, eine Sekunde nach dem Schreiben der Datei). Der
+Trace-Befund unter T-2 legt nahe, dass sie längst überschrieben ist — aber
+solange der Beweis aussteht, wird dort **nichts gelöscht**.
 
-**Folge: Der Deploy ist blockiert.** Vier Commits liegen lokal, davon die
-**Reparatur der unbuchbaren DJI-Ausleihe**.
-
-**Drei Wege, in der Reihenfolge meiner Empfehlung:**
-
-1. **Sun trägt `monkeydrufyyy99` als Collaborator mit „Write" ein**
-   (Repo → Settings → Collaborators). Danach genügt `git push`. Sauberste
-   Lösung, deckt sich mit der Rolle, die Andy ohnehin hat.
-2. **Fork + Pull Request** — Andy pusht in einen eigenen Fork, Sun führt
-   zusammen. Funktioniert ohne Rechteänderung, kostet aber bei jeder Änderung
-   einen Zwischenschritt.
-3. **Sun pusht selbst** — dann muss er die Commits bei sich haben.
-
-Bis dahin ist alles lokal gesichert; nichts geht verloren.
-
-### [ ] T-5 — Kann `~/rentme/` weg?
-
-Dort liegen zwei ältere Kopien der Stripe-Functions. Sie sind nur deshalb
-aufzuheben, weil unklar ist, ob eine davon deployed ist. Sobald T-2 beantwortet
-ist, entfällt der Grund.
+Sobald T-2 bewiesen ist, entfällt der Grund. Löschen dann nur mit Andys
+ausdrücklicher Freigabe.
 
 ---
 
@@ -151,17 +165,32 @@ prüfen** — sonst wird eine funktionierende Zahlungsstrecke ohne Netz umgebaut
 statisch, `docs/pruefen.md` beschreibt das Verfahren. Damit sind die
 Fehlerklassen abgedeckt, die eine Seite **still** lahmlegen.
 
+**Weiter angegangen am 2026-07-27:** Die Preishoheit der Edge-Functions ist
+jetzt getestet — 21 Tests in `supabase/functions/_shared/preise.test.ts`,
+mitgeprüft von `tools/pruefe.py`. Node führt das TypeScript direkt aus, es
+gibt weiterhin **keine** Abhängigkeit und keinen Build-Schritt.
+
 **Was weiterhin fehlt und der eigentliche Punkt ist:**
 - eine **getrennte Testumgebung** (zweites Supabase-Projekt + Stripe-Testmodus).
   Ohne sie kann die Buchungsstrecke nie ganz durchgeklickt werden, weil jeder
   Versuch eine echte Buchung und eine echte Zahlung erzeugt.
-- **Tests der drei Edge-Functions** gegen erfundene Stripe-Ereignisse. Das ginge
-  auch ohne Testumgebung und wäre der nächste sinnvolle Schritt.
+- **Tests der Webhook-Function** gegen erfundene Stripe-Ereignisse. Sie ist die
+  einzige der drei, die noch ungetestet ist — und sie entscheidet, ob eine
+  Buchung als bezahlt gilt.
 
-### [ ] T-8 — Doppelte Preisführung
+### [ ] T-8 — Doppelte Preisführung — **seit 2026-07-27 dreifach**
 
-Preise stehen in `index.html` **und** `booking.html`. Eine Änderung an einer
-Stelle ist eine stille Falle.
+Preise stehen in `index.html`, in `booking.html` **und** jetzt zusätzlich in
+`supabase/functions/_shared/preise.ts`.
+
+Das ist bewusst in Kauf genommen (R-010): Die Alternative wäre gewesen, erst
+die Preise zusammenzuführen und die Sicherheitslücke aus T-1 so lange offen zu
+lassen. `preise.test.ts` nagelt jede Zahl fest, damit ein Auseinanderlaufen
+wenigstens auffällt statt still Geld zu kosten.
+
+**Der Weg heraus:** `preise.ts` ist die einzige Stelle, die serverseitig zählt.
+Sinnvoll wäre, die Beträge von dort auszuliefern (eine schlanke Function oder
+eine erzeugte JSON-Datei) statt sie im HTML zu wiederholen.
 
 ---
 
@@ -191,3 +220,9 @@ Stelle ist eine stille Falle.
       wird (Andys Auflage): `tools/pruefe.py` + `tools/bekannt.txt` +
       `docs/pruefen.md`. Nachgewiesen an drei künstlich eingebauten Fehlern.
       Laufzeitprobe: `index.html` und `booking.html` laden mit leerer Konsole.
+- [x] **2026-07-27** — **Push durch**, GitHub-Schreibrechte geklärt (T-4);
+      `cf51d6c..0e76917` live auf `www.rentme-bkk.com`.
+- [x] **2026-07-27** — **Serverseitige Preisquelle** gebaut (T-1, R-010):
+      `supabase/functions/_shared/preise.ts`, fail-closed, 21 Tests. Dazu die
+      Wache `BETRAG` in `tools/pruefe.py`, die Rückfälle auf den Browser-Wert
+      und eine Währung aus dem Body meldet. **Wartet auf den Functions-Deploy.**

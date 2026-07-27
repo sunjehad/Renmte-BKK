@@ -29,6 +29,22 @@ Geprüft werden fünf Fehlerklassen, alle ohne die Seite auszuführen:
 | `TOT` | dasselbe, aber abgesichert (`if (el) …`) | Harmlos, aber toter Code — als Hinweis geführt. |
 | `HANDLER` | `onclick="foo()"` ohne `foo` | Ein Knopf, der nichts tut. |
 | `GEHEIM` | `sk_live`, `sk_test`, Service-Role-Schlüssel, JWT mit falscher Rolle | Ein geheimer Schlüssel im Frontend ist ein Notfall. Der Anon-Schlüssel (`role: anon`) wird erkannt und **nicht** gemeldet — er gehört dorthin. |
+| `BETRAG` | Ein Betrag oder eine Währung geht an Stripe, ohne aus der serverseitigen Preisquelle zu stammen | Genau das war T-1: eine Zeile `unit_amount: Math.round(amount * 100)` — und die ganze Rechnerei daneben ist wertlos. |
+| `PREISE` | Die 21 Tests der Preisquelle schlagen fehl | Hier hängt der Geldbetrag dran. Ein falscher Preis kommt sonst durch alle anderen Prüfungen sauber hindurch. |
+
+### Auch die Stripe-Functions werden geprüft
+
+Seit dem 2026-07-27 sieht `pruefe.py` nicht mehr nur auf die HTML-Seiten:
+
+- **Syntax der Edge-Functions.** `node --check` kann kein TypeScript, deshalb
+  wird über Nodes Type-Stripping geparst. Ausführen ginge nicht — die Dateien
+  holen ihre Abhängigkeiten über URLs und brauchen Deno.
+- **Die Preisquelle** (`supabase/functions/_shared/preise.ts`) wird mit
+  `node --test` durchgerechnet. Node führt TypeScript direkt aus; es bleibt
+  bei **null Abhängigkeiten** (R-001).
+
+> Beides läuft nur beim Aufruf **ohne Argumente**. `pruefe.py booking.html`
+> prüft weiterhin nur die eine Seite.
 
 ### Bekannte Befunde
 
@@ -48,6 +64,19 @@ booking.html:1884:DOPPELT:Schluessel 'customerName' doppelt im selben Objekt …
 booking.html:875:SYNTAX:Skriptblock ab Zeile 875: SyntaxError: Unexpected identifier 'btn'
 booking.html:1383:TOT:getElementById('editing-episode') -- kein Element mit dieser id
 ```
+
+Für die neuen Prüfungen derselbe Nachweis, vier weitere eingebaute Fehler:
+
+```
+stripe-checkout/index.ts:94:BETRAG:Betrag an Stripe stammt nicht aus der serverseitigen Preisquelle …
+stripe-checkout/index.ts:93:BETRAG:Waehrung an Stripe stammt nicht aus der festen Konstante WAEHRUNG
+_shared/preise.test.ts:0:PREISE:fehlgeschlagen: 1 - manipulierter Betrag: der Browser-Wert wird ignoriert
+_shared/preise.ts:0:SYNTAX:Unterminated string constant
+```
+
+Der dritte Fall ist der wichtigste: Er entstand dadurch, dass der
+Stundensatz von 200 auf 20 gesetzt wurde — ein Preisfehler um eine
+Zehnerstelle, den **vorher keine Prüfung dieses Projekts gefunden hätte.**
 
 ---
 
@@ -101,6 +130,11 @@ der ToDo-Liste steht (`docs/todo.md` T-7).
 **Nur mit Andys ausdrücklicher Freigabe** (`decisions.md` R-005). Vorher müssen
 Schritt 1 und 2 sauber sein.
 
+> ⚠️ **Es sind zwei Deploys, nicht einer.**
+> `git push` spielt **nur das Frontend** aus (Vercel). Die Edge-Functions
+> gehen ausschließlich über `supabase functions deploy` live. Wer nur pusht,
+> hat an den Zahlungswegen nichts geändert — siehe `docs/deploy.md`.
+
 Bei Änderungen an den Stripe-Functions kommt hinzu: **erst klären, was dort
 überhaupt läuft** — siehe `docs/deploy.md`. Ein Deploy über einen ungeklärten
 Stand ist geraten, nicht gewusst.
@@ -109,7 +143,16 @@ Stand ist geraten, nicht gewusst.
 
 ## Was dieses Verfahren nicht ersetzt
 
-Es prüft, ob die Seite **funktioniert** — nicht, ob sie **richtig rechnet**.
-Ein Preis, der um eine Null danebenliegt, kommt hier sauber durch. Der einzige
-echte Ersatz wären Tests gegen die drei Edge-Functions mit erfundenen
-Stripe-Ereignissen (`docs/todo.md` T-7).
+Es prüft, ob die Seite **funktioniert** — und seit dem 2026-07-27 auch, ob die
+**Server**seite richtig rechnet. Nicht geprüft wird, ob `booking.html` dasselbe
+rechnet: Die Preise stehen dort weiterhin doppelt (`docs/todo.md` T-8).
+
+Ein Preisfehler **im Frontend** führt heute nicht mehr zu einem falschen
+Einzug — eingezogen wird immer der serverseitig errechnete Betrag. Er führt
+dazu, dass die Seite dem Gast eine andere Zahl anzeigt, als abgebucht wird,
+und dass im Protokoll der Function eine Betragsabweichung steht. Falsch
+informiert statt falsch abgerechnet: ärgerlich, aber nicht teuer — und im
+Protokoll sichtbar.
+
+Weiterhin ungeprüft: die **Webhook**-Function, die entscheidet, ob eine
+Buchung als bezahlt gilt (`docs/todo.md` T-7).

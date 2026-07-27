@@ -290,6 +290,130 @@ def pruefe_seite(pfad):
     return befunde
 
 
+# ── Die Stripe-Functions ──────────────────────────────────────────────────
+#
+# Die Seiten oben sind nur die halbe Miete: der Betrag, der bei Stripe
+# ankommt, wird in den Edge-Functions bestimmt. Seit dem T-1-Fix
+# (2026-07-27) liegt die Preishoheit in ``_shared/preise.ts``, und die
+# gehoert genauso geprueft wie das Frontend -- sonst faellt ein Fehler dort
+# erst beim Bezahlen auf.
+
+#: Verzeichnis der Edge-Functions.
+FUNKTIONEN = WURZEL / "supabase" / "functions"
+
+#: Die Pruefung der Preisquelle. Node fuehrt TypeScript direkt aus.
+PREIS_TESTS = FUNKTIONEN / "_shared" / "preise.test.ts"
+
+
+def ts_syntax():
+    """Parst jede ``.ts``-Datei der Functions, ohne sie auszufuehren.
+
+    ``node --check`` kann kein TypeScript. Node kann die Typen aber
+    entfernen (``stripTypeScriptTypes``), und das schlaegt bei einem
+    Syntaxfehler fehl -- mehr ist hier nicht noetig. Ausfuehren ginge
+    ohnehin nicht: die Dateien holen ihre Abhaengigkeiten ueber URLs und
+    brauchen die Deno-Laufzeit.
+    """
+    if not FUNKTIONEN.is_dir():
+        return []
+    dateien = sorted(p for p in FUNKTIONEN.rglob("*.ts"))
+    if not dateien:
+        return []
+    skript = (
+        "const {stripTypeScriptTypes} = require('node:module');"
+        "const fs = require('fs');"
+        "let schlecht = 0;"
+        "for (const f of process.argv.slice(1)) {"
+        "  try { stripTypeScriptTypes(fs.readFileSync(f, 'utf8')); }"
+        "  catch (e) { console.log(f + '\\t' + e.message.split('\\n')[0]);"
+        "              schlecht++; }"
+        "}"
+        "process.exitCode = schlecht ? 1 : 0;"
+    )
+    try:
+        ergebnis = subprocess.run(
+            ["node", "--no-warnings", "-e", skript, "--", *map(str, dateien)],
+            capture_output=True, text=True, cwd=WURZEL)
+    except FileNotFoundError:
+        return [("supabase/functions", 0, "SYNTAX",
+                 "node nicht gefunden -- TypeScript-Pruefung uebersprungen")]
+    befunde = []
+    for zeile in ergebnis.stdout.strip().splitlines():
+        if "\t" not in zeile:
+            continue
+        pfad, meldung = zeile.split("\t", 1)
+        name = str(Path(pfad).relative_to(WURZEL)) if Path(pfad).is_absolute() \
+            else pfad
+        befunde.append((name, 0, "SYNTAX", meldung))
+    return befunde
+
+
+def betragsquelle():
+    """Wacht darueber, dass kein Betrag aus dem Request zu Stripe durchgeht.
+
+    Die Tests in ``preise.test.ts`` pruefen die Preisquelle -- sie koennen
+    aber nicht sehen, ob ein Handler sie ueberhaupt benutzt. Genau das war
+    der Fehler von T-1: eine Zeile ``unit_amount: Math.round(amount * 100)``,
+    und die ganze Rechnerei daneben ist wertlos.
+
+    Deshalb hier die grobe, aber wirksame Regel: **jede** Zeile, die einen
+    Betrag oder eine Waehrung an Stripe gibt, muss sich auf den
+    serverseitigen Wert beziehen.
+    """
+    if not FUNKTIONEN.is_dir():
+        return []
+    befunde = []
+    for pfad in sorted(FUNKTIONEN.rglob("index.ts")):
+        name = str(pfad.relative_to(WURZEL))
+        for nr, zeile in enumerate(pfad.read_text(encoding="utf-8").splitlines(), 1):
+            nackt = zeile.strip()
+            if nackt.startswith("//") or nackt.startswith("*"):
+                continue
+            if re.search(r"\b(unit_)?amount\s*:", nackt) \
+                    and "ergebnis.betrag" not in nackt:
+                befunde.append((name, nr, "BETRAG",
+                                "Betrag an Stripe stammt nicht aus der "
+                                "serverseitigen Preisquelle "
+                                "(ergebnis.betrag) -- siehe docs/todo.md T-1"))
+            if re.search(r"\bcurrency\s*:", nackt) and "WAEHRUNG" not in nackt:
+                befunde.append((name, nr, "BETRAG",
+                                "Waehrung an Stripe stammt nicht aus der "
+                                "festen Konstante WAEHRUNG"))
+    return befunde
+
+
+def preis_tests():
+    """Faehrt die Pruefung der serverseitigen Preisquelle.
+
+    Warum das hier haengt und nicht nur in einer eigenen Datei: Wer vor dem
+    Ausspielen ``tools/pruefe.py`` aufruft, soll **eine** Antwort bekommen.
+    Eine Pruefung, an die man sich erinnern muss, ist keine.
+    """
+    if not PREIS_TESTS.is_file():
+        return [("supabase/functions/_shared", 0, "PREISE",
+                 "preise.test.ts fehlt -- die Preisquelle ist ungeprueft")]
+    try:
+        # TAP, damit sich der Name des gescheiterten Tests herauslesen laesst.
+        ergebnis = subprocess.run(
+            ["node", "--no-warnings", "--test", "--test-reporter=tap",
+             str(PREIS_TESTS)],
+            capture_output=True, text=True, cwd=WURZEL)
+    except FileNotFoundError:
+        return [("supabase/functions/_shared", 0, "PREISE",
+                 "node nicht gefunden -- Preispruefung uebersprungen")]
+    if ergebnis.returncode == 0:
+        return []
+    ausgabe = (ergebnis.stdout + ergebnis.stderr).splitlines()
+    gescheitert = [z.strip()[len("not ok"):].strip()
+                   for z in ausgabe if z.strip().startswith("not ok")]
+    if not gescheitert:
+        return [("supabase/functions/_shared/preise.test.ts", 0, "PREISE",
+                 "Preispruefung fehlgeschlagen (Einzelheiten: "
+                 "node --test supabase/functions/_shared/preise.test.ts)")]
+    return [("supabase/functions/_shared/preise.test.ts", 0, "PREISE",
+             f"fehlgeschlagen: {name}") for name in gescheitert]
+
+
 def lade_bekannt():
     """Die geduldeten Altbefunde.
 
@@ -329,6 +453,20 @@ def main(argv):
         zeichen = "FEHLER" if neu else "ok"
         anhang = f", {geduldet} bekannt" if geduldet else ""
         print(f"{eintrag:<16} {zeichen:>7}  ({len(neu)} neu{anhang})")
+
+    # Die Stripe-Functions nur mitpruefen, wenn nicht ausdruecklich einzelne
+    # Seiten verlangt waren -- sonst dauert `pruefe.py booking.html` unnoetig.
+    if not argv[1:]:
+        befunde = [b for b in ts_syntax() + betragsquelle()
+                   if schluessel(b) not in bekannt]
+        alle += befunde
+        print(f"{'stripe-functions':<16} {'FEHLER' if befunde else 'ok':>7}"
+              f"  ({len(befunde)} neu)")
+
+        befunde = [b for b in preis_tests() if schluessel(b) not in bekannt]
+        alle += befunde
+        print(f"{'preise.test.ts':<16} {'FEHLER' if befunde else 'ok':>7}"
+              f"  ({len(befunde)} neu)")
 
     if alle:
         print()

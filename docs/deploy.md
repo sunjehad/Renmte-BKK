@@ -11,8 +11,19 @@ Was **nicht** feststellbar war, steht ausdrücklich als solches darin.
 |---|---|---|---|
 | Frontend (HTML) | **www.rentme-bkk.com**, Vercel | 27. Juli | **= `origin/main`**, automatisch |
 | Supabase-Projekt | `nghsyxwhczvwaorssgoh` | — | läuft |
-| Stripe-Functions | Supabase Edge Functions | 1. Juli | **unbekannt — und das ist das Risiko** |
+| Stripe-Functions | Supabase Edge Functions | 27. Juli | **nein — der T-1-Fix liegt nur lokal** |
 | Datenbankschema | Supabase | `*.sql`, Juni | vermutlich angewandt |
+
+> ## ⚠️ Die zwei Deploys sind getrennt
+>
+> `git push` spielt **nur das Frontend** aus. Die Edge-Functions hängen nicht
+> an Vercel und nicht an Git — sie gehen ausschließlich über
+> `supabase functions deploy` live.
+>
+> **Folge, Stand 2026-07-27:** Der Fix der Preislücke (T-1, R-010) ist
+> committet und gepusht, aber **nicht wirksam**. Bei Supabase läuft weiter die
+> Fassung vom 1. Juli, die den Betrag aus dem Browser übernimmt. Die Lücke ist
+> offen, bis jemand mit Supabase-Zugang deployed.
 
 ---
 
@@ -55,27 +66,18 @@ Das DNS zeigt faktisch auf Vercel, sonst kämen die Kopfzeilen nicht.
 
 ### Was jetzt live ist
 
-`origin/main` steht auf **`cf51d6c`** — das ist der öffentliche Stand.
-Gegenprobe am 2026-07-27: `booking.html` auf `www.rentme-bkk.com` enthält
-**keinen** Drohnen-Dienst (`selectService('drone'` → 0 Treffer). Der neue
-Dienst ist also **nicht** live.
+**Stand 2026-07-27, nach dem Push:** `origin/main` steht auf **`0e76917`**,
+lokal und entfernt gleichauf. Der Drohnen-Dienst und die Reparatur der
+DJI-Ausleihe sind live — an `www.rentme-bkk.com` gegengeprüft.
 
-**Drei Commits liegen lokal und nicht auf `origin`:**
+> ✅ **Die frühere 403-Sperre ist erledigt.** `monkeydrufyyy99` hatte auf
+> `sunjehad/Renmte-BKK` nur Leserechte; Sun hat eine Collaborator-Einladung
+> mit `write` geschickt, sie wurde angenommen, danach ging der Push durch
+> (`cf51d6c..0e76917`, fünf Commits). Einzelheiten: `todo.md` T-4.
 
-```
-7fea6bc feat: Drohnenflug als Dienst + zwei Fehlerbehebungen   ← ungepusht
-f462aa8 docs: Projektdoku, Pruefwerkzeug und Aufraeumen        ← ungepusht
-57ebc3c chore: .gitignore ergaenzen, Studio-Foto aufnehmen     ← ungepusht (seit 21.07.)
-cf51d6c  = origin/main = LIVE
-```
-
-Die Historie ist **linear**, kein Konflikt. Ein einziger `git push` würde alles
-auf einmal live schalten — **nur darf Andys Konto nicht pushen.**
-
-> 🔴 **Der Push scheitert mit 403.** `monkeydrufyyy99` hat auf
-> `sunjehad/Renmte-BKK` nur Leserechte (`push: false`, per GitHub-API
-> bestätigt). Solange das so ist, ist der Deploy blockiert — unabhängig von
-> allem anderen in diesem Dokument. Wege aus der Sache: `todo.md` T-4.
+Für das Frontend gilt damit weiterhin: **was auf `origin/main` liegt, ist
+live.** Für die Edge-Functions gilt das ausdrücklich **nicht** — siehe den
+Kasten ganz oben.
 
 ---
 
@@ -106,6 +108,67 @@ PromptPay geändert**:
 
 ---
 
+### Welche Fassung läuft? — erhoben am 2026-07-27 aus den CLI-Spuren
+
+Die Supabase-CLI schreibt Ablaufspuren nach `~/.supabase/traces/*.ndjson`.
+Sie hat niemand angelegt, um sie zu lesen — aber sie beantwortet die Frage
+fast vollständig, **ohne einen einzigen Zugriff auf Supabase.**
+
+Verzeichnete `functions deploy`-Läufe, alle Zeiten **UTC**:
+
+| Tag | erfolgreich | bemerkenswert |
+|---|---|---|
+| 2026-06-27 | 8 | erste Ausspielung |
+| 2026-06-28 | 1 | **15:21:24** |
+| 2026-06-30 | 0 | nur `functions list`, `secrets list` |
+| 2026-07-01 | 8 (+1 gescheitert) | letzter Lauf **08:27:57** |
+| danach | — | **keine Spurdatei mehr — die CLI lief seither nicht** |
+
+Die Zeiten passen auf die Sekunde zu den Dateiständen:
+
+```
+2026-06-28T15:21:23Z  ~/rentme/…/stripe-webhook/index.ts   (Datei geschrieben)
+2026-06-28T15:21:24Z  functions deploy  ok                  ← eine Sekunde später
+2026-07-01T08:10:20Z  <Repo>/…/stripe-webhook/index.ts     (Datei geschrieben)
+2026-07-01T08:10:26Z  functions deploy  ok                  ← sechs Sekunden später
+2026-07-01T08:27:__Z  supabase link  →  .temp im REPO angelegt
+2026-07-01T08:27:57Z  functions deploy  ok                  ← der letzte Lauf ueberhaupt
+```
+
+Das `.temp/linked-project.json`, das der `link`-Lauf um 08:27 UTC (15:27
+Bangkok) **im Repo** angelegt hat, zeigt auf `nghsyxwhczvwaorssgoh` —
+dasselbe Projekt. Der letzte Deploy erfolgte also aus **diesem** Verzeichnis,
+nach dem letzten Stand der Dateien.
+
+**Schlussfolgerung:** Es spricht alles dafür, dass bei Supabase die Fassung
+vom **1. Juli** läuft — also die neue, mit PaymentIntent und dem Webhook-Zweig
+`payment_intent.succeeded`. Die befürchtete Lage (alte Fassung vom 28. Juni
+live, PromptPay-Zahlungen bleiben auf `pending`) wird von den Spuren
+**nicht** gestützt: Die alte Fassung war live, ist aber am 1. Juli überschrieben
+worden.
+
+**Was daran unbewiesen bleibt — ausdrücklich:**
+
+- Die Spuren nennen **weder den Function-Namen noch das Projekt**. Dass alle
+  drei Functions erfasst waren, ist geschlossen, nicht gemessen (`functions
+  deploy` ohne Slug spielt alle aus, und der Befehl steht ohne Argument in der
+  Spur).
+- Sie sagen nichts über Deploys von **anderen Rechnern** oder aus dem
+  Dashboard.
+- Ob im Stripe-Dashboard `payment_intent.succeeded` als Ereignis abonniert
+  ist, steht auf einem anderen Blatt — fehlt es dort, nützt der neue
+  Webhook-Zweig nichts.
+
+**Damit bleibt T-2 formal offen**, aber das Risiko ist von „ungeklärt" auf
+„sehr wahrscheinlich in Ordnung" gefallen. Der Beweis kostet einen Befehl,
+sobald jemand angemeldet ist — siehe unten.
+
+**Und `~/rentme/` bleibt liegen** (T-5): Die dortige Webhook-Fassung *war*
+nachweislich einmal ausgespielt. Gelöscht wird nichts, solange der Beweis
+aussteht.
+
+---
+
 ## Das offene Risiko, in einem Satz
 
 > **Läuft bei Supabase noch die Fassung vom 28. Juni, während das Frontend vom
@@ -123,18 +186,24 @@ Geld und Kundenvertrauen kostet.**
 
 ---
 
-## Die richtige Reihenfolge
+## Was als Nächstes ansteht
 
-1. **Erst Supabase prüfen** (unten), ob die aktuelle `stripe-webhook`-Fassung
-   deployed ist.
-2. **Dann `git push`** — das ist der Frontend-Deploy.
+**Der Frontend-Push ist durch. Offen ist der Functions-Deploy — und der ist
+jetzt der dringende Teil**, weil der T-1-Fix (R-010) sonst wirkungslos
+bleibt und der Betrag weiter aus dem Browser kommt.
 
-Andersherum ginge ein Frontend live, dessen PromptPay-Weg auf einen Webhook
-trifft, der ihn nicht kennt.
+1. **Prüfen**, was heute läuft (Befehle unten) — bestätigt oder widerlegt den
+   Trace-Befund oben.
+2. **Ausspielen:** `supabase functions deploy` für alle drei Functions.
+3. **Gegenprobe:** eine Buchung anlegen und den Betrag im Request auf `1`
+   setzen. Erwartet wird **HTTP 422** mit `code` aus `preise.ts`, **kein**
+   Stripe-Vorgang.
 
 ## Wie Andy es prüft
 
-Von einer Sitzung aus, die bei Supabase angemeldet ist:
+Von einer Sitzung aus, die bei Supabase angemeldet ist (`supabase login` —
+auf diesem Rechner liegt **kein** Zugangs-Token, `~/.supabase/access-token`
+existiert nicht):
 
 ```bash
 # 1. Welche Functions gibt es, und wann wurden sie zuletzt deployed?
@@ -144,6 +213,9 @@ supabase functions list --project-ref nghsyxwhczvwaorssgoh
 supabase functions download stripe-webhook --project-ref nghsyxwhczvwaorssgoh
 diff supabase/functions/stripe-webhook/index.ts <heruntergeladene Fassung>
 ```
+
+**Steht bei `functions list` ein Datum vom 1. Juli, ist der Trace-Befund
+bestätigt und T-2 erledigt.**
 
 Ohne CLI reicht auch das Supabase-Dashboard → *Edge Functions* → jeweils
 *Deployments*: **Steht dort ein Datum vom 1. Juli oder später, ist alles gut.
