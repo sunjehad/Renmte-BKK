@@ -27,12 +27,16 @@ Eintragen in `booking.html`, Konstante `DRONE_PACKAGES` bzw.
 
 ## Dringend — betrifft Geld
 
-### [~] T-1 — Der Zahlbetrag kam aus dem Browser — **behoben, nicht ausgespielt**
+### [x] T-1 — Der Zahlbetrag kam aus dem Browser — **behoben und live**
 
-**Code fertig am 2026-07-27** (`supabase/functions/_shared/preise.ts`, R-010).
-🔴 **Wirksam wird er erst mit `supabase functions deploy` — bis dahin ist die
-Lücke live offen.** Der Push hat nur das Frontend ausgespielt; Edge-Functions
-hängen nicht an Git (`docs/deploy.md`).
+**Ausgespielt am 2026-07-27 um 05:59:40 UTC** (`stripe-checkout` v6→v7,
+`stripe-paymentlink` v9→v10). Der Fix liegt in
+`supabase/functions/_shared/preise.ts` (R-010).
+
+> 🔴 **Die Lücke wurde ausgenutzt.** Andy hat das am 2026-07-27 bestätigt.
+> Wie viel, wie oft und wer betroffen ist, ist **offen** — die Auswertung hat
+> eine eigene Akte: **`docs/vorfall-2026-07-27-preisluecke.md`**. Sie enthält
+> vier fertige SQL-Abfragen und sagt, was dafür gebraucht wird.
 
 **Der ursprünglich hier vorgeschlagene Fix wäre wirkungslos gewesen.** Er
 lautete: `select total_price from bookings where id = bookingId`. Aber
@@ -57,33 +61,37 @@ als 800 IDR (~1,70 THB) eingezogen werden können.
 Stripe nicht aus der Preisquelle stammt. Beides an künstlich eingebauten
 Fehlern nachgewiesen.
 
-### [~] T-2 — Deploy-Wahrheit der Functions — **sehr wahrscheinlich geklärt**
+### [x] T-2 — Deploy-Wahrheit der Functions — **bewiesen am 2026-07-27**
 
-**2026-07-27 aus den Spuren der Supabase-CLI erhoben**
-(`~/.supabase/traces/*.ndjson`), ohne einen einzigen Zugriff auf Supabase:
+`supabase functions list`, abgefragt **vor** dem Deploy: alle drei `ACTIVE`,
+`stripe-checkout` v6, `stripe-paymentlink` v9, `stripe-webhook` v10, zuletzt
+ausgespielt am **1. Juli** — `stripe-paymentlink` um 08:28:00 UTC, drei
+Sekunden nach dem letzten Deploy-Eintrag in den CLI-Spuren.
 
-Der letzte `functions deploy` überhaupt lief am **2026-07-01 um 08:27:57 UTC**
-— sechs Sekunden nach dem letzten Schreiben von `stripe-webhook/index.ts` im
-Repo und unmittelbar nach einem `link` auf Projekt `nghsyxwhczvwaorssgoh` aus
-**diesem** Verzeichnis. Danach wurde die CLI nie wieder benutzt. Die alte
-Fassung vom 28. Juni war einmal live, ist aber überschrieben worden.
+**Es lief die Fassung vom 1. Juli.** Die befürchtete Lage (per PromptPay
+bezahlte Buchungen bleiben auf `pending`) hat es **nie gegeben**.
 
-**Also läuft mit hoher Wahrscheinlichkeit die Fassung vom 1. Juli** — die
-befürchtete Lage (PromptPay-Zahlungen bleiben auf `pending`) wird nicht
-gestützt. Beweiskette und die Grenzen dieser Aussage: `docs/deploy.md`.
+**Offen bleibt nur noch:** ob Stripe `payment_intent.succeeded` abonniert hat.
+Fehlt das Abonnement, wird der Webhook-Zweig nie ausgelöst — unabhängig davon,
+wie aktuell die Function ist.
 
-**Offen bleibt der Beweis** (ein Befehl, sobald jemand angemeldet ist) und die
-Frage, ob Stripe `payment_intent.succeeded` überhaupt abonniert hat.
+### [ ] T-11 — Vorfall: die Preislücke **wurde** ausgenutzt
 
-### [ ] T-11 — Wurde die Preislücke je ausgenutzt?
+**Andy hat es am 2026-07-27 bestätigt.** Einzelheiten liegen nicht vor.
 
-Neu am 2026-07-27. Solange T-1 offen war, konnte jeder den Betrag frei setzen.
-Ob das geschehen ist, sagt nur das **Stripe-Dashboard**: unter *Payments* nach
-ungewöhnlich kleinen Beträgen sehen — alles unter **฿200** ist verdächtig, denn
-das ist der niedrigste reguläre Preis (eine Stunde Studio).
+Eigene Akte mit belegtem Zeitfenster (2026-06-27 bis 2026-07-27 05:59:40 UTC),
+den drei Angriffswegen und vier fertigen SQL-Abfragen:
+**`docs/vorfall-2026-07-27-preisluecke.md`**.
 
-Braucht Andys Stripe-Zugang; von hier aus nicht feststellbar, und ein Aufruf
-dorthin ist gesperrt.
+**Der Punkt, an dem die Auswertung sonst schiefgeht:** Der wahrscheinlichste
+Angriffsweg — `amount` erst im Aufruf an die Function verbiegen — ist in der
+**Datenbank unsichtbar**. Der Buchungssatz sieht in jeder Spalte richtig aus;
+was tatsächlich eingezogen wurde, steht nur bei Stripe. **Ohne den
+Stripe-Export findet man nichts und hält den Vorfall für erledigt.**
+
+**Dringend zuerst:** Abfrage 3 der Akte — unterbezahlte Buchungen mit Status
+`paid` sperren **bis heute** Termine für echte Gäste. Das ist laufender
+Schaden, unabhängig vom entgangenen Geld.
 
 ---
 
@@ -119,16 +127,18 @@ ausgespielt.
 Sun bleibt Eigentümer, Andy Manager. **Gepusht wird weiterhin nur auf Ansage** —
 in ein fremdes Repo schiebt man nicht nebenbei (R-005).
 
-### [ ] T-5 — Kann `~/rentme/` weg? — **noch nicht**
+### [~] T-5 — Kann `~/rentme/` weg? — **fachlich ja, Freigabe fehlt**
 
-Dort liegen zwei ältere Kopien der Stripe-Functions. **Neu am 2026-07-27:** Die
-dortige Webhook-Fassung *war* nachweislich einmal ausgespielt (Deploy am
-28.06. um 15:21:24 UTC, eine Sekunde nach dem Schreiben der Datei). Der
-Trace-Befund unter T-2 legt nahe, dass sie längst überschrieben ist — aber
-solange der Beweis aussteht, wird dort **nichts gelöscht**.
+Dort liegen zwei ältere Kopien der Stripe-Functions. Der einzige Grund, sie
+aufzuheben, war die Frage, ob eine davon deployed ist. **Mit dem Beweis unter
+T-2 ist das geklärt: `~/rentme/` ist nicht die Quelle des Deployten.** Der
+Grund ist entfallen.
 
-Sobald T-2 bewiesen ist, entfällt der Grund. Löschen dann nur mit Andys
-ausdrücklicher Freigabe.
+**Trotzdem wird dort nichts gelöscht ohne Andys ausdrückliche Ansage.** Zu
+bedenken: Die dortige Fassung vom 28. Juni ist die einzige Kopie des
+**PaymentLink-Verfahrens**, das vor dem 1. Juli lief — und sie hat für die
+Vorfallsauswertung noch einen Wert, weil sich an ihr belegen lässt, dass die
+Lücke von Anfang an bestand.
 
 ---
 
@@ -225,4 +235,10 @@ eine erzeugte JSON-Datei) statt sie im HTML zu wiederholen.
 - [x] **2026-07-27** — **Serverseitige Preisquelle** gebaut (T-1, R-010):
       `supabase/functions/_shared/preise.ts`, fail-closed, 21 Tests. Dazu die
       Wache `BETRAG` in `tools/pruefe.py`, die Rückfälle auf den Browser-Wert
-      und eine Währung aus dem Body meldet. **Wartet auf den Functions-Deploy.**
+      und eine Währung aus dem Body meldet.
+- [x] **2026-07-27** — **Functions ausgespielt**, 05:59:40 UTC:
+      `stripe-checkout` v6→v7, `stripe-paymentlink` v9→v10. Mit `--use-api`,
+      weil der Docker-Weg über zehn Minuten am Image-Download hing.
+- [x] **2026-07-27** — **T-2 bewiesen** über `supabase functions list` vor dem
+      Deploy. Es lief die Fassung vom 1. Juli — die befürchtete
+      `pending`-Lage hat es nie gegeben.

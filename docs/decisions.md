@@ -226,3 +226,39 @@ werden (R-007).
 Kauf genommen: Die Alternative wäre, die Preise erst zusammenzuführen und die
 Lücke so lange offen zu lassen. `preise.test.ts` nagelt jede Zahl fest, damit
 ein Auseinanderlaufen auffällt.
+
+**Nachtrag 2026-07-27, nach dem Ausspielen:** Der Fix ist seit **05:59:40 UTC**
+live (`stripe-checkout` v7, `stripe-paymentlink` v10). **Andy hat bestätigt,
+dass die Lücke ausgenutzt wurde** — die Auswertung führt eine eigene Akte,
+`docs/vorfall-2026-07-27-preisluecke.md`. Damit war R-010 keine Vorsorge,
+sondern eine Reparatur.
+
+---
+
+## R-011 — Functions werden mit `--use-api` und einzeln ausgespielt
+
+**2026-07-27**, aus dem Deploy des T-1-Fixes gelernt.
+
+**`--use-api`.** Ohne das Flag baut die CLI in einem lokalen Docker-Container
+und lädt dafür `edge-runtime:v1.73.13`. Das hing über zehn Minuten am
+Image-Download. Mit `--use-api` baut Supabase serverseitig — Sekunden. Für
+dieses Projekt gibt es keine lokale Entwicklungsumgebung, die der Container
+abbilden müsste; der Docker-Weg kauft hier nichts.
+
+**Einzeln, nicht alle.** `supabase functions deploy` ohne Slug spielt jede
+Function aus, auch die, an denen niemand gearbeitet hat. Bei Zahlungswegen ist
+das unnötiges Risiko. Deshalb:
+
+```bash
+supabase functions deploy stripe-checkout stripe-paymentlink --use-api
+```
+
+**Und vorher `functions list`.** Der Deploy überschreibt Version und Datum —
+also genau die Auskunft darüber, was vorher lief. Am 2026-07-27 hat nur diese
+Reihenfolge den Beweis für T-2 gerettet. Wer zuerst ausspielt, hat ihn
+vernichtet.
+
+**Nebenbei richtiggestellt:** Der Zugangs-Token der CLI 2.108 liegt im
+**macOS-Schlüsselbund**, nicht unter `~/.supabase/access-token`. Aus dem Fehlen
+der Datei wurde am selben Tag fälschlich geschlossen, es gebe keinen Login.
+Die richtige Probe ist `supabase projects list`.

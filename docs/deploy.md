@@ -9,9 +9,9 @@ Was **nicht** feststellbar war, steht ausdrücklich als solches darin.
 
 | Teil | Wo | Stand im Repo | Deployed? |
 |---|---|---|---|
-| Frontend (HTML) | **www.rentme-bkk.com**, Vercel | 27. Juli | **= `origin/main`**, automatisch |
+| Frontend (HTML) | **www.rentme-bkk.com**, Vercel | `d5dca2e` | **= `origin/main`**, automatisch |
 | Supabase-Projekt | `nghsyxwhczvwaorssgoh` | — | läuft |
-| Stripe-Functions | Supabase Edge Functions | 27. Juli | **nein — der T-1-Fix liegt nur lokal** |
+| Stripe-Functions | Supabase Edge Functions | 27. Juli | **ja — seit 2026-07-27 05:59:40 UTC** |
 | Datenbankschema | Supabase | `*.sql`, Juni | vermutlich angewandt |
 
 > ## ⚠️ Die zwei Deploys sind getrennt
@@ -20,10 +20,14 @@ Was **nicht** feststellbar war, steht ausdrücklich als solches darin.
 > an Vercel und nicht an Git — sie gehen ausschließlich über
 > `supabase functions deploy` live.
 >
-> **Folge, Stand 2026-07-27:** Der Fix der Preislücke (T-1, R-010) ist
-> committet und gepusht, aber **nicht wirksam**. Bei Supabase läuft weiter die
-> Fassung vom 1. Juli, die den Betrag aus dem Browser übernimmt. Die Lücke ist
-> offen, bis jemand mit Supabase-Zugang deployed.
+> Wer nur pusht, hat an den Zahlungswegen **nichts** geändert. Das ist keine
+> Feinheit: Genau dieser Irrtum hätte den T-1-Fix wirkungslos im Repo liegen
+> lassen.
+
+**Stand 2026-07-27:** Beides ist ausgespielt. Der Fix der Preislücke (T-1,
+R-010) ist seit **05:59:40 UTC** live — Einzelheiten unter „Functions
+ausspielen". Der **Vorfall** dazu (die Lücke wurde ausgenutzt) hat eine eigene
+Akte: **`docs/vorfall-2026-07-27-preisluecke.md`**.
 
 ---
 
@@ -66,9 +70,11 @@ Das DNS zeigt faktisch auf Vercel, sonst kämen die Kopfzeilen nicht.
 
 ### Was jetzt live ist
 
-**Stand 2026-07-27, nach dem Push:** `origin/main` steht auf **`0e76917`**,
-lokal und entfernt gleichauf. Der Drohnen-Dienst und die Reparatur der
-DJI-Ausleihe sind live — an `www.rentme-bkk.com` gegengeprüft.
+**Stand 2026-07-27, nach dem zweiten Push:** `origin/main` steht auf
+**`d5dca2e`**, lokal und entfernt gleichauf. Drohnen-Dienst und die Reparatur
+der DJI-Ausleihe sind live (gegengeprüft an `www.rentme-bkk.com`); `d5dca2e`
+selbst ändert am Frontend nichts — er betrifft die Functions, die Prüfwerkzeuge
+und die Doku.
 
 > ✅ **Die frühere 403-Sperre ist erledigt.** `monkeydrufyyy99` hatte auf
 > `sunjehad/Renmte-BKK` nur Leserechte; Sun hat eine Collaborator-Einladung
@@ -108,7 +114,34 @@ PromptPay geändert**:
 
 ---
 
-### Welche Fassung läuft? — erhoben am 2026-07-27 aus den CLI-Spuren
+### ✅ Welche Fassung lief? — **bewiesen am 2026-07-27**
+
+`supabase functions list --project-ref nghsyxwhczvwaorssgoh`, abgefragt
+**vor** dem Deploy (denn der Deploy überschreibt genau diese Auskunft):
+
+| Function | Status | Version | zuletzt ausgespielt |
+|---|---|---|---|
+| `stripe-checkout` | ACTIVE | **v6** | 2026-07-01 |
+| `stripe-paymentlink` | ACTIVE | **v9** | 2026-07-01, **08:28:00 UTC** |
+| `stripe-webhook` | ACTIVE | **v10** | 2026-07-01 |
+
+**Damit ist T-2 beantwortet:** Es lief die Fassung vom **1. Juli** — die neue,
+mit PaymentIntent und dem Webhook-Zweig `payment_intent.succeeded`. Die
+befürchtete Lage (alte Fassung live → per PromptPay bezahlte Buchungen bleiben
+auf `pending`) hat es **nie gegeben**.
+
+**Zwei Folgerungen:**
+
+1. **`~/rentme/` ist nachweislich nicht die Quelle des Deployten** (T-5,
+   EA-R-10). Der einzige Grund, den Ordner aufzuheben, ist damit entfallen.
+2. Die Auswertung der CLI-Spuren unten war **richtig** — `stripe-paymentlink`
+   wurde um 08:28:00 UTC ausgespielt, **drei Sekunden** nach dem letzten
+   Deploy-Eintrag in der Spur (08:27:57). Der Abschnitt bleibt hier stehen,
+   weil er zeigt, wie weit man ohne Zugang kommt.
+
+---
+
+### Wie es ohne Zugang erschlossen wurde — die CLI-Spuren
 
 Die Supabase-CLI schreibt Ablaufspuren nach `~/.supabase/traces/*.ndjson`.
 Sie hat niemand angelegt, um sie zu lesen — aber sie beantwortet die Frage
@@ -140,70 +173,58 @@ Bangkok) **im Repo** angelegt hat, zeigt auf `nghsyxwhczvwaorssgoh` —
 dasselbe Projekt. Der letzte Deploy erfolgte also aus **diesem** Verzeichnis,
 nach dem letzten Stand der Dateien.
 
-**Schlussfolgerung:** Es spricht alles dafür, dass bei Supabase die Fassung
-vom **1. Juli** läuft — also die neue, mit PaymentIntent und dem Webhook-Zweig
-`payment_intent.succeeded`. Die befürchtete Lage (alte Fassung vom 28. Juni
-live, PromptPay-Zahlungen bleiben auf `pending`) wird von den Spuren
-**nicht** gestützt: Die alte Fassung war live, ist aber am 1. Juli überschrieben
-worden.
-
-**Was daran unbewiesen bleibt — ausdrücklich:**
-
-- Die Spuren nennen **weder den Function-Namen noch das Projekt**. Dass alle
-  drei Functions erfasst waren, ist geschlossen, nicht gemessen (`functions
-  deploy` ohne Slug spielt alle aus, und der Befehl steht ohne Argument in der
-  Spur).
-- Sie sagen nichts über Deploys von **anderen Rechnern** oder aus dem
-  Dashboard.
-- Ob im Stripe-Dashboard `payment_intent.succeeded` als Ereignis abonniert
-  ist, steht auf einem anderen Blatt — fehlt es dort, nützt der neue
-  Webhook-Zweig nichts.
-
-**Damit bleibt T-2 formal offen**, aber das Risiko ist von „ungeklärt" auf
-„sehr wahrscheinlich in Ordnung" gefallen. Der Beweis kostet einen Befehl,
-sobald jemand angemeldet ist — siehe unten.
-
-**Und `~/rentme/` bleibt liegen** (T-5): Die dortige Webhook-Fassung *war*
-nachweislich einmal ausgespielt. Gelöscht wird nichts, solange der Beweis
-aussteht.
+**Was die Spuren allein nicht sagen konnten:** Sie nennen weder Function-Namen
+noch Projekt, und sie erfassen keine Deploys von anderen Rechnern oder aus dem
+Dashboard. Deshalb war das Ergebnis „sehr wahrscheinlich", nicht „bewiesen" —
+den Beweis lieferte erst `functions list` (oben).
 
 ---
 
-## Das offene Risiko, in einem Satz
+## Functions ausspielen — der Weg, der funktioniert
 
-> **Läuft bei Supabase noch die Fassung vom 28. Juni, während das Frontend vom
-> 6. Juli davor sitzt, dann bezahlt ein Kunde per PromptPay-QR — und die Buchung
-> bleibt auf `pending` stehen.**
+**Ausgespielt am 2026-07-27 um 05:59:40 UTC:**
 
-Denn: Das neue Frontend ruft `stripe-paymentlink` in der Erwartung eines
-PaymentIntent auf. Selbst wenn das gutgeht, fehlt der alten `stripe-webhook`
-der Zweig `payment_intent.succeeded`. Das Geld ist eingegangen, die Buchung ist
-nicht bestätigt, `cancel_competing_pending_bookings` läuft nicht — der Zeitraum
-bleibt für andere buchbar.
+```bash
+supabase functions deploy stripe-checkout stripe-paymentlink --use-api
+```
 
-**Das ist der einzige Punkt in diesem Projekt, an dem Unklarheit unmittelbar
-Geld und Kundenvertrauen kostet.**
+| Function | vorher | nachher |
+|---|---|---|
+| `stripe-checkout` | v6 | **v7** |
+| `stripe-paymentlink` | v9 | **v10** |
+| `stripe-webhook` | v10 | v10 (unverändert — nicht geändert, nicht ausgespielt) |
+
+> ### `--use-api` benutzen, nicht den Docker-Weg
+>
+> Ohne das Flag baut die CLI in einem lokalen Container und lädt dafür
+> `edge-runtime:v1.73.13` herunter. Das hing am 2026-07-27 **über zehn
+> Minuten** am Image-Download. Mit `--use-api` baut Supabase serverseitig —
+> in Sekunden durch.
+>
+> Für dieses Projekt ist das unstrittig: Es gibt keine lokale
+> Entwicklungsumgebung, die der Container abbilden müsste.
+
+**Nur die geänderten Functions nennen.** `supabase functions deploy` ohne Slug
+spielt alle aus — auch die, an denen niemand gearbeitet hat. Bei Zahlungswegen
+ist das unnötiges Risiko.
+
+### Gegenprobe nach dem Deploy
+
+Eine Buchung anlegen und im Request an `stripe-checkout` den Betrag auf `1`
+setzen. Erwartet wird **HTTP 422** mit einem `code` aus `preise.ts` und
+**kein** Stripe-Vorgang. Steht dort eine Stripe-URL, ist etwas schiefgegangen.
 
 ---
 
-## Was als Nächstes ansteht
+## Anmelden — der Token liegt im Schlüsselbund
 
-**Der Frontend-Push ist durch. Offen ist der Functions-Deploy — und der ist
-jetzt der dringende Teil**, weil der T-1-Fix (R-010) sonst wirkungslos
-bleibt und der Betrag weiter aus dem Browser kommt.
-
-1. **Prüfen**, was heute läuft (Befehle unten) — bestätigt oder widerlegt den
-   Trace-Befund oben.
-2. **Ausspielen:** `supabase functions deploy` für alle drei Functions.
-3. **Gegenprobe:** eine Buchung anlegen und den Betrag im Request auf `1`
-   setzen. Erwartet wird **HTTP 422** mit `code` aus `preise.ts`, **kein**
-   Stripe-Vorgang.
-
-## Wie Andy es prüft
-
-Von einer Sitzung aus, die bei Supabase angemeldet ist (`supabase login` —
-auf diesem Rechner liegt **kein** Zugangs-Token, `~/.supabase/access-token`
-existiert nicht):
+> ⚠️ **Nicht auf `~/.supabase/access-token` prüfen.** Die CLI 2.108 legt den
+> Zugangs-Token im **macOS-Schlüsselbund** ab, nicht als Datei. Am 2026-07-27
+> hat genau diese Fehlannahme zu dem falschen Schluss geführt, es liege gar
+> kein Login vor — tatsächlich lief `supabase projects list` anstandslos.
+>
+> **Richtige Probe:** `supabase projects list`. Antwortet der Befehl, ist die
+> Anmeldung da. Sonst `supabase login`.
 
 ```bash
 # 1. Welche Functions gibt es, und wann wurden sie zuletzt deployed?
@@ -214,26 +235,24 @@ supabase functions download stripe-webhook --project-ref nghsyxwhczvwaorssgoh
 diff supabase/functions/stripe-webhook/index.ts <heruntergeladene Fassung>
 ```
 
-**Steht bei `functions list` ein Datum vom 1. Juli, ist der Trace-Befund
-bestätigt und T-2 erledigt.**
-
 Ohne CLI reicht auch das Supabase-Dashboard → *Edge Functions* → jeweils
-*Deployments*: **Steht dort ein Datum vom 1. Juli oder später, ist alles gut.
-Steht dort der 28. Juni oder früher, muss neu deployed werden.**
+*Deployments*.
+
+> **Merksatz für das nächste Mal:** `functions list` **vor** dem Deploy
+> abfragen. Der Deploy überschreibt Version und Datum — also genau die
+> Auskunft, die man hinterher gern hätte. Am 2026-07-27 ist das gutgegangen,
+> weil vorher gefragt wurde.
 
 Ein zweiter, unabhängiger Weg über das **Stripe-Dashboard**: unter
 *Developers → Webhooks* nachsehen, ob `payment_intent.succeeded` als
 abonniertes Ereignis eingetragen ist. Fehlt es dort, wird der neue Zweig nie
-ausgelöst — selbst wenn die Function aktuell ist.
-
-**Erst danach** lässt sich sagen, ob deployed werden muss. Ein Deploy ohne
-diese Prüfung wäre geraten.
+ausgelöst — selbst wenn die Function aktuell ist. **Das ist noch offen.**
 
 ---
 
-## Was danach in dieses Dokument gehört
+## Was hier noch fehlt
 
-- Die tatsächliche Live-Adresse und der Weg, wie das Frontend dorthin kommt.
-- Das Deploy-Datum der drei Functions.
-- Die Antwort auf die Frage, ob `~/rentme/` gelöscht werden kann — sie ist
-  heute nur deshalb aufzuheben, weil unklar ist, ob dort etwas Deploytes liegt.
+- Ob Stripe `payment_intent.succeeded` überhaupt abonniert hat.
+- Wo die Domain registriert ist und wem das Vercel-Konto gehört.
+- Der Datenbank-Zugang, mit dem sich der Vorfall auswerten lässt —
+  `docs/vorfall-2026-07-27-preisluecke.md`.
