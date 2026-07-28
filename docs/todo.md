@@ -257,18 +257,42 @@ Schuld ist damit nicht getilgt, aber sie ist jetzt **geprüft**: 22 Tests in
       Deploy. Es lief die Fassung vom 1. Juli — die befürchtete
       `pending`-Lage hat es nie gegeben.
 
-### [ ] T-13 — Die Aktionsfristen laufen nicht von selbst ab
+### [ ] T-13 — Was am 31. August mit den Aktionen geschieht
 
-Angelegt 2026-07-28. Auf Startseite und in der Buchungsstrecke steht jetzt
-**„promo until 31 Aug"** bzw. **„50% off until 31 August"** — beim
-Studio-Stundensatz und beim Schnittdienst.
+Angelegt 2026-07-28, ergänzt 2026-07-29 um Andys Absicht.
 
-**Das ist reiner Text.** Am 1. September stehen dieselben Preise da, nur mit
-abgelaufener Frist daneben. Es gibt keine Automatik, die auf die Normalpreise
-umschaltet, und es soll auch keine geben, solange die Serverpreise von Hand
-gepflegt werden — eine Automatik, die den Preis unbeaufsichtigt verdoppelt,
-waere gefaehrlicher als ein veraltetes Datum.
+**Andys Plan:** *„Nach dem 31. werden wir die Preise einfach etwas anheben und
+dafür kein Rabatt mehr. Die sind ja nur da, um Kunden zu locken — aber das
+gehen wir dann an, je nachdem wie viele Kunden wir haben."*
 
-**Vor dem 31. August entscheiden:** verlaengern (Datum aendern) oder
-auslaufen lassen (Normalpreise eintragen in `index.html`, `booking.html`
-**und** `_shared/preise.ts`, dann neu ausspielen).
+Also **kein** Zurückschalten auf die durchgestrichenen Normalpreise, sondern
+ein neues, moderat höheres Preisniveau ohne Aktionskennzeichnung. Die heutigen
+Normalpreise sind Anker fürs Marketing, kein Ziel.
+
+**Betroffen sind drei Aktionen:**
+| Aktion | steht auf |
+|---|---|
+| Studio | ฿200/Std. „promo until 31 Aug" |
+| We Cut Your Podcast | 50 % — erste Stunde ฿1.500/฿2.000/฿3.000 |
+| Record Your Podcast | jede weitere Stunde zum halben Satz |
+
+**Wichtig: nichts davon schaltet von selbst um.** Am 1. September stehen
+dieselben Preise da, nur mit abgelaufenem Datum daneben. Eine Automatik, die
+den Preis unbeaufsichtigt verdoppelt, wäre gefährlicher als ein veraltetes
+Datum — deshalb bewusst nicht gebaut.
+
+**Die Entscheidungsgrundlage steht auf der Verwaltungsseite.** Der Wächter
+zeigt „Buchungen der letzten sieben Tage" — genau die Zahl, an der Andy die
+Anhebung festmachen will. Ende August dort nachsehen.
+
+**Wenn es soweit ist, an drei Stellen ändern** (`docs/decisions.md`, T-8):
+`index.html`, `booking.html` und `supabase/functions/_shared/preise.ts` —
+danach **beides** ausspielen, Push und `supabase functions deploy`. Die
+durchgestrichenen Preise und alle „until 31 Aug"-Hinweise fallen dann weg,
+in **allen fünf Sprachen**.
+
+⚠️ **Beim Neusetzen den Abstand zum reinen Schnitt nachrechnen.** Mit der
+jetzigen Staffel (Variante A) unterbietet Filmen + Schnitt ab etwa 1¾ Stunden
+den reinen Schnitt. Das war eine bewusste Entscheidung, ergibt sich aber nicht
+von selbst — wer die Sätze anhebt, verschiebt diesen Punkt.
+
