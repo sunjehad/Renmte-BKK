@@ -660,3 +660,42 @@ sichtbar gescrollt.
 wurden nur die Preiskarten umgehängt, nicht die vier Dienstkarten darüber —
 dort stand die Studiomiete weiterhin auf 01. Reihenfolge jetzt: Podcast ·
 Studio · Geräte · Drohne, mit nachgezogenen Nummern 01–04.
+
+---
+
+## 2026-07-29 — Wächter auf der Verwaltungsseite
+
+Die Seite lud bis dahin **genau einmal**, beim Anmelden. Wer sie morgens
+öffnete und offen ließ, sah abends den Stand von morgens.
+
+**Bewusst nicht gebaut: eine zweite Benachrichtigung.** Über EmailJS kommt zu
+jeder Buchung bereits eine Mail an `rentmebkk@gmail.com` (nachgeprüft: 13 seit
+dem 21. Juni). Ein Telegram-Bot wäre eine zweite Leitung für dieselbe
+Nachricht. Was fehlte, ist der umgekehrte Fall — **niemand bemerkt Stille.**
+
+Die Leiste beantwortet drei Fragen:
+
+1. **Letzte Buchung vor wie vielen Tagen?** Grün bis 2, gelb ab 3, rot ab 7.
+   Ohne jede Buchung: rot mit „nie".
+2. **Wie viele in den letzten sieben Tagen?**
+3. **Wie viele Zahlungen wurden abgebrochen?** `pending_payment`, älter als
+   eine Stunde. Der aussagekräftigste Wert überhaupt: Diese Leute haben die
+   Strecke bis zur Kasse durchlaufen und sind dort abgesprungen. Steigt die
+   Zahl, während in derselben Woche **nichts** bezahlt wurde, ist der Zahlweg
+   vermutlich defekt — die Leiste wird dann rot, bevor sich jemand beschwert.
+   Die erste Stunde zählt nicht mit; so lange darf jemand überlegen, und die
+   Reservierungsfrist läuft ohnehin.
+
+**Selbstaktualisierung alle 60 Sekunden**, aber nur wenn der Tab sichtbar ist —
+ein Hintergrundtab muss die Datenbank nicht jede Minute fragen. Beim
+Zurückwechseln wird sofort geladen statt bis zu einer Minute zu warten.
+
+Neue Buchungen werden **grün markiert**, mit Zähler im Browser-Tab („(2) Admin
+— …"). Ein Klick in die Tabelle hakt sie ab. **Aktive Filter überleben die
+Aktualisierung** — wer gerade sucht, soll seine Trefferliste nicht jede Minute
+verlieren.
+
+**Geprüft:** `tools/waechter_test.mjs` deckt neun Schwellenfälle ab. Der Test
+**löst die Funktionen aus `admin.html` heraus**, statt sie abzuschreiben — wer
+die Schwellen ändert, ändert damit auch das Geprüfte. Eine Kopie wäre
+stillschweigend auseinandergelaufen.

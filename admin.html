@@ -80,6 +80,25 @@ textarea{resize:vertical;min-height:80px}
 .tab-panel.active{display:block;animation:fadeUp .3s var(--ease) both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
+/* ── WAECHTER ── */
+.watch{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.watch-item{background:var(--bg2);border:1px solid var(--border);border-left:4px solid var(--border);border-radius:12px;padding:14px 18px;transition:border-color .3s}
+.watch-item.ok{border-left-color:var(--green)}
+.watch-item.warn{border-left-color:var(--yellow)}
+.watch-item.alarm{border-left-color:var(--red)}
+.watch-k{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.watch-v{font-family:var(--font-head);font-size:1.8rem;line-height:1.1;margin-top:4px}
+.watch-item.warn .watch-v{color:var(--yellow)}
+.watch-item.alarm .watch-v{color:var(--red)}
+.watch-s{font-size:11px;color:var(--muted);margin-top:2px}
+.watch-item.neu{animation:watchPulse 1.2s var(--ease) 2}
+@keyframes watchPulse{0%,100%{background:var(--bg2)}50%{background:rgba(74,222,128,.12)}}
+tr.neu td{background:rgba(74,222,128,.08)!important;position:relative}
+tr.neu td:first-child::before{content:'NEU';position:absolute;left:2px;top:50%;transform:translateY(-50%);font-size:8px;font-weight:800;color:var(--green);letter-spacing:.08em}
+@media(max-width:900px){.watch{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.watch{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.watch-item.neu{animation:none}}
+
 /* ── STAT CARDS ── */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
 .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 22px;position:relative;overflow:hidden}
@@ -284,6 +303,32 @@ textarea{resize:vertical;min-height:80px}
 
     <!-- OVERVIEW -->
     <div class="tab-panel active" id="tab-overview">
+      <!-- Waechter: meldet nicht, dass etwas passiert ist, sondern dass
+           **nichts** passiert. Die Buchungsmail kommt ohnehin; was niemand
+           bemerkt, ist Stille und eine Strecke, die stillschweigend klemmt. -->
+      <div class="watch" id="watch">
+        <div class="watch-item" id="watch-last">
+          <div class="watch-k">Letzte Buchung</div>
+          <div class="watch-v">—</div>
+          <div class="watch-s"></div>
+        </div>
+        <div class="watch-item" id="watch-week">
+          <div class="watch-k">Letzte 7 Tage</div>
+          <div class="watch-v">—</div>
+          <div class="watch-s">neue Buchungen</div>
+        </div>
+        <div class="watch-item" id="watch-abandoned">
+          <div class="watch-k">Zahlung abgebrochen</div>
+          <div class="watch-v">—</div>
+          <div class="watch-s">bis zur Kasse, dann weg</div>
+        </div>
+        <div class="watch-item" id="watch-live">
+          <div class="watch-k">Aktualisiert</div>
+          <div class="watch-v" id="watch-clock">—</div>
+          <div class="watch-s">alle 60 Sekunden</div>
+        </div>
+      </div>
+
       <div class="stats-grid">
         <div class="stat-card blue">
           <div class="stat-label">Total Bookings</div>
@@ -706,6 +751,30 @@ function init() {
   const today = now.toISOString().split('T')[0];
   ['a-date','a-equip-start','a-equip-end'].forEach(id => document.getElementById(id).min = today);
   loadAllBookings();
+  starteSelbstaktualisierung();
+}
+
+// ── SELBSTAKTUALISIERUNG ────────────────────────────────────────────────
+// Die Seite lud bis 2026-07-29 **genau einmal**, beim Anmelden. Wer sie
+// morgens oeffnete und offen liess, sah abends den Stand von morgens.
+let watchTimer = null;
+
+function starteSelbstaktualisierung() {
+  if (watchTimer) return;
+  watchTimer = setInterval(() => {
+    // Nur laden, wenn jemand hinschaut -- ein Tab im Hintergrund muss die
+    // Datenbank nicht jede Minute fragen.
+    if (document.visibilityState === 'visible') loadAllBookings();
+  }, 60000);
+
+  // Beim Zurueckwechseln sofort nachladen, statt bis zu einer Minute zu warten.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') loadAllBookings();
+  });
+
+  // Ein Klick in die Tabelle heisst: gesehen.
+  const tabelle = document.getElementById('bookings-tbody');
+  if (tabelle) tabelle.addEventListener('click', neueQuittieren);
 }
 
 // ── DATA ──
@@ -728,11 +797,107 @@ async function loadAllBookings() {
     }
   });
 
-  filteredBookings = [...allBookings];
+  // Filter ueberleben die Selbstaktualisierung: Wer gerade sucht, soll seine
+  // Trefferliste nicht alle 60 Sekunden verlieren.
+  const filterAktiv = ['filter-search','filter-service','filter-status',
+                       'filter-payment-method','filter-date-from','filter-date-to']
+    .some(id => (document.getElementById(id) || {}).value);
+
+  neueSeitDemLetztenBlick();
+
+  if (filterAktiv) filterBookings();
+  else { filteredBookings = [...allBookings]; renderTable(); }
+
   renderStats();
+  renderWatch();
   renderTodayList();
-  renderTable();
   renderCalendar();
+}
+
+// ── WAECHTER ────────────────────────────────────────────────────────────
+//
+// Die Buchungsmail meldet zuverlaessig, **dass** etwas passiert ist. Was
+// niemand bemerkt, ist der umgekehrte Fall: tagelang nichts, und niemand kann
+// sagen, ob das an fehlender Nachfrage liegt oder daran, dass die Strecke seit
+// dem letzten Deploy klemmt. Genau dafuer ist diese Leiste da.
+
+/** Buchungen, die beim letzten Blick noch nicht da waren. */
+let bekannteIds = null;
+let neueIds = new Set();
+
+function neueSeitDemLetztenBlick() {
+  const jetzt = new Set(allBookings.map(b => b.id));
+  if (bekannteIds === null) { bekannteIds = jetzt; return; }   // erster Lauf
+  const frisch = [...jetzt].filter(id => !bekannteIds.has(id));
+  frisch.forEach(id => neueIds.add(id));
+  bekannteIds = jetzt;
+  if (frisch.length) meldeNeue();
+}
+
+function meldeNeue() {
+  document.title = '(' + neueIds.size + ') ' + document.title.replace(/^\(\d+\)\s*/, '');
+  const kasten = document.getElementById('watch-week');
+  if (kasten) { kasten.classList.remove('neu'); void kasten.offsetWidth; kasten.classList.add('neu'); }
+}
+
+/** Als gesehen abhaken -- beim Klick irgendwo in die Tabelle. */
+function neueQuittieren() {
+  if (!neueIds.size) return;
+  neueIds.clear();
+  document.title = document.title.replace(/^\(\d+\)\s*/, '');
+  document.querySelectorAll('tr.neu').forEach(tr => tr.classList.remove('neu'));
+}
+
+function tageSeit(iso) {
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+}
+
+function renderWatch() {
+  const setze = (id, wert, unter, stufe) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.querySelector('.watch-v').textContent = wert;
+    if (unter !== null) el.querySelector('.watch-s').textContent = unter;
+    el.classList.remove('ok', 'warn', 'alarm');
+    if (stufe) el.classList.add(stufe);
+  };
+
+  // 1. Wie lange kam nichts? Der wichtigste Wert der Leiste.
+  const echte = allBookings.filter(b => b.created_at);
+  if (!echte.length) {
+    setze('watch-last', 'nie', 'noch keine Buchung', 'alarm');
+  } else {
+    const juengste = echte.reduce((a, b) => a.created_at > b.created_at ? a : b);
+    const tage = tageSeit(juengste.created_at);
+    setze('watch-last',
+      tage === 0 ? 'heute' : tage === 1 ? 'gestern' : 'vor ' + tage + ' Tagen',
+      new Date(juengste.created_at).toLocaleDateString('de-DE') + ' · ' + (juengste.booking_ref || ''),
+      tage >= 7 ? 'alarm' : tage >= 3 ? 'warn' : 'ok');
+  }
+
+  // 2. Volumen der letzten sieben Tage.
+  const grenze = new Date(Date.now() - 7 * 86400000).toISOString();
+  const woche = echte.filter(b => b.created_at >= grenze).length;
+  setze('watch-week', String(woche), null, woche > 0 ? 'ok' : 'warn');
+
+  // 3. Abgebrochene Zahlungen. Der aussagekraeftigste Wert ueberhaupt: Diese
+  //    Leute haben die Strecke bis zur Kasse durchlaufen und sind dort
+  //    abgesprungen. Steigt die Zahl, waehrend nichts bezahlt wird, ist der
+  //    Zahlweg defekt -- und zwar bevor sich jemand beschwert.
+  //    Die erste Stunde zaehlt nicht mit: so lange darf jemand einfach
+  //    ueberlegen, und die Reservierungsfrist laeuft ohnehin.
+  const eineStunde = new Date(Date.now() - 3600000).toISOString();
+  const offen = allBookings.filter(b =>
+    b.booking_status === 'pending_payment' &&
+    b.created_at && b.created_at < eineStunde
+  ).length;
+  const bezahltWoche = echte.filter(b => b.created_at >= grenze &&
+    (b.booking_status === 'paid' || b.payment_status === 'paid')).length;
+  setze('watch-abandoned', String(offen), null,
+    offen === 0 ? 'ok' : (bezahltWoche === 0 && offen >= 3) ? 'alarm' : 'warn');
+
+  const uhr = document.getElementById('watch-clock');
+  if (uhr) uhr.textContent = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 }
 
 // ── STATS ──
@@ -800,7 +965,7 @@ function renderTable() {
     const status = b.status || 'confirmed';
     const bookingStatus = b.booking_status || 'confirmed';
     const paymentMethod = b.payment_method || '—';
-    return `<tr>
+    return `<tr class="${neueIds.has(b.id) ? 'neu' : ''}">
       <td><div class="booking-ref-cell">${b.booking_ref||'—'}</div></td>
       <td><div>${date}</div><div class="table-meta">${time}</div></td>
       <td><div class="table-name">${b.guest_name||'—'}</div><div class="table-meta">${b.guest_email||''}</div><div class="table-meta">${b.guest_phone||''}</div></td>
