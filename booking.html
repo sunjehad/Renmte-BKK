@@ -364,7 +364,7 @@ input[type=date]{color-scheme:dark}
         <div class="svc-icon">🚀</div>
         <div class="svc-title">FULL PODCAST SERVICE</div>
         <div class="svc-desc">Five episodes, done end to end — filming, editing, reels and intros. We plan the run with you.</div>
-        <div class="svc-price" style="color:var(--blue-l)">฿19,000 <span style="color:var(--muted);font-weight:400">/ 5 episodes</span></div>
+        <div class="svc-price" style="color:var(--blue-l)">Price on request <span style="color:var(--muted);font-weight:400">· 5 episodes</span></div>
         <div style="margin-top:8px;display:inline-flex;align-items:center;gap:6px;background:rgba(37,99,235,.12);border:1px solid var(--border-blue);border-radius:100px;padding:3px 12px">
           <span style="font-size:11px;font-weight:700;color:var(--blue-l);letter-spacing:.08em">ON REQUEST ONLY</span>
         </div>
@@ -563,8 +563,7 @@ input[type=date]{color-scheme:dark}
         <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">
           <div style="font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.08em">5 EPISODES, DONE END TO END</div>
           <div style="text-align:right">
-            <div style="font-family:var(--font-head);font-size:1.6rem;color:var(--fg)">฿19,000</div>
-            <div style="font-size:11px;font-weight:700;color:var(--blue-l);letter-spacing:.08em">ON REQUEST ONLY</div>
+            <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--blue-l)">ON REQUEST</div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:12px;color:var(--muted);margin-top:12px">
@@ -1377,7 +1376,7 @@ function istAnfrageDienst() { return ANFRAGE_DIENSTE.includes(state.service); }
 // Thema und Zeitplan stehen in keiner eigenen Spalte -- ohne sie waere die
 // Anfrage in der Verwaltung nicht zu beantworten.
 function fullPodcastNotes() {
-  const teile = ['Full Podcast Service — 5 episodes (guide price THB 19,000)'];
+  const teile = ['Full Podcast Service — 5 episodes (price on request)'];
   if (state.fpTopic)  teile.push('About: ' + state.fpTopic);
   if (state.fpTiming) teile.push('Timing: ' + state.fpTiming);
   if (state.notes)    teile.push('Notes: ' + state.notes);
@@ -2233,7 +2232,7 @@ function buildReview() {
       <div class="review-row"><span class="review-label">About</span><span class="review-value">${state.fpTopic}</span></div>
       ${state.fpTiming ? `<div class="review-row"><span class="review-label">Timing</span><span class="review-value">${state.fpTiming}</span></div>` : ''}
       <div class="review-row"><span class="review-label">Included</span><span class="review-value">Filming, editing, intro, reels</span></div>
-      <div class="review-total"><span class="label">Guide price</span><span class="amount" style="color:var(--blue-l)">฿19,000 — on request only</span></div>`;
+      <div class="review-total"><span class="label">Price</span><span class="amount" style="color:var(--blue-l)">On request</span></div>`;
   } else if (state.service === 'reel') {
     detailRows = `
       <div class="review-row"><span class="review-label">Service</span><span class="review-value">Reel Editing</span></div>
