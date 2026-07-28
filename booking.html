@@ -357,7 +357,7 @@ input[type=date]{color-scheme:dark}
         <div class="svc-icon">🎙️</div>
         <div class="svc-title">RECORD YOUR PODCAST</div>
         <div class="svc-desc">Studio, mics, lighting, sofa &amp; decor — we film it, edit it, and cut you an intro clip. Choose your camera package and add a videographer.</div>
-        <div class="svc-price" style="color:var(--blue-l)">From ฿900/hr <span style="color:var(--muted);font-weight:400">+ ฿1,500 setup · editing &amp; intro included</span></div>
+        <div class="svc-price" style="color:var(--blue-l)">From ฿900 first hour <span style="color:var(--accent);font-weight:700">HALF PRICE AFTER</span> <span style="color:var(--muted);font-weight:400">+ ฿1,500 setup · editing &amp; intro included</span></div>
       </div>
       <div class="svc-card" onclick="selectService('full_podcast',this)">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -589,6 +589,11 @@ input[type=date]{color-scheme:dark}
 
     <!-- PODCAST STUDIO SETUP DETAILS -->
     <div id="details-podcast-setup" style="display:none">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.4);border-radius:6px;padding:6px 14px;margin-bottom:16px">
+        <span style="font-family:var(--font-head);font-size:1rem;color:var(--accent);letter-spacing:.04em">LAUNCH OFFER</span>
+        <span style="font-size:12px;color:var(--fg);font-weight:700">Every further hour at half price</span>
+        <span style="font-size:11px;color:var(--muted)">&mdash; until 31 August</span>
+      </div>
       <div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.3);border-radius:10px;padding:16px 20px;margin-bottom:20px">
         <div style="font-size:12px;font-weight:700;color:var(--blue-l);letter-spacing:.08em;margin-bottom:6px">WHAT'S INCLUDED</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:12px;color:var(--muted)">
@@ -600,8 +605,13 @@ input[type=date]{color-scheme:dark}
       </div>
       <div style="background:rgba(230,57,70,.06);border:1px solid rgba(230,57,70,.25);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
         <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">Studio rate</div>
-          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)"><span id="ps-hourly-rate">฿900</span> <span style="font-size:.7rem;color:var(--muted)">/hour</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">First hour</div>
+          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)"><span id="ps-hourly-rate">฿900</span></div>
+        </div>
+        <div style="width:1px;height:36px;background:var(--border)"></div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">Every further hour</div>
+          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--accent)"><span id="ps-half-rate">฿450</span></div>
         </div>
         <div style="width:1px;height:36px;background:var(--border)"></div>
         <div>
@@ -612,6 +622,7 @@ input[type=date]{color-scheme:dark}
         <div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:2px" id="ps-example-label">Total (e.g. 2h)</div>
           <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)" id="ps-example-total">฿3,300</div>
+          <div style="font-size:12px;color:var(--muted);text-decoration:line-through" id="ps-example-was"></div>
         </div>
       </div>
 
@@ -1409,7 +1420,7 @@ function setupStep2() {
   } else if (state.service === 'podcast_setup') {
     document.getElementById('details-podcast-setup').style.display = '';
     document.getElementById('s2-heading').textContent = 'RECORD YOUR PODCAST';
-    document.getElementById('s2-sub').textContent = 'Choose your camera setup, date, time, and duration. From ฿900/hr + ฿1,500 one-time setup fee — editing and intro clip included.';
+    document.getElementById('s2-sub').textContent = 'Choose your camera setup, date, time, and duration. Every hour after the first is half price — editing and intro clip included.';
     // Reset camera selection UI
     state.cameraCount = 1;
     state.withVideographer = false;
@@ -1735,6 +1746,24 @@ function updateStudioPrice() {
 /** Einmalige Einrichtungsgebuehr. Zugleich die online eingezogene Anzahlung. */
 const PODCAST_AUFBAU = 1500;
 
+// Launch-Aktion ab 2026-07-28: **jede weitere Stunde zum halben Satz** --
+// dieselbe Staffel wie beim Schnittdienst. Die Stundensaetze selbst bleiben
+// unveraendert; die Aktion besteht allein aus dieser Staffel.
+//
+// Eine Stunde kostet also unveraendert 3.800 THB (3 Kameras, Videograf), zwei
+// Stunden 4.950 statt 6.100.
+const PS_FAKTOR = stunden => 1 + 0.5 * (stunden - 1);
+
+/** Was die Session kostet -- mit Aktion. */
+function psGesamt(stunden) {
+  return Math.round(psHourlyRate() * PS_FAKTOR(stunden)) + PODCAST_AUFBAU + state.reelAddonPrice;
+}
+
+/** Was sie ohne die Aktion kostete: jede Stunde zum vollen Satz. */
+function psGesamtNormal(stunden) {
+  return psHourlyRate() * stunden + PODCAST_AUFBAU + state.reelAddonPrice;
+}
+
 function psHourlyRate() {
   // Preisstufe vom 2026-07-28, zweite Anpassung.
   //
@@ -1758,19 +1787,25 @@ function psHourlyRate() {
 function updatePodcastSetupStrip() {
   const hourlyRate = psHourlyRate();
   const rateEl = document.getElementById('ps-hourly-rate');
-  if (rateEl) rateEl.textContent = '฿' + hourlyRate;
+  if (rateEl) rateEl.textContent = '฿' + hourlyRate.toLocaleString();
+  const halbEl = document.getElementById('ps-half-rate');
+  if (halbEl) halbEl.textContent = '฿' + (hourlyRate / 2).toLocaleString();
+
+  const stunden = state.duration || 2;
   const exLabel = document.getElementById('ps-example-label');
   const exTotal = document.getElementById('ps-example-total');
-  if (state.duration) {
-    // real configured total
-    const total = hourlyRate * state.duration + PODCAST_AUFBAU + state.reelAddonPrice;
-    if (exLabel) exLabel.textContent = 'Total (' + state.duration + 'h)';
-    if (exTotal) exTotal.textContent = '฿' + total.toLocaleString();
-  } else {
-    // 2h example
-    const example = hourlyRate * 2 + PODCAST_AUFBAU + state.reelAddonPrice;
-    if (exLabel) exLabel.textContent = 'Total (e.g. 2h)';
-    if (exTotal) exTotal.textContent = '฿' + example.toLocaleString();
+  const exWas   = document.getElementById('ps-example-was');
+
+  if (exLabel) exLabel.textContent = state.duration ? 'Total (' + stunden + 'h)' : 'Total (e.g. 2h)';
+  if (exTotal) exTotal.textContent = '฿' + psGesamt(stunden).toLocaleString();
+  // Der durchgestrichene Preis ist, was ohne die Aktion faellig waere. Bei
+  // einer Stunde gibt es keinen Unterschied -- dann bleibt er weg, statt eine
+  // Ersparnis zu behaupten, die es nicht gibt.
+  if (exWas) {
+    const normal = psGesamtNormal(stunden);
+    const zeigen = normal > psGesamt(stunden);
+    exWas.textContent = zeigen ? '฿' + normal.toLocaleString() : '';
+    exWas.style.display = zeigen ? '' : 'none';
   }
 }
 
@@ -1778,17 +1813,25 @@ function updatePodcastSetupPrice() {
   updatePodcastSetupStrip();
   updateDock();
   if (!state.startTime || !state.duration) return;
-  const cameraRates = { 1: 400, 2: 600, 3: 900 };
-  const hourlyRate = 200 + cameraRates[state.cameraCount] + (state.withVideographer ? 300 : 0);
-  const total = hourlyRate * state.duration + 1000 + state.reelAddonPrice;
+  // Diese Funktion hatte bis 2026-07-28 eine **zweite, eigene Preistabelle**
+  // mit den alten Saetzen (400/600/900, Aufbau 1.000). Folge: Die Leiste oben
+  // zeigte den neuen Preis, der gespeicherte Gesamtpreis war der alte -- zwei
+  // verschiedene Summen auf derselben Seite. Es gibt jetzt nur noch
+  // `psHourlyRate()` und `psGesamt()`.
+  const hourlyRate = psHourlyRate();
+  const total = psGesamt(state.duration);
   state.totalPrice = total;
   const startH = parseInt(state.startTime);
   state.endTime = String(startH + state.duration).padStart(2,'0') + ':00';
   document.getElementById('ps-hours').textContent = state.duration;
   document.getElementById('ps-total-price').textContent = '฿' + total.toLocaleString();
-  const vgText = state.withVideographer ? ' + ฿300/hr videographer' : '';
   const reelText = state.reelAddonPrice ? ' + ฿' + state.reelAddonPrice.toLocaleString() + ' (' + state.reelAddonCount + ' reel' + (state.reelAddonCount > 1 ? 's' : '') + ')' : '';
-  document.getElementById('ps-price-breakdown').innerHTML = '฿' + hourlyRate + '/hr × <span id=ps-hours>' + state.duration + '</span>h + ฿' + PODCAST_AUFBAU.toLocaleString() + ' setup' + vgText + reelText;
+  const weitere = state.duration - 1;
+  const stundenText = weitere > 0
+    ? '฿' + hourlyRate.toLocaleString() + ' first hour + ฿' + (hourlyRate / 2).toLocaleString() + ' × ' + weitere + 'h'
+    : '฿' + hourlyRate.toLocaleString() + ' first hour';
+  document.getElementById('ps-price-breakdown').innerHTML =
+    stundenText + ' + ฿' + PODCAST_AUFBAU.toLocaleString() + ' setup' + reelText;
   document.getElementById('ps-price-strip').style.display = '';
 }
 
@@ -2177,7 +2220,8 @@ function buildReview() {
       <div class="review-row"><span class="review-label">Date</span><span class="review-value">${formatDate(state.date)}</span></div>
       <div class="review-row"><span class="review-label">Time</span><span class="review-value">${state.startTime} – ${state.endTime}</span></div>
       <div class="review-row"><span class="review-label">Duration</span><span class="review-value">${state.duration} hour${state.duration > 1 ? 's' : ''}</span></div>
-      <div class="review-row"><span class="review-label">Rate</span><span class="review-value">฿${satz.toLocaleString()}/hr + ฿${PODCAST_AUFBAU.toLocaleString()} setup</span></div>
+      <div class="review-row"><span class="review-label">Rate</span><span class="review-value">฿${satz.toLocaleString()} first hour${state.duration > 1 ? ` + ฿${(satz / 2).toLocaleString()} × ${state.duration - 1}h` : ''} + ฿${PODCAST_AUFBAU.toLocaleString()} setup</span></div>
+      ${psGesamtNormal(state.duration) > state.totalPrice ? `<div class="review-row"><span class="review-label">Normal price</span><span class="review-value"><span style="text-decoration:line-through;color:var(--muted)">฿${psGesamtNormal(state.duration).toLocaleString()}</span> — launch offer</span></div>` : ''}
       <div class="review-row"><span class="review-label">Included</span><span class="review-value">Full edit + intro clip</span></div>
       ${state.reelAddonCount ? `<div class="review-row"><span class="review-label">Reels</span><span class="review-value">${state.reelAddonCount} reel(s)</span></div>` : ''}
       <div class="review-row"><span class="review-label">Session total</span><span class="review-value">฿${state.totalPrice.toLocaleString()}</span></div>

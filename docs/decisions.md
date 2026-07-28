@@ -587,3 +587,50 @@ dran als ohne — jede stehengebliebene Zahl wird irgendwann zur Unwahrheit.
 
 Gegengeprüft: Im gesamten Markup steht keine Zahl mehr, die nicht aus der
 Preisliste oder der Adresse kommt.
+
+---
+
+## 2026-07-28 — Aufnahme: Stundenstaffel als Launch-Aktion (Variante A)
+
+Andys Entscheidung nach dem Vergleich zweier Varianten. **Die Stundensätze
+bleiben unverändert** (฿900 / ฿1.300 / ฿1.900, Videograf +฿400, Einrichtung
+฿1.500) — die Aktion besteht allein aus der Staffel:
+
+> **Erste Stunde voll, jede weitere zum halben Satz** — dieselbe Logik wie beim
+> Schnittdienst.
+
+| 3 Kameras + Videograf | 1 Std. | 2 Std. | 4 Std. | 8 Std. |
+|---|---|---|---|---|
+| **Aktion** | ฿3.800 | ฿4.950 | ฿7.250 | ฿11.850 |
+| ohne Aktion | ฿3.800 | ฿6.100 | ฿10.700 | ฿19.900 |
+
+Bei einer Stunde gibt es keinen Unterschied — der durchgestrichene Preis wird
+dann **ausgeblendet** statt eine Ersparnis zu behaupten, die es nicht gibt.
+
+**Das Paket geht ohne Änderung auf:** 5 × ฿3.800 = ฿19.000, und Intro mit
+Motion Graphics sowie die Highlight-Clips kommen obendrauf. Beides steht jetzt
+in den Merkmalen der Paketkarte.
+
+**Bewusst in Kauf genommen:** Ab etwa 1¾ Stunden unterbietet Filmen + Schnitt
+den reinen Schnitt (bei 8 Std. und 3 Kameras um ฿3.450). Die Alternative
+(Variante B: Stundensätze auf Schnittniveau) hätte das mathematisch
+ausgeschlossen, aber lange Sessions verteuert. Andy hat sich für die
+günstigeren langen Sessions entschieden. **Wer die Preise später ändert, muss
+diesen Abstand von Hand nachrechnen — er ergibt sich nicht mehr von selbst.**
+
+### Zwei Fehler, die dabei ans Licht kamen
+
+🔴 **`updatePodcastSetupPrice()` hatte eine zweite, eigene Preistabelle** —
+`{1:400, 2:600, 3:900}`, Grundpreis 200, Videograf 300, Aufbau **1.000**. Also
+die Sätze von **vor** der Preiserhöhung. Folge: Die Leiste oben zeigte den neuen
+Preis, der gespeicherte `state.totalPrice` war der alte. **Zwei verschiedene
+Summen auf derselben Seite, seit heute Nachmittag live.** Genau die Schuld aus
+T-8, nur innerhalb einer einzigen Datei. Es gibt jetzt nur noch
+`psHourlyRate()` und `psGesamt()`.
+
+🔴 **18 Übersetzungsmarker hingen am schließenden `</svg>`-Tag** —
+`</svg data-i18n="p3_f3">`. Attribute an schließenden Tags verwirft jeder
+Browser, die Merkmalslisten aller Preiskarten wurden also **nie übersetzt**.
+Die frühere Prüfung hat es nicht gefunden, weil sie den Rohtext nach
+`data-i18n="…"` durchsucht hat statt den geparsten Baum. Die neue Prüfung liest
+den Baum und meldet Marker, die an einem `<svg>` hängen.
