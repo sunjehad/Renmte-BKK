@@ -392,37 +392,13 @@ section[id]{scroll-margin-top:84px}
   </div>
 
   <div class="services-grid">
-
-    <!-- SERVICE 1: Photo Studio -->
-    <div class="service-card reveal">
-      <div class="service-num">01</div>
-      <div class="service-images">
-        <img src="images/photo-studio.jpg" alt="Photo studio colorful backdrop Bangkok">
-        <img src="images/studio-photoshoot.jpg" alt="Fashion photoshoot in action at Rent Me Bangkok studio" style="filter:brightness(.42) contrast(1.05);object-position:center center;">
-      </div>
-      <div class="service-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-      </div>
-      <div class="service-for" data-i18n="s1_for">For photographers, brands & content creators</div>
-      <h3 class="service-title" data-i18n="s1_title">PHOTO STUDIO RENTAL</h3>
-      <p class="service-desc" data-i18n="s1_desc">A fully equipped photography studio in central Bangkok you can rent by the hour or day. Comes with studio strobe lights, softboxes, seamless backdrop in multiple colors, and a lounge setup for lifestyle shoots. No hidden fees — just show up and shoot.</p>
-      <div class="service-benefit">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        <span data-i18n="s1_benefit">Professional lighting + backdrops ready in minutes — no setup stress.</span>
-      </div>
-      <a href="booking.html" class="service-cta">
-        <span data-i18n="s1_cta">Book the Studio</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </a>
-    </div>
-
-    <!-- SERVICE 2: Podcast FEATURED -->
+    <!-- SERVICE 1: Podcast FEATURED -->
     <div class="service-card featured-pod reveal reveal-delay-1">
       <div class="pod-featured-badge">
         <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#2563eb"/></svg>
         Most Booked Service
       </div>
-      <div class="service-num" style="color:rgba(37,99,235,.06)">02</div>
+      <div class="service-num" style="color:rgba(37,99,235,.06)">01</div>
       <div class="service-images">
         <img src="images/podcast-on-air.jpg" alt="ON AIR podcast studio Bangkok" style="filter:brightness(.8)">
         <img src="images/podcast-setup.jpg" alt="Podcast studio setup" style="filter:brightness(.8)">
@@ -446,10 +422,34 @@ section[id]{scroll-margin-top:84px}
           <div style="display:flex;justify-content:space-between;gap:12px"><span style="color:var(--fg-muted)">3 cameras / hour</span><span><span style="text-decoration:line-through;color:var(--fg-muted)">฿6,000</span> <strong style="color:var(--fg)">฿3,000</strong></span></div>
           <div style="color:var(--fg-muted);margin-top:4px">Additional hours: 50% of the promo rate &middot; delivered in 16:9 or 9:16</div>
         </div>
+        <a href="booking.html?service=podcast" style="display:inline-block;margin-top:12px;font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.04em" data-i18n="s2_cut_cta">Send us your footage &rarr;</a>
       </div>
-      <a href="booking.html?service=podcast" class="service-cta" style="border-color:rgba(37,99,235,.4);color:#60a5fa;margin-top:16px">
+      <a href="booking.html?service=podcast_setup" class="service-cta" style="border-color:rgba(37,99,235,.4);color:#60a5fa;margin-top:16px">
         <span data-i18n="s2_cta">Start Your Podcast</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
+    <!-- SERVICE 2: Photo Studio -->
+    <div class="service-card reveal">
+      <div class="service-num">02</div>
+      <div class="service-images">
+        <img src="images/photo-studio.jpg" alt="Photo studio colorful backdrop Bangkok">
+        <img src="images/studio-photoshoot.jpg" alt="Fashion photoshoot in action at Rent Me Bangkok studio" style="filter:brightness(.42) contrast(1.05);object-position:center center;">
+      </div>
+      <div class="service-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </div>
+      <div class="service-for" data-i18n="s1_for">For photographers, brands & content creators</div>
+      <h3 class="service-title" data-i18n="s1_title">PHOTO STUDIO RENTAL</h3>
+      <p class="service-desc" data-i18n="s1_desc">A fully equipped photography studio in central Bangkok you can rent by the hour or day. Comes with studio strobe lights, softboxes, seamless backdrop in multiple colors, and a lounge setup for lifestyle shoots. No hidden fees — just show up and shoot.</p>
+      <div class="service-benefit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span data-i18n="s1_benefit">Professional lighting + backdrops ready in minutes — no setup stress.</span>
+      </div>
+      <a href="booking.html?service=studio_rental" class="service-cta">
+        <span data-i18n="s1_cta">Book the Studio</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
 
@@ -469,7 +469,7 @@ section[id]{scroll-margin-top:84px}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         <span data-i18n="s3_benefit">Cinematic aerial shots at a fraction of the ownership cost.</span>
       </div>
-      <a href="booking.html" class="service-cta">
+      <a href="booking.html?service=equipment" class="service-cta">
         <span data-i18n="s3_cta">Rent a DJI</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
@@ -505,6 +505,7 @@ section[id]{scroll-margin-top:84px}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
+
   </div>
 </section>
 
@@ -1051,6 +1052,7 @@ const translations = {
     p1_desc:"Full studio access with lights, backdrops, and lounge setup. Hourly booking, no minimum.",
     p1_f1:"Studio strobes + softboxes", p1_f2:"Multiple backdrop colors", p1_f3:"Lounge props & furniture", p1_f4:"Ring light + accessories",
     p1_btn:"Book Studio",
+    s2_cut_cta:"Send us your footage &rarr;",
     p3_f5:"Studio, mics, decor &amp; reels included",
     p2_half:"EVERY FURTHER HOUR HALF PRICE &middot; UNTIL 31 AUG",
     mb_title:"Studio from ฿200 / hour",
@@ -1145,6 +1147,7 @@ const translations = {
     p1_service:"Studio photo", p1_title:"Location studio", p1_period:" / heure — promo jusqu'au 31 août",
     p1_desc:"Accès complet au studio avec éclairages, fonds et décor lounge. Réservation à l'heure, sans minimum.",
     p1_f1:"Stroboscopes + boîtes à lumière", p1_f2:"Plusieurs couleurs de fond", p1_f3:"Accessoires lounge", p1_f4:"Ring light + accessoires", p1_btn:"Réserver le studio",
+    s2_cut_cta:"Envoyez vos rushes &rarr;",
     p3_f5:"Studio, micros, décor &amp; reels inclus",
     p2_half:"CHAQUE HEURE SUIVANTE À MOITIÉ PRIX &middot; JUSQU’AU 31 AOÛT",
     mb_title:"Studio dès ฿200 / heure",
@@ -1239,6 +1242,7 @@ const translations = {
     p1_service:"Fotostudio", p1_title:"Studio-Verleih", p1_period:" / Stunde — Aktion bis 31. Aug.",
     p1_desc:"Voller Studio-Zugang mit Lichtern, Hintergründen und Lounge-Setup. Stundenbuching, kein Minimum.",
     p1_f1:"Studioblitze + Softboxen", p1_f2:"Mehrere Hintergrundfarben", p1_f3:"Lounge-Requisiten", p1_f4:"Ringlicht + Zubehör", p1_btn:"Studio buchen",
+    s2_cut_cta:"Material schicken &rarr;",
     p3_f5:"Studio, Mikrofone, Deko &amp; Reels inklusive",
     p2_half:"JEDE WEITERE STUNDE ZUM HALBEN PREIS &middot; BIS 31. AUG.",
     mb_title:"Studio ab ฿200 / Stunde",
@@ -1333,6 +1337,7 @@ const translations = {
     p1_service:"Фотостудия", p1_title:"Аренда студии", p1_period:" / час — акция до 31 авг.",
     p1_desc:"Полный доступ к студии со светом, фонами и лаунж-декором. Почасовое бронирование без минимума.",
     p1_f1:"Студийные вспышки + софтбоксы", p1_f2:"Несколько цветов фона", p1_f3:"Лаундж-реквизит и мебель", p1_f4:"Кольцевой свет + аксессуары", p1_btn:"Забронировать студию",
+    s2_cut_cta:"Прислать материал &rarr;",
     p3_f5:"Студия, микрофоны, декор и reels включены",
     p2_half:"КАЖДЫЙ СЛЕДУЮЩИЙ ЧАС ВДВОЕ ДЕШЕВЛЕ &middot; ДО 31 АВГ.",
     mb_title:"Студия от ฿200 / час",
@@ -1427,6 +1432,7 @@ const translations = {
     p1_service:"สตูดิโอถ่ายภาพ", p1_title:"เช่าสตูดิโอ", p1_period:" / ชั่วโมง — โปรถึง 31 ส.ค.",
     p1_desc:"เข้าใช้สตูดิโอเต็มรูปแบบพร้อมไฟ ฉากหลัง และเซตอัปเลานจ์ จองรายชั่วโมง ไม่มีขั้นต่ำ",
     p1_f1:"ไฟสตูดิโอ + ซอฟต์บ็อกซ์", p1_f2:"ฉากหลังหลายสี", p1_f3:"อุปกรณ์และเฟอร์นิเจอร์เลานจ์", p1_f4:"ไฟวงกลม + อุปกรณ์เสริม", p1_btn:"จองสตูดิโอ",
+    s2_cut_cta:"ส่งไฟล์ให้เรา &rarr;",
     p3_f5:"รวมสตูดิโอ ไมค์ ของตกแต่ง และรีล",
     p2_half:"ชั่วโมงถัดไปลดครึ่งราคา &middot; ถึง 31 ส.ค.",
     mb_title:"สตูดิโอเริ่ม ฿200 / ชม.",

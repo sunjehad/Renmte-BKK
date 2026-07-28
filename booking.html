@@ -2554,12 +2554,18 @@ function updateQRCountdown(seconds) {
 (function preselectServiceFromUrl() {
   const gewuenscht = new URLSearchParams(location.search).get('service');
   if (!gewuenscht) return;
-  // Nur Dienste, fuer die es auch eine Karte gibt -- sonst stuende der Nutzer
-  // in einem Schritt 2 ohne Inhalt.
+  // Nur Dienste, fuer die es auch eine Karte gibt.
   const karte = document.querySelector(`.svc-card[onclick*="'${gewuenscht}'"]`);
   if (!karte) return;
+
   selectService(gewuenscht, karte);
-  goStep(2);
+
+  // **Kein Sprung nach Schritt 2.** Bis 2026-07-29 rief diese Stelle
+  // `goStep(2)` auf: Wer auf der Startseite einen Dienst anklickte, landete
+  // mitten in den Details, ohne je gesehen zu haben, was es sonst gibt -- und
+  // ohne zu merken, dass oben schon etwas ausgewaehlt war. Jetzt bleibt der
+  // Kunde auf Schritt 1, die Karte ist markiert und wird sichtbar gescrollt.
+  karte.scrollIntoView({ behavior: 'smooth', block: 'center' });
 })();
 
 (async function handleStripeRedirect() {

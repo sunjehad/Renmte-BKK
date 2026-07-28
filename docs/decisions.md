@@ -634,3 +634,29 @@ Browser, die Merkmalslisten aller Preiskarten wurden also **nie übersetzt**.
 Die frühere Prüfung hat es nicht gefunden, weil sie den Rohtext nach
 `data-i18n="…"` durchsucht hat statt den geparsten Baum. Die neue Prüfung liest
 den Baum und meldet Marker, die an einem `<svg>` hängen.
+
+---
+
+## 2026-07-29 — Zwei Fehler aus Andys Durchsicht
+
+**1. Der Podcast-Knopf führte in den falschen Dienst.** Die Dienstkarte
+„PODCAST FILMING & EDITING" verlinkte auf `booking.html?service=podcast` —
+und `podcast` heißt seit dem 2026-07-28 **Cut Only**. Wer auf der Startseite
+„Start Your Podcast" drückte, landete also im Schnittdienst statt in der
+Aufnahme. Der Link zeigt jetzt auf `podcast_setup`; der Cut-Only-Kasten in
+derselben Karte hat seinen eigenen Knopf bekommen („Send us your footage").
+
+Die Karten für Studio und Geräte verlinkten auf `booking.html` **ohne**
+Parameter — sie sind jetzt ebenfalls vorbelegt.
+
+**2. Der Deep-Link sprang direkt nach Schritt 2.** `preselectServiceFromUrl()`
+rief `goStep(2)` auf. Wer von der Startseite kam, stand mitten in den Details,
+ohne je gesehen zu haben, was es sonst gibt — und ohne zu merken, dass oben
+schon etwas ausgewählt war. Die Vorauswahl bleibt, der Sprung entfällt: Der
+Kunde landet auf **Schritt 1**, die passende Karte ist markiert und wird
+sichtbar gescrollt.
+
+**3. Der Dienste-Abschnitt war nicht mit umsortiert.** Beim Tausch am Vortag
+wurden nur die Preiskarten umgehängt, nicht die vier Dienstkarten darüber —
+dort stand die Studiomiete weiterhin auf 01. Reihenfolge jetzt: Podcast ·
+Studio · Geräte · Drohne, mit nachgezogenen Nummern 01–04.
