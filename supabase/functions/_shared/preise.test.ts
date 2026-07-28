@@ -91,8 +91,9 @@ test("manipulierter Betrag: gefaelschte rental_days bleiben wirkungslos", () => 
     equipment_end_date: "2026-08-05",   // 5 Tage
     rental_days: 1,                      // Luege
   } as Parameters<typeof ermittleBetrag>[0];
-  // 500 x 5 Tage, ab 3 Tagen 10 % Rabatt = 2250
-  assert.equal(betrag(buchung), 2250);
+  // 5 Tage: 500 x 2 volle Tage + 300 x 3 weitere = 1900.
+  // Die gemeldete 1 bleibt folgenlos.
+  assert.equal(betrag(buchung), 1900);
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -172,8 +173,17 @@ test("fail-closed: Geraetemiete ohne Geraete wird abgelehnt", () => {
   );
 });
 
-test("fail-closed: Reel ist serverseitig nicht nachrechenbar", () => {
-  assert.equal(ablehnung({ service_type: "reel" }), "KEIN_PREIS_HINTERLEGT");
+test("fail-closed: Reel ohne bekannte Paketgroesse wird abgelehnt", () => {
+  for (const art of ["reel", "reel_3", "reel_99", null, undefined]) {
+    assert.equal(
+      ablehnung({
+        service_type: "reel",
+        service_subtype: art as string | null | undefined,
+      }),
+      "ANGABEN_UNVOLLSTAENDIG",
+      `unerwartet angenommen: ${JSON.stringify(art)}`,
+    );
+  }
 });
 
 test("fail-closed: bereits bezahlte Buchung bekommt keinen zweiten Zahlweg", () => {
@@ -212,34 +222,68 @@ test("Studio: 200 THB je Stunde", () => {
   assert.equal(betrag({ service_type: "studio_rental", duration_hours: 8 }), 1600);
 });
 
-test("Podcast-Aufnahme: 200 THB/h + 1000 THB Aufbau", () => {
-  assert.equal(
+test("Schnitt: erste Stunde voll, jede weitere zur Haelfte -- je Kameraanzahl", () => {
+  const schnitt = (kameras: number, stunden: number) =>
     betrag({
       service_type: "podcast",
-      service_subtype: "podcast_recording",
-      duration_hours: 2,
-    }),
-    1400,
-  );
+      service_subtype: `editing_only_${kameras}cam`,
+      duration_hours: stunden,
+    });
+
+  // Die drei Promo-Saetze der Werbung, erste Stunde.
+  assert.equal(schnitt(1, 1), 1500);
+  assert.equal(schnitt(2, 1), 2000);
+  assert.equal(schnitt(3, 1), 3000);
+
+  // Jede weitere Stunde 50% des Promo-Satzes.
+  assert.equal(schnitt(1, 2), 1500 + 750);
+  assert.equal(schnitt(2, 3), 2000 + 2 * 1000);
+  assert.equal(schnitt(3, 4), 3000 + 3 * 1500);
+
+  // Und einmal weit aussen, damit die Staffel nicht irgendwo kippt.
+  assert.equal(schnitt(1, 8), 1500 + 7 * 750);
+});
+
+test("Schnitt: ohne Kameraangabe wird abgelehnt, nicht geraten", () => {
+  // Aufnahme laeuft seit dem 2026-07-28 ueber `podcast_setup`, und die
+  // Kameraanzahl steckt in `service_subtype`. Fehlt sie oder steht dort eine
+  // alte Unterart, darf die Preisquelle keinen Betrag erfinden.
+  for (
+    const art of [
+      "podcast_recording",
+      "podcast_editing",
+      "editing_only", // die alte Form ohne Kameraangabe
+      "editing_only_4cam", // Kameraanzahl gibt es nicht
+      "editing_only_0cam",
+      null,
+      undefined,
+    ]
+  ) {
+    assert.equal(
+      ablehnung({
+        service_type: "podcast",
+        service_subtype: art as string | null | undefined,
+        duration_hours: 2,
+      }),
+      "ANGABEN_UNVOLLSTAENDIG",
+      `unerwartet angenommen: ${JSON.stringify(art)}`,
+    );
+  }
+});
+
+test("Full Podcast Service: Anfrage, kein Zahlbetrag", () => {
+  // Die 19.000 THB auf der Seite sind eine Hausnummer. Wer die Function
+  // trotzdem aufruft, bekommt keinen Betrag.
   assert.equal(
-    betrag({
-      service_type: "podcast",
-      service_subtype: "podcast_editing",
-      duration_hours: 4,
-    }),
-    1800,
+    ablehnung({ service_type: "full_podcast", duration_hours: 2 }),
+    "KEINE_ZAHLUNG_VORGESEHEN",
   );
 });
 
-test("Podcast, reiner Schnitt: 1000 THB je Folge", () => {
-  assert.equal(
-    betrag({
-      service_type: "podcast",
-      service_subtype: "editing_only",
-      duration_hours: 3,
-    }),
-    3000,
-  );
+test("Podcast-Setup: die Anzahlung ist die Einrichtungsgebuehr (1500 THB)", () => {
+  // Nagelt die Zahl selbst fest, nicht nur die Konstante -- sonst zoege ein
+  // Vertipper in `preise.ts` den Test stillschweigend mit.
+  assert.equal(PODCAST_SETUP_ANZAHLUNG, 1500);
 });
 
 test("Podcast-Setup: feste Anzahlung, unabhaengig von der Ausstattung", () => {
@@ -255,17 +299,63 @@ test("Podcast-Setup: feste Anzahlung, unabhaengig von der Ausstattung", () => {
   );
 });
 
-test("Geraete: Tagessatz mal Tage, ab 3 Tagen 10 Prozent Rabatt", () => {
-  const zeitraum = (von: string, bis: string) => ({
-    service_type: "equipment",
-    equipment_items: ["pocket3", "neo"],   // 500 + 700 = 1200/Tag
-    equipment_start_date: von,
-    equipment_end_date: bis,
-  });
-  assert.equal(betrag(zeitraum("2026-08-01", "2026-08-01")), 1200);
-  assert.equal(betrag(zeitraum("2026-08-01", "2026-08-02")), 2400);
-  // 3 Tage: 1200 x 3 x 0,9 = 3240
-  assert.equal(betrag(zeitraum("2026-08-01", "2026-08-03")), 3240);
+test("Geraete: erste zwei Tage voll, jeder weitere zum Zusatzsatz", () => {
+  const miete = (teile: string[], von: string, bis: string) =>
+    betrag({
+      service_type: "equipment",
+      equipment_items: teile,
+      equipment_start_date: von,
+      equipment_end_date: bis,
+    });
+  const tage = (n: number) => `2026-08-${String(n).padStart(2, "0")}`;
+
+  // Pocket 3: 500 fuer die ersten zwei Tage, danach 300 je Tag.
+  assert.equal(miete(["pocket3"], tage(1), tage(1)), 500);
+  assert.equal(miete(["pocket3"], tage(1), tage(2)), 1000);
+  assert.equal(miete(["pocket3"], tage(1), tage(3)), 1300);
+  assert.equal(miete(["pocket3"], tage(1), tage(4)), 1600);
+  assert.equal(miete(["pocket3"], tage(1), tage(7)), 2500);
+
+  // Neo: 700 / 500.
+  assert.equal(miete(["neo"], tage(1), tage(3)), 1900);
+
+  // Mehrere Geraete zaehlen ihre Saetze zusammen.
+  assert.equal(miete(["pocket3", "neo"], tage(1), tage(5)), 4800);
+});
+
+test("Geraete: der Preis steigt mit jedem Tag -- nie faellt er", () => {
+  // Der Grund fuer die ganze Umstellung: Ein rueckwirkender Staffelsatz machte
+  // drei Tage (900) billiger als zwei (1.000). Wer laenger mietet, darf nie
+  // weniger zahlen -- sonst bucht der Kunde den laengeren Zeitraum, und das
+  // Geraet ist unnoetig aus dem Haus.
+  for (const teil of ["pocket3", "neo", "nano"]) {
+    let vorher = 0;
+    for (let n = 1; n <= 30; n++) {
+      const jetzt = betrag({
+        service_type: "equipment",
+        equipment_items: [teil],
+        equipment_start_date: "2026-08-01",
+        equipment_end_date: new Date(Date.UTC(2026, 7, n)).toISOString().slice(0, 10),
+      });
+      assert.ok(jetzt > vorher, `${teil}: ${n} Tage kosten ${jetzt}, vorher ${vorher}`);
+      vorher = jetzt;
+    }
+  }
+});
+
+test("Reel-Pakete: 300 einzeln, echter Nachlass im Paket", () => {
+  const paket = (n: number) =>
+    betrag({ service_type: "reel", service_subtype: `reel_${n}` });
+
+  assert.equal(paket(1), 300);
+  assert.equal(paket(5), 1200);   // 240 je Reel
+  assert.equal(paket(10), 2100);  // 210 je Reel
+
+  // Der Punkt der ganzen Aenderung: das Paket muss billiger sein als die
+  // gleiche Zahl einzeln gekaufter Reels.
+  assert.ok(paket(5) < 5 * paket(1));
+  assert.ok(paket(10) < 10 * paket(1));
+  assert.ok(paket(10) / 10 < paket(5) / 5);
 });
 
 test("Miettage zaehlen beide Randtage und ueberstehen Zeitumstellungen", () => {

@@ -6,26 +6,47 @@ Stand **2026-07-27**. Reihenfolge ist Dringlichkeit, nicht Aufwand.
 
 ## Dringend — wartet auf Andy
 
-### [ ] T-10 — Preise für den Drohnen-Dienst fehlen
+### [x] T-10 — Drohnen-Preise — **entschieden am 2026-07-28: bleibt „auf Anfrage"**
 
-Der Dienst ist gebaut und läuft, zeigt aber **„Price on request"**, weil keine
-Zahlen vorliegen. Das ist bewusst so: erfundene Preise auf einer Live-Seite
-sind schlimmer als keine.
+**Andys Entscheidung:** „drohnen video preise bleiben erstmal nur auf anfrage."
 
-**Gebraucht werden vier Zahlen:**
+**Es ist nichts zu tun** — der jetzige Zustand ist genau der gewünschte:
+- `booking.html` führt Drohne als **Anfrage** (`booking_status: 'enquiry'`),
+  ohne Zahlschritt; `dronePriceLabel()` zeigt „Price on request".
+- `supabase/functions/_shared/preise.ts` hat `DROHNEN_PAKETPREIS` bewusst auf
+  `null` und lehnt jede Drohnen-Zahlung ab, statt eine Zahl zu erfinden.
 
-| | Umfang | Preis |
-|---|---|---|
-| BASIC | bis 1 Std. vor Ort, Rohmaterial | ฿____ |
-| STANDARD | bis 3 Std. vor Ort, Rohmaterial | ฿____ |
-| PREMIUM | halber Tag, Rohmaterial | ฿____ |
-| Schnitt (Zusatz) | fertiger Film statt Rohmaterial | ฿____ |
-
-Eintragen in `booking.html`, Konstante `DRONE_PACKAGES` bzw.
-`DRONE_EDITING_PRICE` — **nur dort**, eine Zeile je Paket. Der Umfangstext
-(„bis 1 Stunde vor Ort") ist ebenfalls geraten und gehört bestätigt.
+**Wieder aufmachen, sobald Preise feststehen.** Dann vier Zahlen (BASIC,
+STANDARD, PREMIUM, Schnitt-Zusatz) in `booking.html` `DRONE_PACKAGES` /
+`DRONE_EDITING_PRICE` **und** in `preise.ts` — solange T-8 offen ist, an beiden
+Stellen. Der Umfangstext („bis 1 Stunde vor Ort") ist geraten und gehört
+mitbestätigt.
 
 ## Dringend — betrifft Geld
+
+### [ ] T-12 — Die neuen Podcast-Preise sind **gebaut, aber nicht ausgespielt**
+
+Angelegt 2026-07-28. `supabase/functions/_shared/preise.ts` ist geaendert,
+**deployt laeuft weiterhin die alte Fassung.**
+
+**Solange nicht ausgespielt ist, zieht Cut Only den falschen Betrag ein.** Die
+Buchungsstrecke zeigt ฿3.000 an und meldet ฿3.000 -- die deployte Function
+rechnet aber noch `1.000 x duration_hours` und zieht bei zwei Stunden Material
+**฿2.000** ein. Der serverseitig errechnete Betrag gilt (das ist die
+Sicherheitseigenschaft aus T-1), also gewinnt hier die alte Zahl.
+
+Fuer `full_podcast` ist es ungefaehrlich: Der Dienst ist eine Anfrage, die
+Strecke ruft die Function gar nicht auf.
+
+**Zu tun** (Reihenfolge aus `docs/decisions.md`, 2026-07-27):
+
+```bash
+supabase functions list                       # erst den Ist-Stand festhalten
+supabase functions deploy stripe-checkout stripe-paymentlink --use-api
+```
+
+Danach hier abhaken und die Versionsnummern notieren.
+
 
 ### [x] T-1 — Der Zahlbetrag kam aus dem Browser — **behoben und live**
 
@@ -75,23 +96,25 @@ bezahlte Buchungen bleiben auf `pending`) hat es **nie gegeben**.
 Fehlt das Abonnement, wird der Webhook-Zweig nie ausgelöst — unabhängig davon,
 wie aktuell die Function ist.
 
-### [ ] T-11 — Vorfall: die Preislücke **wurde** ausgenutzt
+### [~] T-11 — Vorfall: die Preislücke — **Annahme widerrufen am 2026-07-28**
 
-**Andy hat es am 2026-07-27 bestätigt.** Einzelheiten liegen nicht vor.
+**Es gab keinen Vorfall.** Andy stellt am 2026-07-28 klar: „es wurde noch gar
+nichts per kreditkarte gebucht, das waren nur testbuchungen von uns". Die
+Bestätigung vom 2026-07-27 beruhte auf einem Missverständnis.
 
-Eigene Akte mit belegtem Zeitfenster (2026-06-27 bis 2026-07-27 05:59:40 UTC),
-den drei Angriffswegen und vier fertigen SQL-Abfragen:
+**Erhoben:** Abfrage 3 der Akte gelaufen → **0 Zeilen**. Keine Buchung sperrt
+einen Termin bei unstimmigem Preis. Abfragen 1, 2 und 4 nicht ausgeführt —
+ohne echte Zahlungen ohne Gegenstand.
+
+**Gültig bleibt:** Die Lücke war real und ist behoben (T-1, live seit
+2026-07-27 05:59:40 UTC). Das Zeitfenster stimmt — es war offen, es wurde nur
+nichts hineingetragen.
+
+**Rest, dann ist T-11 zu:** Stripe-Dashboard im **Live-Modus** → *Payments* →
+Filter *Succeeded*, 2026-06-27 bis 2026-07-27. Erwartet: leer.
+
+Akte mit Korrektur und Ergebnisabschnitt:
 **`docs/vorfall-2026-07-27-preisluecke.md`**.
-
-**Der Punkt, an dem die Auswertung sonst schiefgeht:** Der wahrscheinlichste
-Angriffsweg — `amount` erst im Aufruf an die Function verbiegen — ist in der
-**Datenbank unsichtbar**. Der Buchungssatz sieht in jeder Spalte richtig aus;
-was tatsächlich eingezogen wurde, steht nur bei Stripe. **Ohne den
-Stripe-Export findet man nichts und hält den Vorfall für erledigt.**
-
-**Dringend zuerst:** Abfrage 3 der Akte — unterbezahlte Buchungen mit Status
-`paid` sperren **bis heute** Termine für echte Gäste. Das ist laufender
-Schaden, unabhängig vom entgangenen Geld.
 
 ---
 
@@ -204,6 +227,13 @@ eine erzeugte JSON-Datei) statt sie im HTML zu wiederholen.
 
 ---
 
+**Stand 2026-07-28:** Beim Umbau des Podcast-Angebots sind die Preise erneut an
+drei Stellen angefasst worden (`index.html`, `booking.html`, `preise.ts`). Die
+Schuld ist damit nicht getilgt, aber sie ist jetzt **geprüft**: 22 Tests in
+`preise.test.ts` nageln jede Zahl der Serverseite fest. Wer sie ändert, ohne
+`booking.html` mitzuziehen, merkt es nicht — wer sie in `preise.ts` falsch
+ändert, schon.
+
 ## Erledigt
 
 - [x] **2026-07-27** — `customerName` wurde in `booking.html` zweimal im selben
@@ -242,3 +272,19 @@ eine erzeugte JSON-Datei) statt sie im HTML zu wiederholen.
 - [x] **2026-07-27** — **T-2 bewiesen** über `supabase functions list` vor dem
       Deploy. Es lief die Fassung vom 1. Juli — die befürchtete
       `pending`-Lage hat es nie gegeben.
+
+### [ ] T-13 — Die Aktionsfristen laufen nicht von selbst ab
+
+Angelegt 2026-07-28. Auf Startseite und in der Buchungsstrecke steht jetzt
+**„promo until 31 Aug"** bzw. **„50% off until 31 August"** — beim
+Studio-Stundensatz und beim Schnittdienst.
+
+**Das ist reiner Text.** Am 1. September stehen dieselben Preise da, nur mit
+abgelaufener Frist daneben. Es gibt keine Automatik, die auf die Normalpreise
+umschaltet, und es soll auch keine geben, solange die Serverpreise von Hand
+gepflegt werden — eine Automatik, die den Preis unbeaufsichtigt verdoppelt,
+waere gefaehrlicher als ein veraltetes Datum.
+
+**Vor dem 31. August entscheiden:** verlaengern (Datum aendern) oder
+auslaufen lassen (Normalpreise eintragen in `index.html`, `booking.html`
+**und** `_shared/preise.ts`, dann neu ausspielen).

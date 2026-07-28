@@ -1,11 +1,44 @@
-# Vorfall — die Preislücke wurde ausgenutzt
+# Vorfall — die Preislücke (Annahme „ausgenutzt" widerrufen)
 
-**Angelegt:** 2026-07-27 · **Status:** Lücke geschlossen, **Schaden nicht
-beziffert** · **Blockiert auf:** Datenbank- und Stripe-Auswertung
+**Angelegt:** 2026-07-27 · **Korrigiert:** 2026-07-28 · **Status:** Lücke
+geschlossen; **kein Hinweis auf Ausnutzung, kein bezifferbarer Schaden** ·
+**Offen:** ein bestätigender Blick in Stripe (Live-Modus)
 
 ---
 
-## Was bekannt ist
+## 🔴 Korrektur vom 2026-07-28 — bitte zuerst lesen
+
+**Der Titel dieser Akte war falsch.** Am 2026-07-28 stellt Andy klar:
+
+> „es wurde noch gar nichts per kreditkarte gebucht, das waren nur
+> testbuchungen von uns"
+
+Damit entfällt die Grundlage der ganzen Akte. **Es gab keine echten Zahlungen**,
+also auch keinen Geldschaden, keine unterbezahlte Buchung, die einen Termin
+sperrt, und keine verdrängten Gäste. Die Formulierung „Andy hat bestätigt, dass
+die Lücke ausgenutzt wurde" (unten, Fassung vom 27.07.) beruhte auf einem
+Missverständnis und ist **widerrufen**.
+
+**Was aus der Akte gültig bleibt:**
+- Die **Lücke selbst war real** und ist behoben (WO-33, live seit 2026-07-27
+  05:59:40 UTC). Der Befund über den Code stimmt unverändert.
+- Das **Zeitfenster** 2026-06-27 bis 2026-07-27 stimmt — es war offen, es wurde
+  nur nichts hineingetragen.
+- Die **vier Abfragen** bleiben brauchbar, jetzt als Prüfwerkzeug statt als
+  Forensik.
+
+**Erhoben am 2026-07-28:** Abfrage 3 (heute noch gesperrte Termine mit
+unstimmigem Preis) — **0 Zeilen**. Deckt sich mit Andys Angabe.
+
+**Noch offen, damit dies belegt statt geglaubt ist:** Stripe-Dashboard,
+**Live-Modus** → *Payments* → Filter *Succeeded*, Zeitraum 2026-06-27 bis
+2026-07-27. Erwartet: **leer**. Ergebnis unten unter „Ergebnisse" nachtragen.
+
+---
+
+## Was am 2026-07-27 bekannt schien
+
+> ⚠️ Historischer Stand. Der erste Satz ist durch die Korrektur oben überholt.
 
 **Andy sagt: die Lücke wurde ausgenutzt.** Mehr liegt bis jetzt nicht vor —
 keine Zahl, kein Zeitraum, keine Beträge, kein Hinweis darauf, wie es
@@ -341,3 +374,16 @@ Dashboard braucht keines von beidem.
   jetzt folgenlos für den Einzug (der Betrag wird ohnehin neu gerechnet), aber
   die Verwaltung zeigt den Wert an. Sauber wäre, die Spalte serverseitig zu
   füllen oder ganz zu streichen.
+
+---
+
+## Ergebnisse
+
+| Datum | Was | Ergebnis |
+|---|---|---|
+| 2026-07-28 | Abfrage 3 (gesperrte Termine, unstimmiger Preis) | **0 Zeilen** |
+| 2026-07-28 | Andys Angabe zur Sachlage | **keine echten Kartenbuchungen, nur eigene Testbuchungen** |
+| offen | Stripe *Payments* → *Succeeded*, 27.06.–27.07., **Live-Modus** | — erwartet leer |
+
+Abfragen 1, 2 und 4 wurden **nicht** ausgeführt: Ohne echte Zahlungen haben sie
+keinen Gegenstand. Sie bleiben hier stehen, falls die Lage sich ändert.

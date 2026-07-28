@@ -392,8 +392,11 @@ textarea{resize:vertical;min-height:80px}
               <select id="a-service" onchange="updateAddForm()">
                 <option value="">Select service…</option>
                 <option value="studio_rental">Photo Studio Rental</option>
-                <option value="podcast">Podcast Session</option>
+                <option value="podcast_setup">Record Your Podcast</option>
+                <option value="podcast">We Cut Your Podcast</option>
                 <option value="equipment">Equipment Rental</option>
+                <option value="reel">Reel Editing</option>
+                <option value="full_podcast">Full Podcast Service (enquiry)</option>
               </select>
             </div>
             <div class="form-group">
@@ -942,7 +945,17 @@ function updateAddForm() {
   document.getElementById('add-studio-fields').style.display = isEquip ? 'none' : '';
   document.getElementById('add-equip-fields').style.display  = isEquip ? '' : 'none';
   if (svc === 'podcast') {
-    sub.innerHTML = '<option value="">Select…</option><option value="podcast_recording">Recording Only</option><option value="podcast_editing">Recording + Editing</option>';
+    // Seit 2026-07-28 heisst 'podcast' nur noch "Cut Only" -- Aufnahme laeuft
+    // ueber 'podcast_setup'. Die Preisquelle lehnt jede andere Unterart ab.
+    sub.innerHTML = '<option value="">Select…</option>'
+      + '<option value="editing_only_1cam">Cut Only — 1 camera</option>'
+      + '<option value="editing_only_2cam">Cut Only — 2 cameras</option>'
+      + '<option value="editing_only_3cam">Cut Only — 3 cameras</option>';
+  } else if (svc === 'reel') {
+    sub.innerHTML = '<option value="">Select…</option>'
+      + '<option value="reel_1">1 Reel — ฿300</option>'
+      + '<option value="reel_5">5 Reels — ฿1,200</option>'
+      + '<option value="reel_10">10 Reels — ฿2,100</option>';
   } else if (svc === 'equipment') {
     sub.innerHTML = '<option value="">Select…</option><option value="pocket3">DJI Pocket 3</option><option value="neo">DJI Neo</option><option value="nano">DJI Osmo Nano</option>';
   }

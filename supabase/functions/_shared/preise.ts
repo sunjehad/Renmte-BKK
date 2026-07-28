@@ -57,16 +57,37 @@ export const WAEHRUNG = "thb";
 /** Studio je angefangener Stunde. `booking.html` updateStudioPrice(). */
 export const STUDIO_STUNDENSATZ = 200;
 
-/** Aufbaupauschale bei Podcast-Aufnahme. `booking.html` updatePodcastPrice(). */
-export const PODCAST_AUFBAU = 1000;
-
-/** Reiner Schnitt, je Folge. `booking.html` updatePodcastPrice(). */
-export const PODCAST_SCHNITT_JE_FOLGE = 1000;
+/**
+ * Schnittdienst "We cut your podcast" -- Preistafel aus der Werbung
+ * (Aushang, Launch Offer 50%).
+ *
+ * Der Preis haengt an der **Zahl der Kameraperspektiven** im Rohmaterial, denn
+ * die bestimmt den Schnittaufwand. Die erste Stunde kostet den vollen
+ * Promo-Satz, jede weitere die Haelfte davon.
+ *
+ *   Kameras | normal/h | promo/h | jede weitere Stunde
+ *   --------+----------+---------+--------------------
+ *      1    |   3.000  |  1.500  |   750
+ *      2    |   4.000  |  2.000  | 1.000
+ *      3    |   6.000  |  3.000  | 1.500
+ *
+ * Bis zum 2026-07-28 rechnete diese Datei `1.000 THB x Folgenzahl`. Das war
+ * gleich doppelt falsch: die falsche Bezugsgroesse (Folgen statt Material) und
+ * die falsche Zahl. Sie haette fail-closed-konform und voellig unauffaellig
+ * einen Bruchteil des vereinbarten Preises eingezogen.
+ *
+ * `booking.html` cutOnlyPreis(). Nur die Promo-Saetze werden eingezogen; die
+ * Normalpreise stehen hier, damit die Seite sie durchgestrichen zeigen kann
+ * und beide Zahlen an **einer** Stelle gepflegt werden.
+ */
+export const CUT_ERSTE_STUNDE: Record<number, number> = { 1: 1500, 2: 2000, 3: 3000 };
+export const CUT_NORMAL_ERSTE_STUNDE: Record<number, number> = { 1: 3000, 2: 4000, 3: 6000 };
+export const CUT_WEITERE_STUNDE: Record<number, number> = { 1: 750, 2: 1000, 3: 1500 };
 
 /**
  * Podcast-Setup wird **nicht** voll abgerechnet, sondern mit einer festen
  * Anzahlung; der Rest wird vor Ort beglichen. `booking.html` setupStep5():
- * `const chargeAmount = isSetup ? 1000 : state.totalPrice`.
+ * `const chargeAmount = isSetup ? PODCAST_AUFBAU : state.totalPrice`.
  *
  * Das ist hier ein Gluecksfall: Der Gesamtpreis haengt an Kameraanzahl,
  * Videograf und Reel-Zusatz -- und **keine** dieser Angaben steht in einer
@@ -74,7 +95,7 @@ export const PODCAST_SCHNITT_JE_FOLGE = 1000;
  * ist serverseitig daher gar nicht nachrechenbar. Der einzuziehende Betrag
  * sehr wohl, denn er ist fest.
  */
-export const PODCAST_SETUP_ANZAHLUNG = 1000;
+export const PODCAST_SETUP_ANZAHLUNG = 1500;
 
 /** Geraetemiete je Tag. `booking.html` EQUIP_PRICES. */
 export const GERAETE_TAGESSATZ: Record<string, number> = {
@@ -83,11 +104,54 @@ export const GERAETE_TAGESSATZ: Record<string, number> = {
   nano: 500,
 };
 
-/** Ab dieser Mietdauer greift der Rabatt. `booking.html` calcEquipPrice(). */
-export const GERAETE_RABATT_AB_TAGEN = 3;
+/**
+ * Satz fuer jeden Tag **ab dem dritten** -- gilt nur fuer die zusaetzlichen
+ * Tage, nicht rueckwirkend fuer die ganze Miete.
+ *
+ * Zwei Anlaeufe waren vorher noetig:
+ *
+ * 1. Bis zum 2026-07-28 rechnete die Seite `10 % ab 3 Tagen`, waehrend die
+ *    Startseite eine feste Staffel bewarb. Bei 3 Tagen Pocket 3 versprach sie
+ *    900 THB und buchte 1.350 ab.
+ * 2. Der Staffelsatz galt dann rueckwirkend fuer alle Tage -- damit kostete
+ *    eine Dreitagesmiete (900) **weniger als zwei Tage** (1.000). Das passiert
+ *    zwangslaeufig, sobald ein rueckwirkender Satz unter dem Grundsatz liegt;
+ *    eine hoehere Zahl verschiebt den Sprung nur.
+ *
+ * Andys Entscheidung vom 2026-07-28: Die ersten beiden Tage kosten den vollen
+ * Satz, **jeder weitere** den Zusatzsatz. Damit steigt die Reihe streng
+ * monoton, und der Nachlass landet bei den langen Mieten. Es ist dieselbe
+ * Logik wie beim Schnittdienst (erste Stunde voll, jede weitere zur Haelfte) --
+ * ein Kunde, der beides bucht, findet dasselbe Muster wieder.
+ */
+export const GERAETE_ZUSATZTAG: Record<string, number> = {
+  pocket3: 300,
+  neo: 500,
+  nano: 300,
+};
 
-/** Hoehe des Rabatts. `booking.html` calcEquipPrice(). */
-export const GERAETE_RABATT_SATZ = 0.1;
+/** Ab diesem Tag gilt der Zusatzsatz. `booking.html` calcEquipPrice(). */
+export const GERAETE_ZUSATZTAG_AB = 3;
+
+/**
+ * Reel-Pakete. Preis je Paket, **nicht** je Reel mal Anzahl.
+ *
+ * Bis zum 2026-07-28 kosteten alle drei Pakete 200 THB je Reel -- die Karte in
+ * der Buchungsstrecke sagte es selbst: "5-reel package - save 0 THB per reel".
+ * Ein Paket ohne Ersparnis ist schlechter als gar kein Paket. Andys Entscheidung
+ * vom 2026-07-28: Einzelreel auf 300 THB, Pakete mit echtem Nachlass.
+ *
+ *   1 Reel  -> 300 THB je Reel   (kein Nachlass)
+ *   5 Reels -> 240 THB je Reel   (20 %)
+ *  10 Reels -> 210 THB je Reel   (30 %)
+ *
+ * `booking.html` REEL_PAKETE.
+ */
+export const REEL_PAKETE: Record<number, number> = {
+  1: 300,
+  5: 1200,
+  10: 2100,
+};
 
 /**
  * Drohnenpakete. **Bewusst alle `null`** -- die Preise liegen nicht vor
@@ -263,6 +327,15 @@ function nachDienst(dienst: string, buchung: Buchung): Preisergebnis {
       };
     case "equipment":
       return geraete(buchung);
+    case "full_podcast":
+      // Fuenf Folgen ueber Wochen -- Termine und Umfang werden im Gespraech
+      // festgelegt. Die 19.000 THB auf der Seite sind eine Hausnummer zur
+      // Vorfilterung, kein Zahlbetrag.
+      return ablehnen(
+        "KEINE_ZAHLUNG_VORGESEHEN",
+        "Der Full Podcast Service wird als Anfrage aufgenommen; Umfang und " +
+          "Preis werden individuell abgestimmt.",
+      );
     case "drone":
       // Drohne ist eine Anfrage, kein Verkauf: Termin und Preis werden erst
       // abgestimmt. Selbst wenn spaeter Preise in DROHNEN_PAKETPREIS stehen,
@@ -273,15 +346,7 @@ function nachDienst(dienst: string, buchung: Buchung): Preisergebnis {
           "individuell abgestimmt (docs/todo.md T-10).",
       );
     case "reel":
-      // Die Paketgroesse steht nur als Fliesstext in `notes`, in keiner
-      // Spalte. Damit ist der Preis serverseitig nicht nachrechenbar.
-      // Der Weg ist in der Buchungsstrecke derzeit ohnehin nicht erreichbar
-      // (`state.service` wird nirgends auf 'reel' gesetzt).
-      return ablehnen(
-        "KEIN_PREIS_HINTERLEGT",
-        "Reel-Pakete sind serverseitig nicht nachrechenbar: die Paketgroesse " +
-          "steht nur in `notes`, nicht in einer eigenen Spalte.",
-      );
+      return reel(buchung);
     default:
       return ablehnen(
         "DIENST_UNBEKANNT",
@@ -330,51 +395,88 @@ function studio(buchung: Buchung): Preisergebnis {
   };
 }
 
+/**
+ * `service_type = 'podcast'` heisst seit dem 2026-07-28 **ausschliesslich**
+ * "We cut your podcast": Der Kunde schickt Rohmaterial, es gibt keinen
+ * Studiotermin. Aufnahme laeuft ueber `podcast_setup`.
+ *
+ * Die Kameraanzahl steckt in `service_subtype` (`editing_only_2cam`), **nicht**
+ * in einer eigenen Spalte. Das ist Absicht: Die Spalte gibt es bereits und sie
+ * traegt genau diese Art von Angabe, also braucht der Preis keine
+ * Schemaaenderung -- und er bleibt trotzdem serverseitig nachrechenbar. Ein
+ * `notes`-Feld waere es nicht gewesen (siehe `reel`).
+ *
+ * Die frueheren Unterarten `podcast_recording`, `podcast_editing` und das
+ * nackte `editing_only` werden **abgelehnt statt weitergerechnet**: Taucht so
+ * etwas neu auf, stimmt etwas nicht, und dann soll die Preisquelle stehen
+ * bleiben statt zu raten.
+ */
 function podcast(buchung: Buchung): Preisergebnis {
   const art = buchung.service_subtype;
+  const treffer = typeof art === "string"
+    ? /^editing_only_([123])cam$/.exec(art)
+    : null;
 
-  if (art === "editing_only") {
-    const folgen = ganzzahl(buchung.duration_hours, 1, MAX_STUNDEN);
-    if (folgen === null) {
-      return ablehnen(
-        "ANGABEN_UNVOLLSTAENDIG",
-        `Reiner Schnitt braucht eine Folgenzahl von 1 bis ${MAX_STUNDEN}, ` +
-          `angegeben war: ${JSON.stringify(buchung.duration_hours)}.`,
-      );
-    }
-    return {
-      ok: true,
-      betrag: PODCAST_SCHNITT_JE_FOLGE * folgen,
-      grundlage: `Podcast-Schnitt: ${PODCAST_SCHNITT_JE_FOLGE} THB x ` +
-        `${folgen} Folge(n)`,
-    };
-  }
-
-  // `booking.html` behandelt jede andere Unterart gleich (Aufnahme mit und
-  // ohne Schnitt). Trotzdem wird hier auf die bekannten Werte eingegrenzt:
-  // eine unbekannte Unterart ist ein Hinweis darauf, dass sich die
-  // Buchungsstrecke geaendert hat, und dann soll die Preisquelle stehen
-  // bleiben statt zu raten.
-  if (art !== "podcast_recording" && art !== "podcast_editing") {
+  if (treffer === null) {
     return ablehnen(
       "ANGABEN_UNVOLLSTAENDIG",
-      `Unbekannte Podcast-Unterart: ${JSON.stringify(art)}.`,
+      `Unter 'podcast' gibt es nur noch den Schnitt mit Kameraangabe ` +
+        `('editing_only_1cam' bis '_3cam'), angegeben war: ` +
+        `${JSON.stringify(art)}.`,
     );
   }
+  const kameras = Number(treffer[1]) as 1 | 2 | 3;
 
+  // `duration_hours` traegt hier die **Stunden Rohmaterial**, nicht die
+  // Studiodauer und nicht die Folgenzahl.
   const stunden = ganzzahl(buchung.duration_hours, 1, MAX_STUNDEN);
   if (stunden === null) {
     return ablehnen(
       "ANGABEN_UNVOLLSTAENDIG",
-      `Podcast-Aufnahme braucht eine Dauer von 1 bis ${MAX_STUNDEN} Stunden, ` +
-        `angegeben war: ${JSON.stringify(buchung.duration_hours)}.`,
+      `Der Schnitt braucht eine Materialmenge von 1 bis ${MAX_STUNDEN} ` +
+        `Stunden, angegeben war: ${JSON.stringify(buchung.duration_hours)}.`,
     );
   }
+
+  const zusatz = stunden - 1;
   return {
     ok: true,
-    betrag: STUDIO_STUNDENSATZ * stunden + PODCAST_AUFBAU,
-    grundlage: `Podcast: ${STUDIO_STUNDENSATZ} THB x ${stunden} h + ` +
-      `${PODCAST_AUFBAU} THB Aufbau`,
+    betrag: CUT_ERSTE_STUNDE[kameras] + zusatz * CUT_WEITERE_STUNDE[kameras],
+    grundlage: zusatz === 0
+      ? `Schnitt ${kameras} Kamera(s): ${CUT_ERSTE_STUNDE[kameras]} THB erste Stunde`
+      : `Schnitt ${kameras} Kamera(s): ${CUT_ERSTE_STUNDE[kameras]} THB erste ` +
+        `Stunde + ${CUT_WEITERE_STUNDE[kameras]} THB x ${zusatz} h`,
+  };
+}
+
+/**
+ * Reel-Schnitt. Die Paketgroesse steckt in `service_subtype` (`reel_5`) --
+ * bis zum 2026-07-28 stand sie nur als Fliesstext in `notes` und war damit
+ * serverseitig nicht nachrechenbar; der Dienst musste deshalb abgelehnt
+ * werden. Derselbe Weg wie beim Schnittdienst: vorhandene Spalte, keine
+ * Schemaaenderung, trotzdem fail-closed.
+ */
+function reel(buchung: Buchung): Preisergebnis {
+  const art = buchung.service_subtype;
+  const treffer = typeof art === "string" ? /^reel_(\d{1,2})$/.exec(art) : null;
+  const anzahl = treffer === null ? null : Number(treffer[1]);
+
+  if (
+    anzahl === null ||
+    !Object.prototype.hasOwnProperty.call(REEL_PAKETE, anzahl)
+  ) {
+    return ablehnen(
+      "ANGABEN_UNVOLLSTAENDIG",
+      `Reel-Buchungen brauchen eine bekannte Paketgroesse ` +
+        `(${Object.keys(REEL_PAKETE).map((n) => `reel_${n}`).join(", ")}), ` +
+        `angegeben war: ${JSON.stringify(art)}.`,
+    );
+  }
+
+  return {
+    ok: true,
+    betrag: REEL_PAKETE[anzahl],
+    grundlage: `Reel-Paket: ${anzahl} Reel(s) fuer ${REEL_PAKETE[anzahl]} THB`,
   };
 }
 
@@ -388,6 +490,7 @@ function geraete(buchung: Buchung): Preisergebnis {
   }
 
   let tagessatz = 0;
+  let zusatzsatz = 0;
   for (const teil of teile) {
     // `Object.prototype.hasOwnProperty` statt `in`: sonst waere
     // `equipment_items: ['constructor']` ein "bekanntes" Geraet.
@@ -401,6 +504,7 @@ function geraete(buchung: Buchung): Preisergebnis {
       );
     }
     tagessatz += GERAETE_TAGESSATZ[teil];
+    zusatzsatz += GERAETE_ZUSATZTAG[teil];
   }
 
   const von = buchung.equipment_start_date;
@@ -423,13 +527,12 @@ function geraete(buchung: Buchung): Preisergebnis {
   // Bewusst **nicht** aus `rental_days` gelesen: die Spalte kommt aus
   // demselben Browser-Payload wie alles andere und koennte kleiner sein als
   // der Zeitraum, den der Kalender tatsaechlich sperrt.
-  const rabatt = tage >= GERAETE_RABATT_AB_TAGEN ? GERAETE_RABATT_SATZ : 0;
-  const betrag = Math.round(tagessatz * tage * (1 - rabatt));
-  const rabattText = rabatt > 0 ? ` - ${Math.round(rabatt * 100)} % Rabatt` : "";
+  const volleTage  = Math.min(tage, GERAETE_ZUSATZTAG_AB - 1);
+  const zusatzTage = tage - volleTage;
   return {
     ok: true,
-    betrag,
-    grundlage: `Geraete (${teile.join(", ")}): ${tagessatz} THB/Tag x ` +
-      `${tage} Tag(e)${rabattText}`,
+    betrag: tagessatz * volleTage + zusatzsatz * zusatzTage,
+    grundlage: `Geraete (${teile.join(", ")}): ${tagessatz} THB x ${volleTage} Tag(e)` +
+      (zusatzTage > 0 ? ` + ${zusatzsatz} THB x ${zusatzTage} weitere(r) Tag(e)` : ""),
   };
 }

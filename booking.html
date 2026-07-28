@@ -44,6 +44,9 @@ nav{position:sticky;top:0;z-index:50;padding:14px 40px;display:flex;align-items:
 
 /* ── PROGRESS ── */
 .progress-bar{display:flex;align-items:center;margin-bottom:48px;gap:0}
+/* Auf dem Handy werden die Beschriftungen ausgeblendet -- dann sagen nackte
+   Punkte niemandem, wie viel noch kommt. Der Zaehler schon. */
+.step-counter{display:none;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .step-item{display:flex;align-items:center;gap:8px;flex:1;position:relative}
 .step-item:last-child{flex:none}
 .step-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;transition:all .3s var(--ease);background:var(--bg)}
@@ -64,7 +67,14 @@ nav{position:sticky;top:0;z-index:50;padding:14px 40px;display:flex;align-items:
 .step-sub{font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.6}
 
 /* ── SERVICE CARDS ── */
-.service-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:8px}
+.service-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+/* Drei beschriftete Gruppen statt sieben gleichrangiger Karten: Die Beschriftung
+   beantwortet die Frage, die der Kunde tatsaechlich hat -- wer macht was und wo. */
+.svc-group{margin-bottom:34px}
+.svc-group:last-of-type{margin-bottom:8px}
+.svc-group-head{display:flex;flex-direction:column;gap:2px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.svc-group-title{font-family:var(--font-head);font-size:1.15rem;letter-spacing:.06em;color:var(--fg)}
+.svc-group-sub{font-size:12px;color:var(--muted)}
 .svc-card{background:var(--bg2);border:2px solid var(--border);border-radius:14px;padding:28px 24px;cursor:pointer;transition:all .25s var(--ease);position:relative;overflow:hidden}
 .svc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
 .svc-card:hover{border-color:rgba(255,255,255,.18);background:var(--bg3)}
@@ -177,6 +187,13 @@ textarea{resize:vertical;min-height:80px}
 .btn-blue:hover{opacity:.85}
 
 .step-actions{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:32px}
+/* Auf dem Handy klebt die Aktionsleiste am unteren Rand: Preis links, Knopf
+   rechts, beides immer erreichbar. Vorher stand der Knopf unter dem gesamten
+   Inhalt -- wer die Dauer waehlte, sah ihn nicht und musste weiterscrollen,
+   wobei der Preis oben aus dem Bild verschwand. */
+.dock-total{display:none;flex-direction:column;line-height:1.15;margin-right:auto}
+.dock-total .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.dock-total .v{font-size:20px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
 .step-actions.right{justify-content:flex-end}
 
 /* ── MSG ── */
@@ -230,6 +247,18 @@ input[type=date]{color-scheme:dark}
 .pay-desc{font-size:12px;color:var(--muted);line-height:1.5}
 
 /* ── RESPONSIVE ── */
+/* Fingerbedienung: 44 px sind das empfohlene Mindestmass, die Chips lagen bei
+   rund 33. Und Safari zoomt in jedes Eingabefeld unter 16 px hinein -- die
+   Seite springt dann bei jedem Antippen. */
+@media(pointer:coarse){
+  .chip{min-height:44px;display:inline-flex;align-items:center;font-size:15px}
+  input[type=text],input[type=email],input[type=tel],input[type=password],
+  input[type=number],input[type=date],select,textarea{font-size:16px}
+  .cal-day{font-size:15px}
+  .time-slot{min-height:44px;display:flex;align-items:center;justify-content:center}
+  .sub-card,.svc-card,.equip-card,.pay-card{-webkit-tap-highlight-color:transparent}
+}
+
 @media(max-width:640px){
   nav{padding:12px 16px}
   .wizard-wrap{padding:24px 16px 60px}
@@ -240,11 +269,24 @@ input[type=date]{color-scheme:dark}
   .form-row{grid-template-columns:1fr}
   .sub-grid{grid-template-columns:1fr}
   .date-range{grid-template-columns:1fr}
-  .step-actions{flex-direction:column-reverse}
-  .btn-primary,.btn-ghost{width:100%;text-align:center}
-  .progress-bar{gap:0}
+  .step-actions{
+    position:sticky;bottom:0;z-index:20;
+    margin:24px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:rgba(7,7,9,.94);backdrop-filter:blur(12px);
+    border-top:1px solid var(--border);
+    flex-direction:row;flex-wrap:wrap;
+  }
+  .step-actions.right{justify-content:flex-end}
+  .dock-total.on{display:flex}
+  /* Der Hauptknopf bleibt gross genug fuer den Daumen, nimmt aber nicht mehr
+     die ganze Zeile -- daneben steht der Preis. */
+  .btn-primary{flex:1;min-width:150px;min-height:48px;text-align:center}
+  .btn-ghost{min-height:44px}
+  .wizard-wrap{padding-bottom:16px}
+  .progress-bar{margin-bottom:28px}
   .step-label{display:none}
   .step-line{margin:0 6px}
+  .step-counter{display:block}
 }
 </style>
 </head>
@@ -264,6 +306,7 @@ input[type=date]{color-scheme:dark}
 <div class="wizard-wrap" id="wizard-wrap">
 
   <!-- PROGRESS -->
+  <div class="step-counter" id="step-counter">Schritt 1 von 5</div>
   <div class="progress-bar" id="progress-bar">
     <div class="step-item active" id="pi-1">
       <div class="step-circle">1</div>
@@ -296,26 +339,73 @@ input[type=date]{color-scheme:dark}
     <div class="step-heading">CHOOSE A SERVICE</div>
     <div class="step-sub">Select what you'd like to book with us.</div>
 
-    <div class="service-cards">
+    <div class="svc-group">
+      <div class="svc-group-head">
+        <div class="svc-group-title">IN OUR STUDIO</div>
+        <div class="svc-group-sub">You come to us — we have the room, the mics and the lights ready.</div>
+      </div>
+      <div class="service-cards">
       <div class="svc-card" onclick="selectService('studio_rental',this)">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="svc-icon">📸</div>
         <div class="svc-title">PHOTO STUDIO RENTAL</div>
         <div class="svc-desc">Rent our fully equipped studio by the hour. Lights, backdrops, lounge props — ready for you.</div>
-        <div class="svc-price">฿200 / hour</div>
+        <div class="svc-price">฿200 / hour <span style="color:var(--muted);font-weight:400">promo until 31 Aug</span></div>
       </div>
       <div class="svc-card" onclick="selectService('podcast_setup',this)" style="border-color:rgba(37,99,235,.25)">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="svc-icon">🎙️</div>
-        <div class="svc-title">PODCAST SETUP / SERVICE</div>
-        <div class="svc-desc">We set up everything — mics, lighting, sofa & decor. Choose your camera package, videographer & reel editing.</div>
-        <div class="svc-price" style="color:var(--blue-l)">฿200/hr <span style="color:var(--muted);font-weight:400">+ ฿1,000 setup</span></div>
+        <div class="svc-title">RECORD YOUR PODCAST</div>
+        <div class="svc-desc">Studio, mics, lighting, sofa &amp; decor — we film it, edit it, and cut you an intro clip. Choose your camera package and add a videographer.</div>
+        <div class="svc-price" style="color:var(--blue-l)">From ฿900/hr <span style="color:var(--muted);font-weight:400">+ ฿1,500 setup · editing &amp; intro included</span></div>
       </div>
+      <div class="svc-card" onclick="selectService('full_podcast',this)">
+        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="svc-icon">🚀</div>
+        <div class="svc-title">FULL PODCAST SERVICE</div>
+        <div class="svc-desc">Five episodes, done end to end — filming, editing, reels and intros. We plan the run with you.</div>
+        <div class="svc-price" style="color:var(--blue-l)">฿19,000 <span style="color:var(--muted);font-weight:400">/ 5 episodes</span></div>
+        <div style="margin-top:8px;display:inline-flex;align-items:center;gap:6px;background:rgba(37,99,235,.12);border:1px solid var(--border-blue);border-radius:100px;padding:3px 12px">
+          <span style="font-size:11px;font-weight:700;color:var(--blue-l);letter-spacing:.08em">ON REQUEST ONLY</span>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div class="svc-group">
+      <div class="svc-group-head">
+        <div class="svc-group-title">YOU SEND US THE FOOTAGE</div>
+        <div class="svc-group-sub">Already filmed? No studio time needed — send the files after booking.</div>
+      </div>
+      <div class="service-cards">
+      <div class="svc-card" onclick="selectService('podcast',this)">
+        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="svc-icon">🎞️</div>
+        <div class="svc-title">WE CUT YOUR PODCAST</div>
+        <div class="svc-desc">Already filmed? Send us the raw files — clean audio, smooth cuts, ready to publish. Delivered in 16:9 or 9:16. No studio time needed.</div>
+        <div class="svc-price">From ฿1,500 / hour <span style="color:var(--accent);font-weight:700">50% OFF UNTIL 31 AUG</span></div>
+      </div>
+      <div class="svc-card" onclick="selectService('reel',this)">
+        <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="svc-icon">📱</div>
+        <div class="svc-title">REEL EDITING</div>
+        <div class="svc-desc">Send us the footage — we cut, color grade, add music &amp; captions. Delivered within 48h.</div>
+        <div class="svc-price">฿300 <span style="color:var(--muted);font-weight:400">per reel · cheaper in packs</span></div>
+      </div>
+      </div>
+    </div>
+
+    <div class="svc-group">
+      <div class="svc-group-head">
+        <div class="svc-group-title">GEAR &amp; AERIAL</div>
+        <div class="svc-group-sub">Take the gear yourself, or let us fly it for you.</div>
+      </div>
+      <div class="service-cards">
       <div class="svc-card" onclick="selectService('equipment',this)">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="svc-icon">📷</div>
         <div class="svc-title">DJI CAMERA RENTAL</div>
-        <div class="svc-desc">Rent DJI Pocket 3, Neo drone, or Osmo Nano by the day. 10% discount for 3+ days.</div>
+        <div class="svc-desc">Rent DJI Pocket 3, Neo drone, or Osmo Nano by the day. Every day from the 3rd is cheaper.</div>
         <div class="svc-price">From ฿500 / day</div>
       </div>
       <div class="svc-card" onclick="selectService('drone',this)">
@@ -335,6 +425,7 @@ input[type=date]{color-scheme:dark}
         <div class="svc-title">AERIAL / DRONE FILMING</div>
         <div class="svc-desc">We fly to your location — buildings, venues, events — film it from the air and edit it into a finished video.</div>
         <div class="svc-price" style="color:var(--blue-l)">Request a quote</div>
+      </div>
       </div>
     </div>
 
@@ -392,76 +483,108 @@ input[type=date]{color-scheme:dark}
       </div>
     </div>
 
-    <!-- PODCAST DETAILS -->
+    <!-- CUT ONLY DETAILS -->
+    <!--
+      Bis 2026-07-28 hiess dieser Abschnitt "PODCAST DETAILS" und bot drei
+      Unterarten an: Recording Only, Recording + Editing, Editing Only. Die
+      ersten beiden kosteten **denselben** Preis (200/h + 1.000) -- der Schnitt
+      war also gratis -- und der Dienst war ueberhaupt nicht erreichbar, weil es
+      keine Auswahlkarte dafuer gab. Aufnahme ist seither Teil von
+      `podcast_setup`; hier bleibt nur der reine Schnitt.
+    -->
     <div id="details-podcast" style="display:none">
-      <label style="margin-bottom:10px">Service Type</label>
-      <div class="sub-grid">
-        <div class="sub-card" onclick="selectSubtype('podcast_recording',this,'podcast')">
-          <div class="sub-card-title">🎬 Recording Only</div>
-          <div class="sub-card-desc">Use our studio and professional setup. We handle the filming. No editing included.</div>
-        </div>
-        <div class="sub-card" onclick="selectSubtype('podcast_editing',this,'podcast')">
-          <div class="sub-card-title">✂️ Recording + Editing</div>
-          <div class="sub-card-desc">Full package: filming, color grading, audio mix, titles, and delivery-ready episode.</div>
-        </div>
-        <div class="sub-card" onclick="selectSubtype('editing_only',this,'podcast')">
-          <div class="sub-card-title">🎞️ Editing Only</div>
-          <div class="sub-card-desc" style="display:flex;flex-direction:column;gap:4px">
-            <span>Send us your raw footage — we handle color grading, audio mix, titles & delivery.</span>
-            <span style="color:var(--accent);font-weight:600">฿1,000/hr episode <span style="text-decoration:line-through;color:var(--fg-muted);font-weight:400">฿2,000</span> promo</span>
+      <div style="background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.25);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--muted)">
+        🎞️ <strong style="color:var(--fg)">No studio time needed.</strong>
+        Send us your raw files via Google Drive or WeTransfer after booking. We handle
+        color grading, audio mix, titles and delivery.
+      </div>
+
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.4);border-radius:6px;padding:6px 14px;margin-bottom:20px">
+        <span style="font-family:var(--font-head);font-size:1rem;color:var(--accent);letter-spacing:.04em">LAUNCH OFFER</span>
+        <span style="font-size:12px;color:var(--fg);font-weight:700">50% OFF</span>
+        <span style="font-size:11px;color:var(--muted)">&mdash; until 31 August</span>
+      </div>
+
+      <label style="margin-bottom:10px;display:block">How many camera angles?</label>
+      <div style="font-size:12px;color:var(--muted);margin:-4px 0 10px">
+        Every device that filmed counts as one angle — a phone plus a GoPro is two.
+      </div>
+      <div class="chip-group" id="cut-camera-chips">
+        <div class="chip selected" onclick="selectCutCameras(1,this)">1 Camera &mdash; ฿1,500/hr</div>
+        <div class="chip" onclick="selectCutCameras(2,this)">2 Cameras &mdash; ฿2,000/hr</div>
+        <div class="chip" onclick="selectCutCameras(3,this)">3 Cameras &mdash; ฿3,000/hr</div>
+      </div>
+
+      <label style="margin:20px 0 10px;display:block">Total length of your recordings</label>
+      <div style="font-size:12px;color:var(--muted);margin:-4px 0 10px">
+        How long you recorded for — not how long the finished episode should be.
+        Filmed 90&nbsp;minutes on three cameras? That is 90&nbsp;minutes, not 4½&nbsp;hours.
+      </div>
+      <div class="chip-group" id="cut-footage-chips">
+        <div class="chip selected" onclick="selectCutFootage(1,this)">1 hour</div>
+        <div class="chip" onclick="selectCutFootage(2,this)">2 hours</div>
+        <div class="chip" onclick="selectCutFootage(3,this)">3 hours</div>
+        <div class="chip" onclick="selectCutFootage(4,this)">4 hours</div>
+        <div class="chip" onclick="selectCutFootage(6,this)">6 hours</div>
+        <div class="chip" onclick="selectCutFootage(8,this)">8 hours</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px" id="cut-extra-hint"></div>
+
+      <div style="font-size:12px;color:var(--muted);margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+        📐 Delivered in <strong style="color:var(--fg)">16:9</strong> or <strong style="color:var(--fg)">9:16</strong> —
+        both formats available on request. Not sure of the length? Pick the closest — we confirm before we start.
+      </div>
+
+      <div id="pod-price-strip" style="display:none;background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:14px 18px;margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div style="font-size:13px;color:var(--blue-l)" id="pod-price-breakdown"></div>
+          <div style="text-align:right">
+            <div style="font-size:12px;color:var(--muted);text-decoration:line-through" id="pod-normal-price"></div>
+            <div style="font-size:18px;font-weight:700;color:var(--fg)" id="pod-total-price"></div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULL PODCAST SERVICE DETAILS -->
+    <!--
+      Anfrage, keine Buchung -- wie die Drohne. Fuenf Folgen lassen sich in
+      einem Ablauf, der **einen** Termin bucht, nicht abbilden; die Termine
+      werden im Gespraech festgelegt. Preis steht als Hausnummer da, damit
+      Anfragen vorgefiltert ankommen.
+    -->
+    <div id="details-full-podcast" style="display:none;padding:0 0 16px">
+      <div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.3);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--muted)">
+        🚀 <strong style="color:var(--fg)">This is an enquiry, not an instant booking.</strong>
+        Nothing is charged now. We reply with a plan and proposed dates.
+      </div>
+
+      <div style="background:rgba(230,57,70,.06);border:1px solid rgba(230,57,70,.25);border-radius:10px;padding:16px 20px;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">
+          <div style="font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.08em">5 EPISODES, DONE END TO END</div>
+          <div style="text-align:right">
+            <div style="font-family:var(--font-head);font-size:1.6rem;color:var(--fg)">฿19,000</div>
+            <div style="font-size:11px;font-weight:700;color:var(--blue-l);letter-spacing:.08em">ON REQUEST ONLY</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:12px;color:var(--muted);margin-top:12px">
+          <span>✓ Studio, mics, lighting &amp; decor</span><span>✓ Filming with videographer</span>
+          <span>✓ Full edit per episode</span><span>✓ Intro clip</span>
+          <span>✓ Reels for social</span><span>✓ Delivery-ready files</span>
         </div>
       </div>
 
       <div class="form-group">
-        <label>Number of Participants</label>
-        <select id="pod-participants">
-          <option value="1">1 person</option>
-          <option value="2" selected>2 people</option>
-          <option value="3">3 people</option>
-          <option value="4">4 people (max)</option>
-        </select>
+        <label for="fp-topic">What is your podcast about? <span style="color:var(--accent)">*</span></label>
+        <textarea id="fp-topic" rows="4" placeholder="e.g. A weekly interview show with Bangkok founders. Two hosts, one guest per episode, roughly 45 minutes each."></textarea>
       </div>
 
-      <label style="margin-bottom:10px;display:block">Select Date</label>
-      <div class="cal-wrap">
-        <div class="cal-header">
-          <button class="cal-nav" onclick="calNav(-1,'podcast')">‹</button>
-          <div class="cal-month" id="cal-month-podcast"></div>
-          <button class="cal-nav" onclick="calNav(1,'podcast')">›</button>
-        </div>
-        <div class="cal-grid">
-          <div class="cal-days-head">
-            <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
-          </div>
-          <div class="cal-days" id="cal-days-podcast"></div>
-        </div>
-        <div class="cal-legend">
-          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(37,99,235,.3);border:1px solid var(--blue)"></div> Available</div>
-          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(230,57,70,.2);border:1px solid var(--red)"></div> Booked</div>
-        </div>
+      <div class="form-group">
+        <label for="fp-timing">When would you like to start, and how often?</label>
+        <input type="text" id="fp-timing" placeholder="e.g. Start in September, one recording every two weeks">
       </div>
 
-      <div id="podcast-time-section" style="display:none">
-        <label>Select Start Time</label>
-        <div class="time-grid" id="time-slots-podcast" style="margin-top:10px"></div>
-
-        <label style="margin-top:16px;display:block">Duration</label>
-        <div class="chip-group" id="pod-duration-chips">
-          <div class="chip" onclick="selectDuration(1,this,'pod')">1 hour</div>
-          <div class="chip" onclick="selectDuration(2,this,'pod')">2 hours</div>
-          <div class="chip" onclick="selectDuration(3,this,'pod')">3 hours</div>
-          <div class="chip" onclick="selectDuration(4,this,'pod')">4 hours</div>
-          <div class="chip" onclick="selectDuration(8,this,'pod')">Full day (8h)</div>
-        </div>
-      </div>
-
-      <div id="pod-price-strip" style="display:none;background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:14px 18px;margin-top:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="font-size:13px;color:var(--blue-l)" id="pod-price-breakdown">฿200/hr × 1h + ฿1,000 setup</div>
-          <div style="font-size:18px;font-weight:700;color:var(--fg)" id="pod-total-price">฿1,200</div>
-        </div>
-      </div>
+      <div id="fp-summary" style="display:none;background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:14px 18px;margin-top:20px;font-size:13px;color:var(--blue-l)"></div>
     </div>
 
     <!-- PODCAST STUDIO SETUP DETAILS -->
@@ -472,22 +595,23 @@ input[type=date]{color-scheme:dark}
           <span>✓ 3 Microphones (always included)</span><span>✓ Studio lighting rig</span>
           <span>✓ Sofa &amp; table setup</span>
           <span>✓ Decorations &amp; design</span><span>✓ Fully customisable</span>
+          <span>✓ Full edit of your episode</span><span>✓ Intro clip</span>
         </div>
       </div>
       <div style="background:rgba(230,57,70,.06);border:1px solid rgba(230,57,70,.25);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
         <div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:2px">Studio rate</div>
-          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)"><span id="ps-hourly-rate">฿600</span> <span style="font-size:.7rem;color:var(--muted)">/hour</span></div>
+          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)"><span id="ps-hourly-rate">฿900</span> <span style="font-size:.7rem;color:var(--muted)">/hour</span></div>
         </div>
         <div style="width:1px;height:36px;background:var(--border)"></div>
         <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">One-time setup fee</div>
-          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--accent)">฿1,000</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">Setup fee — paid at booking</div>
+          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--accent)">฿1,500</div>
         </div>
         <div style="width:1px;height:36px;background:var(--border)"></div>
         <div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:2px" id="ps-example-label">Total (e.g. 2h)</div>
-          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)" id="ps-example-total">฿2,200</div>
+          <div style="font-family:var(--font-head);font-size:1.4rem;color:var(--fg)" id="ps-example-total">฿3,300</div>
         </div>
       </div>
 
@@ -495,14 +619,14 @@ input[type=date]{color-scheme:dark}
       <div style="margin-bottom:20px">
         <label style="display:block;margin-bottom:10px">Camera Setup</label>
         <div class="chip-group" id="camera-chips">
-          <div class="chip selected" onclick="selectCameraSetup(1,this)">1 Camera &mdash; ฿400/hr</div>
-          <div class="chip" onclick="selectCameraSetup(2,this)">2 Cameras &mdash; ฿600/hr</div>
-          <div class="chip" onclick="selectCameraSetup(3,this)">3 Cameras &mdash; ฿900/hr</div>
+          <div class="chip selected" onclick="selectCameraSetup(1,this)">1 Camera &mdash; ฿900/hr</div>
+          <div class="chip" onclick="selectCameraSetup(2,this)">2 Cameras &mdash; ฿1,300/hr</div>
+          <div class="chip" onclick="selectCameraSetup(3,this)">3 Cameras &mdash; ฿1,900/hr</div>
         </div>
         <div style="margin-top:12px">
           <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--muted)">
             <input type="checkbox" id="with-videographer" onchange="toggleVideographer(this)" style="width:18px;height:18px;cursor:pointer">
-            <span>Add Videographer <span style="color:var(--accent)">+฿300/hr</span></span>
+            <span>Add Videographer <span style="color:var(--accent)">+฿400/hr</span></span>
           </label>
         </div>
       </div>
@@ -513,9 +637,9 @@ input[type=date]{color-scheme:dark}
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Instagram, TikTok &amp; YouTube Shorts — cut, color, captions, music.</div>
         <div class="chip-group" id="reel-chips">
           <div class="chip selected" onclick="selectReelAddon(0,0,this)">None</div>
-          <div class="chip" onclick="selectReelAddon(1,200,this)">1 Reel &mdash; ฿200</div>
-          <div class="chip" onclick="selectReelAddon(5,1000,this)">5 Reels &mdash; ฿1,000</div>
-          <div class="chip" onclick="selectReelAddon(10,2000,this)">10 Reels &mdash; ฿2,000</div>
+          <div class="chip" onclick="selectReelAddon(1,300,this)">1 Reel &mdash; ฿300</div>
+          <div class="chip" onclick="selectReelAddon(5,1200,this)">5 Reels &mdash; ฿1,200</div>
+          <div class="chip" onclick="selectReelAddon(10,2100,this)">10 Reels &mdash; ฿2,100</div>
         </div>
       </div>
 
@@ -556,7 +680,7 @@ input[type=date]{color-scheme:dark}
           <div><div class="label">Total price</div>
             <div class="amount" id="ps-total-price">฿0</div>
           </div>
-          <div style="font-size:12px;color:var(--muted)" id="ps-price-breakdown">฿300 × <span id="ps-hours">0</span>h + ฿1,000 setup</div>
+          <div style="font-size:12px;color:var(--muted)" id="ps-price-breakdown">฿900 × <span id="ps-hours">0</span>h + ฿1,500 setup</div>
         </div>
       </div>
     </div>
@@ -618,7 +742,7 @@ input[type=date]{color-scheme:dark}
         <div>
           <div class="label">Total Rental Cost</div>
           <div class="amount" id="equip-total-price">฿0</div>
-          <div class="discount" id="equip-discount-label" style="display:none">10% discount applied!</div>
+          <div class="discount" id="equip-discount-label" style="display:none">Extra days at the lower rate!</div>
         </div>
         <div style="text-align:right;font-size:12px;color:var(--muted)">
           <div id="equip-days-label"></div>
@@ -706,20 +830,20 @@ input[type=date]{color-scheme:dark}
     </div>
     <label style="margin-bottom:10px;display:block">Select Package</label>
     <div class="sub-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="sub-card" onclick="selectReelPackage(1,200,this)">
+      <div class="sub-card" onclick="selectReelPackage(1,300,this)">
         <div class="sub-card-title">📱 1 Reel</div>
         <div class="sub-card-desc">Single Instagram, TikTok or YouTube Short</div>
-        <div style="margin-top:8px;font-size:16px;font-weight:700;color:var(--fg)">฿200</div>
+        <div style="margin-top:8px;font-size:16px;font-weight:700;color:var(--fg)">฿300</div>
       </div>
-      <div class="sub-card" onclick="selectReelPackage(5,1000,this)">
+      <div class="sub-card" onclick="selectReelPackage(5,1200,this)">
         <div class="sub-card-title">📦 5 Reels</div>
-        <div class="sub-card-desc">5-reel package — save ฿0 per reel</div>
-        <div style="margin-top:8px;font-size:16px;font-weight:700;color:var(--fg)">฿1,000</div>
+        <div class="sub-card-desc">฿240 each — save ฿300</div>
+        <div style="margin-top:8px;font-size:16px;font-weight:700;color:var(--fg)">฿1,200</div>
       </div>
-      <div class="sub-card" onclick="selectReelPackage(10,2000,this)">
+      <div class="sub-card" onclick="selectReelPackage(10,2100,this)">
         <div class="sub-card-title">🚀 10 Reels</div>
-        <div class="sub-card-desc">Best value — 10 reels at ฿200 each</div>
-        <div style="margin-top:8px;font-size:16px;font-weight:700;color:var(--accent)">฿2,000</div>
+        <div class="sub-card-desc">Best value — ฿210 each, save ฿900</div>
+        <div style="margin-top:8px;font-size:16px;font-weight:700;color:var(--accent)">฿2,100</div>
       </div>
     </div>
     <div id="reel-price-strip" style="display:none;background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:14px 18px;margin-top:16px">
@@ -840,8 +964,8 @@ input[type=date]{color-scheme:dark}
     <div class="step-sub" id="pay-sub">Your booking is held for 30 minutes while you complete payment.</div>
 
     <div id="deposit-banner" style="display:none;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.4);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#fbbf24">
-      <strong style="display:block;margin-bottom:4px">฿1,000 Deposit Required</strong>
-      A non-refundable deposit of ฿1,000 is required to confirm your booking. The remaining balance (<span id="deposit-remaining"></span>) is paid on the day at the studio.
+      <strong style="display:block;margin-bottom:4px">฿1,500 Setup Fee — Paid Now</strong>
+      You pay the one-time setup fee of ฿1,500 now to confirm the date. The rest (<span id="deposit-remaining"></span>) is paid at the studio on the day — this is part of your total, not a refundable deposit.
     </div>
 
     <div class="payment-methods" id="payment-methods">
@@ -994,6 +1118,9 @@ let state = {
   subtype: null,
   dronePackage: null,   // Schluessel aus DRONE_PACKAGES
   droneEditing: false,
+  cutCameras: null,     // Cut Only: Zahl der Kameraperspektiven im Rohmaterial
+  fpTopic: '',          // Full Podcast Service: worum geht die Sendung
+  fpTiming: '',         // Full Podcast Service: Start und Takt
   droneLocation: '',
   droneBrief: '',
   date: null,           // 'YYYY-MM-DD'
@@ -1072,6 +1199,37 @@ sb.auth.getSession().then(async ({ data }) => {
 // ═══════════════════════════════════════════════
 // STEP NAVIGATION
 // ═══════════════════════════════════════════════
+// ── Preisanzeige in der Aktionsleiste ────────────────────────────────────
+// Auf dem Handy klebt die Leiste unten am Bildschirm. Ohne den Preis darin
+// waere sie eine nackte Knopfzeile -- der Betrag stuende weiter oben und
+// waere beim Weitertippen nicht mehr zu sehen.
+function updateDock() {
+  const panel = document.querySelector('.step-panel.active');
+  if (!panel) return;
+  const leiste = panel.querySelector('.step-actions');
+  if (!leiste) return;
+
+  let anzeige = leiste.querySelector('.dock-total');
+  if (!anzeige) {
+    anzeige = document.createElement('div');
+    anzeige.className = 'dock-total';
+    anzeige.innerHTML = '<span class="k"></span><span class="v"></span>';
+    leiste.insertBefore(anzeige, leiste.firstChild);
+  }
+
+  // Anfragen haben keinen Preis, Podcast-Aufnahmen nur eine Anzahlung.
+  const anfrage = istAnfrageDienst();
+  const zeigen = !anfrage && state.totalPrice > 0 && state.step >= 2 && state.step <= 4;
+  anzeige.classList.toggle('on', zeigen);
+  if (!zeigen) return;
+
+  const anzahlung = state.service === 'podcast_setup';
+  anzeige.querySelector('.k').textContent = anzahlung ? 'Now / total' : 'Total';
+  anzeige.querySelector('.v').textContent = anzahlung
+    ? '฿' + PODCAST_AUFBAU.toLocaleString() + ' / ฿' + state.totalPrice.toLocaleString()
+    : '฿' + state.totalPrice.toLocaleString();
+}
+
 function goStep(n) {
   document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('step-' + n).classList.add('active');
@@ -1082,9 +1240,14 @@ function goStep(n) {
   if (n === 2) setupStep2();
   if (n === 4) buildReview();
   if (n === 5) setupStep5();
+  updateDock();
 }
 
+const SCHRITT_NAMEN = ['Service', 'Details', 'Your Info', 'Review', 'Payment'];
+
 function updateProgress(n) {
+  const zaehler = document.getElementById('step-counter');
+  if (zaehler) zaehler.textContent = 'Step ' + n + ' of 5 — ' + SCHRITT_NAMEN[n - 1];
   for (let i = 1; i <= 5; i++) {
     const pi = document.getElementById('pi-' + i);
     pi.classList.remove('active', 'done');
@@ -1108,6 +1271,33 @@ function updateProgress(n) {
 function selectService(type, el) {
   document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
+
+  // Beim Wechsel des Dienstes alles verwerfen, was zum vorigen gehoerte.
+  // Ohne das blieb der Preis stehen: Wer Cut Only waehlte (3.000 THB) und dann
+  // auf einen Anfrage-Dienst zurueckwechselte, legte eine Anfrage **mit**
+  // Preis an -- und der Zahlschritt haette ihn eingezogen. Dasselbe galt fuer
+  // Miettage und Uhrzeiten aus einem vorher angefangenen Dienst.
+  if (state.service !== type) {
+    state.subtype = null;
+    state.date = null;
+    state.startTime = null;
+    state.endTime = null;
+    state.duration = null;
+    state.totalPrice = null;
+    state.participants = null;
+    state.equipItems = [];
+    state.equipStart = null;
+    state.equipEnd = null;
+    state.reelCount = null;
+    state.reelAddonCount = 0;
+    state.reelAddonPrice = 0;
+    state.cutCameras = null;
+    state.dronePackage = null;
+    state.droneEditing = false;
+    state.fpTopic = '';
+    state.fpTiming = '';
+  }
+
   state.service = type;
   document.getElementById('btn-step1-next').disabled = false;
 }
@@ -1166,6 +1356,23 @@ function updateDroneSummary() {
 }
 
 /** Was in `notes` der Buchung landet -- die Anfrage steckt vollstaendig darin. */
+// ── Anfrage-Dienste ───────────────────────────────────────────────────────
+// Dienste ohne Preis und ohne festen Termin. Sie durchlaufen dieselbe Strecke,
+// enden aber **nicht** an der Kasse: kein Zahlschritt, Status `enquiry`, und
+// die Bestaetigungsseite spricht von einer Anfrage statt von einer Buchung.
+const ANFRAGE_DIENSTE = ['drone', 'full_podcast'];
+function istAnfrageDienst() { return ANFRAGE_DIENSTE.includes(state.service); }
+
+// Thema und Zeitplan stehen in keiner eigenen Spalte -- ohne sie waere die
+// Anfrage in der Verwaltung nicht zu beantworten.
+function fullPodcastNotes() {
+  const teile = ['Full Podcast Service — 5 episodes (guide price THB 19,000)'];
+  if (state.fpTopic)  teile.push('About: ' + state.fpTopic);
+  if (state.fpTiming) teile.push('Timing: ' + state.fpTiming);
+  if (state.notes)    teile.push('Notes: ' + state.notes);
+  return teile.join(' | ');
+}
+
 function droneNotes() {
   const paket = DRONE_PACKAGES.find(p => p.key === state.dronePackage);
   const teile = [
@@ -1183,11 +1390,16 @@ function droneNotes() {
 // STEP 2 SETUP
 // ═══════════════════════════════════════════════
 function setupStep2() {
+  // `details-drone` fehlte hier bis 2026-07-28: Wer eine Drohnen-Anfrage
+  // begann und dann zurueckging, sah deren Felder unter dem naechsten Dienst
+  // weiterstehen.
   document.getElementById('details-studio').style.display        = 'none';
   document.getElementById('details-podcast').style.display       = 'none';
   document.getElementById('details-podcast-setup').style.display = 'none';
+  document.getElementById('details-full-podcast').style.display  = 'none';
   document.getElementById('details-equipment').style.display     = 'none';
   document.getElementById('details-reel').style.display          = 'none';
+  document.getElementById('details-drone').style.display         = 'none';
 
   if (state.service === 'studio_rental') {
     document.getElementById('details-studio').style.display = '';
@@ -1196,8 +1408,8 @@ function setupStep2() {
     initCalendar('studio');
   } else if (state.service === 'podcast_setup') {
     document.getElementById('details-podcast-setup').style.display = '';
-    document.getElementById('s2-heading').textContent = 'PODCAST SETUP / SERVICE';
-    document.getElementById('s2-sub').textContent = 'Choose your camera setup, date, time, and duration. From ฿600/hr + ฿1,000 one-time setup fee.';
+    document.getElementById('s2-heading').textContent = 'RECORD YOUR PODCAST';
+    document.getElementById('s2-sub').textContent = 'Choose your camera setup, date, time, and duration. From ฿900/hr + ฿1,500 one-time setup fee — editing and intro clip included.';
     // Reset camera selection UI
     state.cameraCount = 1;
     state.withVideographer = false;
@@ -1212,10 +1424,19 @@ function setupStep2() {
     updatePodcastSetupStrip();
     initCalendar('podcast_setup');
   } else if (state.service === 'podcast') {
+    // "Cut Only": kein Studiotermin, also **kein** Kalender. Der Preis haengt
+    // allein an den Stunden Rohmaterial. `service_subtype` bleibt
+    // `editing_only` -- so heisst der Fall in der Datenbank und in
+    // `_shared/preise.ts` seit jeher.
     document.getElementById('details-podcast').style.display = '';
-    document.getElementById('s2-heading').textContent = 'PODCAST DETAILS';
-    document.getElementById('s2-sub').textContent = 'Choose your session type, participants, and date.';
-    initCalendar('podcast');
+    document.getElementById('s2-heading').textContent = 'CUT ONLY';
+    document.getElementById('s2-sub').textContent = 'Tell us how much raw footage you have — no studio time needed.';
+    selectCutCameras(1, document.querySelector('#cut-camera-chips .chip'));
+    selectCutFootage(1, document.querySelector('#cut-footage-chips .chip'));
+  } else if (state.service === 'full_podcast') {
+    document.getElementById('details-full-podcast').style.display = '';
+    document.getElementById('s2-heading').textContent = 'FULL PODCAST SERVICE';
+    document.getElementById('s2-sub').textContent = 'Tell us about the show — we reply with a plan, no payment now.';
   } else if (state.service === 'equipment') {
     // Ueberschrift, Untertitel und Kalender standen bis 2026-07-27 im
     // 'reel'-Zweig darunter -- der aber nie erreicht wird, weil state.service
@@ -1331,9 +1552,6 @@ async function selectCalDate(type, dateStr, el) {
   } else if (type === 'podcast_setup') {
     document.getElementById('ps-time-section').style.display = '';
     await loadTimeSlots('podcast_setup', dateStr);
-  } else {
-    document.getElementById('podcast-time-section').style.display = '';
-    await loadTimeSlots('podcast', dateStr);
   }
 }
 
@@ -1361,7 +1579,7 @@ async function loadTimeSlots(type, date) {
     }
   });
 
-  const containerMap = { studio: 'time-slots-studio', podcast: 'time-slots-podcast', podcast_setup: 'time-slots-podcast_setup' };
+  const containerMap = { studio: 'time-slots-studio', podcast_setup: 'time-slots-podcast_setup' };
   const containerId = containerMap[type];
   const grid = document.getElementById(containerId);
   grid.innerHTML = '';
@@ -1402,7 +1620,7 @@ function limitDurations(startTime, type) {
   const CLOSE = 22;
   const startH = parseInt(startTime);
   const maxDur = CLOSE - startH;
-  const groupId = type === 'podcast_setup' ? 'ps-duration-chips' : type === 'podcast' ? 'pod-duration-chips' : 'duration-chips';
+  const groupId = type === 'podcast_setup' ? 'ps-duration-chips' : 'duration-chips';
   document.querySelectorAll('#' + groupId + ' .chip').forEach(chip => {
     const m = chip.getAttribute('onclick').match(/selectDuration\((\d+)/);
     const dur = m ? parseInt(m[1]) : 1;
@@ -1420,7 +1638,7 @@ function limitDurations(startTime, type) {
   // Clear an out-of-range selection
   if (state.duration && state.duration > maxDur) {
     state.duration = null;
-    document.getElementById(type === 'podcast_setup' ? 'ps-price-strip' : type === 'podcast' ? 'pod-price-strip' : 'studio-price-strip').style.display = 'none';
+    document.getElementById(type === 'podcast_setup' ? 'ps-price-strip' : 'studio-price-strip').style.display = 'none';
   }
 }
 
@@ -1430,10 +1648,6 @@ function selectDuration(h, el, context) {
     document.querySelectorAll('#ps-duration-chips .chip').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
     updatePodcastSetupPrice();
-  } else if (context === 'pod') {
-    document.querySelectorAll('#duration-chips .chip').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    updatePodcastPrice();
   } else {
     document.querySelectorAll('#duration-chips .chip').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
@@ -1441,23 +1655,69 @@ function selectDuration(h, el, context) {
   }
 }
 
+// ── Cut Only ("We cut your podcast") ─────────────────────────────────────
+// Preistafel aus der Werbung (Aushang "WE CUT YOUR PODCAST", Launch Offer):
+// Der Preis haengt an der **Zahl der Kameraperspektiven** im Rohmaterial, denn
+// die bestimmt den Schnittaufwand -- nicht an einer Materialpauschale.
+//
+//   Kameras │ normal/h │ promo/h │ jede weitere Stunde (50% vom Promo-Satz)
+//   ────────┼──────────┼─────────┼──────────────────────────────────────────
+//      1    │   3.000  │  1.500  │   750
+//      2    │   4.000  │  2.000  │ 1.000
+//      3    │   6.000  │  3.000  │ 1.500
+//
+// Die erste Stunde kostet den vollen Satz, jede weitere die Haelfte.
+// Muss mit `_shared/preise.ts` zusammenpassen (docs/todo.md T-8).
+const CUT_PROMO  = { 1: 1500, 2: 2000, 3: 3000 };
+const CUT_NORMAL = { 1: 3000, 2: 4000, 3: 6000 };
+const CUT_ZUSATZ = { 1:  750, 2: 1000, 3: 1500 };
+
+function cutOnlyPreis(kameras, stunden) {
+  return CUT_PROMO[kameras] + Math.max(0, Math.ceil(stunden) - 1) * CUT_ZUSATZ[kameras];
+}
+
+function selectCutCameras(n, el) {
+  document.querySelectorAll('#cut-camera-chips .chip').forEach(c => c.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  state.cutCameras = n;
+  // In `service_subtype` kodiert, damit `_shared/preise.ts` den Betrag
+  // nachrechnen kann, ohne dass die Buchungstabelle eine neue Spalte braucht.
+  state.subtype = 'editing_only_' + n + 'cam';
+  updatePodcastPrice();
+}
+
+function selectCutFootage(stunden, el) {
+  document.querySelectorAll('#cut-footage-chips .chip').forEach(c => c.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  state.duration = stunden;   // Stunden Rohmaterial, landet in `duration_hours`
+  updatePodcastPrice();
+}
+
 function updatePodcastPrice() {
-  if (!state.duration) return;
-  let total, breakdown;
-  if (state.subtype === 'editing_only') {
-    total = 1000 * state.duration;
-    breakdown = '฿1,000/hr × ' + state.duration + ' episode(s) — promo (was ฿2,000/hr)';
-  } else {
-    if (!state.startTime) return;
-    total = 200 * state.duration + 1000;
-    breakdown = '฿200/hr × ' + state.duration + 'h + ฿1,000 setup';
-    const startH = parseInt(state.startTime);
-    state.endTime = String(startH + state.duration).padStart(2,'0') + ':00';
-  }
+  const k = state.cutCameras;
+  if (!k || !state.duration) return;
+
+  const zusatzStunden = Math.max(0, Math.ceil(state.duration) - 1);
+  const total  = cutOnlyPreis(k, state.duration);
+  const normal = CUT_NORMAL[k] + zusatzStunden * CUT_ZUSATZ[k] * 2;
+
+  const breakdown = zusatzStunden === 0
+    ? '฿' + CUT_PROMO[k].toLocaleString() + ' — first hour, ' + k + ' camera' + (k > 1 ? 's' : '')
+    : '฿' + CUT_PROMO[k].toLocaleString() + ' (1st hour) + ฿' + CUT_ZUSATZ[k].toLocaleString()
+      + ' × ' + zusatzStunden + ' extra hour' + (zusatzStunden > 1 ? 's' : '');
+
   state.totalPrice = total;
   document.getElementById('pod-price-breakdown').textContent = breakdown;
-  document.getElementById('pod-total-price').textContent = '฿' + total.toLocaleString();
+  document.getElementById('pod-normal-price').textContent = '฿' + normal.toLocaleString();
+  document.getElementById('pod-total-price').textContent  = '฿' + total.toLocaleString();
   document.getElementById('pod-price-strip').style.display = '';
+  updateDock();
+
+  const hinweis = document.getElementById('cut-extra-hint');
+  if (hinweis) {
+    hinweis.textContent = 'First hour ฿' + CUT_PROMO[k].toLocaleString()
+      + ', every additional hour ฿' + CUT_ZUSATZ[k].toLocaleString() + ' (50% of the promo rate).';
+  }
 }
 
 function updateStudioPrice() {
@@ -1469,11 +1729,30 @@ function updateStudioPrice() {
   document.getElementById('studio-hours').textContent = state.duration;
   document.getElementById('studio-total-price').textContent = '฿' + total.toLocaleString();
   document.getElementById('studio-price-strip').style.display = '';
+  updateDock();
 }
 
+/** Einmalige Einrichtungsgebuehr. Zugleich die online eingezogene Anzahlung. */
+const PODCAST_AUFBAU = 1500;
+
 function psHourlyRate() {
-  const cameraRates = { 1: 400, 2: 600, 3: 900 };
-  return 200 + cameraRates[state.cameraCount] + (state.withVideographer ? 300 : 0);
+  // Preisstufe vom 2026-07-28, zweite Anpassung.
+  //
+  // Erster Anlauf: 800 / 1.100 / 1.500 je Stunde. Dabei entstand ein
+  // Zusammenstoss, den ein rechnender Kunde bemerkt haette: Bei drei Kameras
+  // und zwei Stunden kostete "wir filmen **und** schneiden" genau so viel wie
+  // "du filmst, wir schneiden nur" -- beides 4.500 THB. Wer rechnet, fragt
+  // sich dann, warum er selbst filmen sollte.
+  //
+  // Jetzt: 900 / 1.300 / 1.900 je Stunde. Damit liegt Filmen+Schnitt in
+  // **jeder** Kombination aus Kameras und Dauer ueber dem reinen Schnitt --
+  // der knappste Fall (3 Kameras, 1 Stunde) noch um 400 THB.
+  // Normalfall (2h, 2 Kameras, Videograf) 4.900 THB; fuenf einzeln 24.500
+  // gegen 19.000 im Paket, also 22 % Ersparnis.
+  //
+  // Muss mit `_shared/preise.ts` zusammenpassen (docs/todo.md T-8).
+  const cameraRates = { 1: 700, 2: 1100, 3: 1700 };
+  return 200 + cameraRates[state.cameraCount] + (state.withVideographer ? 400 : 0);
 }
 
 function updatePodcastSetupStrip() {
@@ -1484,12 +1763,12 @@ function updatePodcastSetupStrip() {
   const exTotal = document.getElementById('ps-example-total');
   if (state.duration) {
     // real configured total
-    const total = hourlyRate * state.duration + 1000 + state.reelAddonPrice;
+    const total = hourlyRate * state.duration + PODCAST_AUFBAU + state.reelAddonPrice;
     if (exLabel) exLabel.textContent = 'Total (' + state.duration + 'h)';
     if (exTotal) exTotal.textContent = '฿' + total.toLocaleString();
   } else {
     // 2h example
-    const example = hourlyRate * 2 + 1000 + state.reelAddonPrice;
+    const example = hourlyRate * 2 + PODCAST_AUFBAU + state.reelAddonPrice;
     if (exLabel) exLabel.textContent = 'Total (e.g. 2h)';
     if (exTotal) exTotal.textContent = '฿' + example.toLocaleString();
   }
@@ -1497,6 +1776,7 @@ function updatePodcastSetupStrip() {
 
 function updatePodcastSetupPrice() {
   updatePodcastSetupStrip();
+  updateDock();
   if (!state.startTime || !state.duration) return;
   const cameraRates = { 1: 400, 2: 600, 3: 900 };
   const hourlyRate = 200 + cameraRates[state.cameraCount] + (state.withVideographer ? 300 : 0);
@@ -1508,7 +1788,7 @@ function updatePodcastSetupPrice() {
   document.getElementById('ps-total-price').textContent = '฿' + total.toLocaleString();
   const vgText = state.withVideographer ? ' + ฿300/hr videographer' : '';
   const reelText = state.reelAddonPrice ? ' + ฿' + state.reelAddonPrice.toLocaleString() + ' (' + state.reelAddonCount + ' reel' + (state.reelAddonCount > 1 ? 's' : '') + ')' : '';
-  document.getElementById('ps-price-breakdown').innerHTML = '฿' + hourlyRate + '/hr × <span id=ps-hours>' + state.duration + '</span>h + ฿1,000 setup' + vgText + reelText;
+  document.getElementById('ps-price-breakdown').innerHTML = '฿' + hourlyRate + '/hr × <span id=ps-hours>' + state.duration + '</span>h + ฿' + PODCAST_AUFBAU.toLocaleString() + ' setup' + vgText + reelText;
   document.getElementById('ps-price-strip').style.display = '';
 }
 
@@ -1533,45 +1813,15 @@ function selectReelAddon(count, price, el) {
 }
 
 // Subtype selection
+//
+// Der 'podcast'-Zweig ist am 2026-07-28 entfallen: Cut Only hat nur noch eine
+// Ausfuehrung, `state.subtype` wird in `setupStep2()` fest auf `editing_only`
+// gesetzt. Die Funktion bleibt fuer die Drohnenpakete.
 function selectSubtype(subtype, el, context) {
   const parent = el.parentElement;
   parent.querySelectorAll('.sub-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   state.subtype = subtype;
-
-  if (context === 'podcast') {
-    const timeSection = document.getElementById('podcast-time-section');
-    const durationLabel = timeSection ? timeSection.querySelector('label:last-of-type') : null;
-    if (subtype === 'editing_only') {
-      // No time slot needed — just episodes count
-      if (timeSection) timeSection.style.display = 'none';
-      document.getElementById('pod-price-strip').style.display = 'none';
-      // Show episode selector
-      let epBox = document.getElementById('editing-episodes');
-      if (!epBox) {
-        epBox = document.createElement('div');
-        epBox.id = 'editing-episodes';
-        epBox.style.cssText = 'margin-top:16px';
-        epBox.innerHTML = `<label style="display:block;margin-bottom:10px">Number of Episodes</label>
-          <div class="chip-group">
-            <div class="chip selected" onclick="selectEditingEpisodes(1,this)">1 episode</div>
-            <div class="chip" onclick="selectEditingEpisodes(2,this)">2 episodes</div>
-            <div class="chip" onclick="selectEditingEpisodes(3,this)">3 episodes</div>
-            <div class="chip" onclick="selectEditingEpisodes(4,this)">4 episodes</div>
-          </div>`;
-        timeSection.parentNode.insertBefore(epBox, timeSection.nextSibling);
-        state.duration = 1;
-        updatePodcastPrice();
-      }
-      epBox.style.display = '';
-    } else {
-      if (timeSection) timeSection.style.display = state.startTime ? '' : 'none';
-      const epBox = document.getElementById('editing-episodes');
-      if (epBox) epBox.style.display = 'none';
-      state.duration = null;
-      document.getElementById('pod-price-strip').style.display = 'none';
-    }
-  }
 }
 
 function selectReelPackage(count, price, el) {
@@ -1579,23 +1829,31 @@ function selectReelPackage(count, price, el) {
   el.classList.add('selected');
   state.totalPrice = price;
   state.reelCount = count;
+  // In `service_subtype` kodiert -- bis 2026-07-28 stand die Paketgroesse nur
+  // in `notes`, und `_shared/preise.ts` musste den Dienst deshalb ablehnen.
+  state.subtype = 'reel_' + count;
   document.getElementById('reel-price-breakdown').textContent = count + ' reel' + (count > 1 ? 's' : '') + ' × ฿' + (price / count) + '/reel';
   document.getElementById('reel-total-price').textContent = '฿' + price.toLocaleString();
   document.getElementById('reel-price-strip').style.display = '';
-}
-
-function selectEditingEpisodes(n, el) {
-  document.querySelectorAll('#editing-episodes .chip').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  state.duration = n;
-  state.startTime = state.startTime || '00:00';
-  updatePodcastPrice();
+  updateDock();
 }
 
 // ═══════════════════════════════════════════════
 // EQUIPMENT
 // ═══════════════════════════════════════════════
 const EQUIP_PRICES = { pocket3: 500, neo: 700, nano: 500 };
+
+// Die ersten zwei Tage kosten den vollen Satz, **jeder weitere** den
+// Zusatzsatz -- der gilt nur fuer die zusaetzlichen Tage, nicht rueckwirkend
+// fuer die ganze Miete.
+//
+// Ein rueckwirkender Staffelsatz unter dem Grundsatz macht die Reihe
+// zwangslaeufig krumm: Mit 300 THB rueckwirkend kostete eine Dreitagesmiete
+// 900 THB und damit **weniger als zwei Tage** (1.000). So steigt sie streng
+// monoton, und der Nachlass landet bei den langen Mieten.
+// Muss mit `_shared/preise.ts` zusammenpassen (docs/todo.md T-8).
+const EQUIP_EXTRA_DAY = { pocket3: 300, neo: 500, nano: 300 };
+const EQUIP_EXTRA_DAY_FROM = 3;
 
 // ═══════════════════════════════════════════════
 // EQUIPMENT CALENDAR (range picker)
@@ -1716,17 +1974,23 @@ function calcEquipPrice() {
   const start = new Date(state.equipStart), end = new Date(state.equipEnd);
   const days  = Math.max(1, Math.round((end - start) / 86400000) + 1);
 
-  const basePrice = state.equipItems.reduce((sum, id) => sum + EQUIP_PRICES[id], 0);
-  const discount  = days >= 3 ? 0.1 : 0;
-  const total     = Math.round(basePrice * days * (1 - discount));
+  const basePrice  = state.equipItems.reduce((sum, id) => sum + EQUIP_PRICES[id], 0);
+  const extraPrice = state.equipItems.reduce((sum, id) => sum + EQUIP_EXTRA_DAY[id], 0);
+  const fullDays   = Math.min(days, EQUIP_EXTRA_DAY_FROM - 1);
+  const extraDays  = days - fullDays;
+  const staffel    = extraDays > 0;
+  const total      = basePrice * fullDays + extraPrice * extraDays;
   state.totalPrice = total;
 
   const strip = document.getElementById('equip-price-strip');
   strip.style.display = '';
   document.getElementById('equip-total-price').textContent = '฿' + total.toLocaleString();
   document.getElementById('equip-days-label').textContent  = days + ' day' + (days > 1 ? 's' : '');
-  document.getElementById('equip-breakdown').textContent   = '฿' + basePrice + '/day × ' + days;
-  document.getElementById('equip-discount-label').style.display = discount > 0 ? '' : 'none';
+  document.getElementById('equip-breakdown').textContent   = staffel
+    ? '฿' + basePrice + ' × ' + fullDays + 'd + ฿' + extraPrice + ' × ' + extraDays + 'd'
+    : '฿' + basePrice + '/day × ' + days;
+  document.getElementById('equip-discount-label').style.display = staffel ? '' : 'none';
+  updateDock();
 }
 
 // ═══════════════════════════════════════════════
@@ -1749,18 +2013,23 @@ function validateStep2() {
     goStep(3);
     return;
   }
+  if (state.service === 'full_podcast') {
+    // Ebenfalls Anfrage. Ohne Thema ist sie nicht beantwortbar; der Zeitplan
+    // ist hilfreich, aber nicht Bedingung.
+    state.fpTopic  = document.getElementById('fp-topic').value.trim();
+    state.fpTiming = document.getElementById('fp-timing').value.trim();
+    if (!state.fpTopic) return alert('Please tell us what your podcast is about — it lets us plan properly.');
+    goStep(3);
+    return;
+  }
   if (state.service === 'studio_rental') {
     if (!state.date)      return alert('Please select a date.');
     if (!state.startTime) return alert('Please select a start time.');
     if (!state.duration)  return alert('Please select a duration.');
   } else if (state.service === 'podcast') {
-    if (!state.subtype)   return alert('Please choose recording type.');
-    if (state.subtype !== 'editing_only') {
-      if (!state.date)      return alert('Please select a date.');
-      if (!state.startTime) return alert('Please select a start time.');
-      if (!state.duration)  return alert('Please select a duration.');
-    }
-    state.participants = parseInt(document.getElementById('pod-participants').value);
+    // Cut Only: kein Datum, keine Uhrzeit -- Kameraperspektiven und Menge.
+    if (!state.cutCameras) return alert('Please choose how many camera angles your footage has.');
+    if (!state.duration)   return alert('Please tell us how much raw footage you have.');
   } else if (state.service === 'equipment') {
     if (state.equipItems.length === 0) return alert('Please select at least one piece of equipment.');
     if (!state.equipStart) return alert('Please select a pick-up date.');
@@ -1887,20 +2156,40 @@ function buildReview() {
       <div class="review-row"><span class="review-label">Duration</span><span class="review-value">${state.duration} hour${state.duration > 1 ? 's' : ''}</span></div>
       <div class="review-total"><span class="label">Total</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
   } else if (state.service === 'podcast') {
-    const subLabel = state.subtype === 'podcast_recording' ? 'Recording Only' : 'Recording + Editing';
+    const k = state.cutCameras;
+    const extraStunden = Math.max(0, Math.ceil(state.duration) - 1);
+    const normal = CUT_NORMAL[k] + extraStunden * CUT_ZUSATZ[k] * 2;
     detailRows = `
-      ${state.subtype === 'editing_only' ? `
-      <div class="review-row"><span class="review-label">Service</span><span class="review-value">Editing Only (Promo)</span></div>
-      <div class="review-row"><span class="review-label">Episodes</span><span class="review-value">${state.duration} episode${state.duration > 1 ? 's' : ''}</span></div>
-      <div class="review-row"><span class="review-label">Rate</span><span class="review-value">฿1,000/episode (was ฿2,000)</span></div>
-      ` : `
-      <div class="review-row"><span class="review-label">Service</span><span class="review-value">Podcast ${subLabel}</span></div>
-      <div class="review-row"><span class="review-label">Participants</span><span class="review-value">${state.participants}</span></div>
+      <div class="review-row"><span class="review-label">Service</span><span class="review-value">We Cut Your Podcast — you send the footage</span></div>
+      <div class="review-row"><span class="review-label">Camera angles</span><span class="review-value">${k} camera${k > 1 ? 's' : ''}</span></div>
+      <div class="review-row"><span class="review-label">Raw footage</span><span class="review-value">${state.duration} hour${state.duration > 1 ? 's' : ''}</span></div>
+      <div class="review-row"><span class="review-label">Rate</span><span class="review-value">฿${CUT_PROMO[k].toLocaleString()} first hour${extraStunden ? ` + ฿${CUT_ZUSATZ[k].toLocaleString()} × ${extraStunden}h` : ''}</span></div>
+      <div class="review-row"><span class="review-label">Delivery</span><span class="review-value">16:9 or 9:16 — both on request</span></div>
+      <div class="review-row"><span class="review-label">Normal price</span><span class="review-value"><span style="text-decoration:line-through;color:var(--muted)">฿${normal.toLocaleString()}</span> — launch offer 50% off</span></div>
+      <div class="review-total"><span class="label">Total</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
+  } else if (state.service === 'podcast_setup') {
+    // Dieser Zweig fehlte bis 2026-07-28 vollstaendig: Schritt 4 zeigte fuer
+    // den Podcast-Dienst **keine** Zeile an -- weder Termin noch Betrag.
+    const satz = psHourlyRate();
+    detailRows = `
+      <div class="review-row"><span class="review-label">Service</span><span class="review-value">Record Your Podcast</span></div>
+      <div class="review-row"><span class="review-label">Cameras</span><span class="review-value">${state.cameraCount} camera${state.cameraCount > 1 ? 's' : ''}${state.withVideographer ? ' + videographer' : ''}</span></div>
       <div class="review-row"><span class="review-label">Date</span><span class="review-value">${formatDate(state.date)}</span></div>
       <div class="review-row"><span class="review-label">Time</span><span class="review-value">${state.startTime} – ${state.endTime}</span></div>
       <div class="review-row"><span class="review-label">Duration</span><span class="review-value">${state.duration} hour${state.duration > 1 ? 's' : ''}</span></div>
-      `}
-      <div class="review-total"><span class="label">Total</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
+      <div class="review-row"><span class="review-label">Rate</span><span class="review-value">฿${satz.toLocaleString()}/hr + ฿${PODCAST_AUFBAU.toLocaleString()} setup</span></div>
+      <div class="review-row"><span class="review-label">Included</span><span class="review-value">Full edit + intro clip</span></div>
+      ${state.reelAddonCount ? `<div class="review-row"><span class="review-label">Reels</span><span class="review-value">${state.reelAddonCount} reel(s)</span></div>` : ''}
+      <div class="review-row"><span class="review-label">Session total</span><span class="review-value">฿${state.totalPrice.toLocaleString()}</span></div>
+      <div class="review-total"><span class="label">Setup fee — paid now</span><span class="amount">฿${PODCAST_AUFBAU.toLocaleString()}</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">The remaining ฿${(state.totalPrice - PODCAST_AUFBAU).toLocaleString()} is paid at the studio on the day.</div>`;
+  } else if (state.service === 'full_podcast') {
+    detailRows = `
+      <div class="review-row"><span class="review-label">Service</span><span class="review-value">Full Podcast Service — 5 episodes</span></div>
+      <div class="review-row"><span class="review-label">About</span><span class="review-value">${state.fpTopic}</span></div>
+      ${state.fpTiming ? `<div class="review-row"><span class="review-label">Timing</span><span class="review-value">${state.fpTiming}</span></div>` : ''}
+      <div class="review-row"><span class="review-label">Included</span><span class="review-value">Filming, editing, intro, reels</span></div>
+      <div class="review-total"><span class="label">Guide price</span><span class="amount" style="color:var(--blue-l)">฿19,000 — on request only</span></div>`;
   } else if (state.service === 'reel') {
     detailRows = `
       <div class="review-row"><span class="review-label">Service</span><span class="review-value">Reel Editing</span></div>
@@ -1916,14 +2205,14 @@ function buildReview() {
       <div class="review-row"><span class="review-label">Pick-up</span><span class="review-value">${formatDate(state.equipStart)}</span></div>
       <div class="review-row"><span class="review-label">Return</span><span class="review-value">${formatDate(state.equipEnd)}</span></div>
       <div class="review-row"><span class="review-label">Rental Days</span><span class="review-value">${days} day${days > 1 ? 's' : ''}</span></div>
-      <div class="review-total"><span class="label">Total${days >= 3 ? ' (10% discount applied)' : ''}</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
+      <div class="review-total"><span class="label">Total${days >= EQUIP_EXTRA_DAY_FROM ? ' (extra days discounted)' : ''}</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
   }
   document.getElementById('review-details').innerHTML = detailRows;
 
   // Person details
   // Eine Anfrage ist keine Buchung -- Knopf und Zustimmungstext duerfen nicht
   // behaupten, es werde jetzt verbindlich gebucht.
-  const istAnfrage = state.service === 'drone';
+  const istAnfrage = ANFRAGE_DIENSTE.includes(state.service);
   const confBtn = document.getElementById('btn-confirm');
   if (confBtn) confBtn.innerHTML = istAnfrage ? 'Send Enquiry &rarr;' : 'Continue &rarr;';
   const termsEl = document.querySelector('#step-4 .terms-text');
@@ -1961,7 +2250,7 @@ function bookingPayload() {
     service_type:         state.service,
     service_subtype:      state.service === 'drone' ? state.dronePackage : state.subtype,
     // Eine Anfrage hat noch kein Datum -- der Termin wird abgestimmt.
-    booking_date:         (state.service === 'equipment' || state.service === 'drone') ? null : state.date,
+    booking_date:         (state.service === 'equipment' || istAnfrageDienst()) ? null : state.date,
     start_time:           state.startTime,
     end_time:             state.endTime,
     duration_hours:       state.duration,
@@ -1971,16 +2260,16 @@ function bookingPayload() {
     equipment_items:      state.equipItems.length > 0 ? state.equipItems : null,
     participant_count:    state.participants || null,
     total_price:          state.totalPrice || null,
-    notes:                state.service === 'drone' ? droneNotes() : state.service === 'reel' ? `Reel package: ${state.reelCount} reel(s)${state.notes ? ' | ' + state.notes : ''}` : state.notes ? state.notes + (state.service === 'podcast_setup' ? ' | Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : '') : (state.service === 'podcast_setup' ? 'Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : null),
+    notes:                state.service === 'drone' ? droneNotes() : state.service === 'full_podcast' ? fullPodcastNotes() : state.service === 'reel' ? `Reel package: ${state.reelCount} reel(s)${state.notes ? ' | ' + state.notes : ''}` : state.notes ? state.notes + (state.service === 'podcast_setup' ? ' | Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : '') : (state.service === 'podcast_setup' ? 'Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : null),
     source:               'website',
     payment_method:       null,
-    // Eine Drohnen-Anfrage ist **weder** bezahlt **noch** bestaetigt -- ohne
-    // eigenen Status stuende sie sonst als `confirmed` in der Verwaltung, weil
-    // sie keinen Preis hat. Genau das darf sie nicht: Termin und Preis sind
-    // noch offen.
-    booking_status:       state.service === 'drone' ? 'enquiry'
+    // Eine Anfrage ist **weder** bezahlt **noch** bestaetigt -- ohne eigenen
+    // Status stuende sie sonst als `confirmed` in der Verwaltung, weil sie
+    // keinen Preis hat. Genau das darf sie nicht: Termin und Preis sind noch
+    // offen. Gilt fuer Drohne und Full Podcast Service gleichermassen.
+    booking_status:       istAnfrageDienst() ? 'enquiry'
                           : state.totalPrice ? 'pending_payment' : 'confirmed',
-    status:               state.service === 'drone' ? 'pending'
+    status:               istAnfrageDienst() ? 'pending'
                           : state.totalPrice ? 'pending' : 'confirmed'
   };
 }
@@ -1990,10 +2279,10 @@ async function goToPayment() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Please wait…';
 
-  // Drohnen-Anfrage: kein Preis, also auch kein Zahlschritt. Sie wird
-  // angelegt und bestaetigt sich selbst -- die Pruefung unten wuerde sie
-  // sonst mit "No price calculated" abweisen.
-  if (state.service === 'drone') {
+  // Anfrage: kein Preis, also auch kein Zahlschritt. Sie wird angelegt und
+  // bestaetigt sich selbst -- die Pruefung unten wuerde sie sonst mit
+  // "No price calculated" abweisen.
+  if (istAnfrageDienst()) {
     await finalizeBooking(bookingPayload());
     return;
   }
@@ -2033,13 +2322,13 @@ async function goToPayment() {
 // ═══════════════════════════════════════════════
 function setupStep5() {
   const isSetup = state.service === 'podcast_setup';
-  const chargeAmount = isSetup ? 1000 : state.totalPrice;
+  const chargeAmount = isSetup ? PODCAST_AUFBAU : state.totalPrice;
   state.depositAmount = chargeAmount;
 
   document.getElementById('cash-amount-label').textContent = '฿' + chargeAmount.toLocaleString();
   document.getElementById('deposit-banner').style.display = isSetup ? '' : 'none';
   if (isSetup) {
-    document.getElementById('deposit-remaining').textContent = '฿' + (state.totalPrice - 1000).toLocaleString();
+    document.getElementById('deposit-remaining').textContent = '฿' + (state.totalPrice - PODCAST_AUFBAU).toLocaleString();
   }
 
   // Disable cash for podcast_setup — deposit must be paid online
@@ -2300,16 +2589,22 @@ async function finalizeBooking(payload, existingBooking, skipEmail) {
   // Eine Anfrage darf sich nicht als bestaetigte Buchung ausgeben. Ohne das
   // stuende hier "BOOKING CONFIRMED!", obwohl weder Termin noch Preis
   // feststehen -- und die Kalenderknoepfe trugen ein Datum, das es nicht gibt.
-  if (state.service === 'drone') {
+  if (istAnfrageDienst()) {
     const titel = document.getElementById('conf-title');
     const text  = document.getElementById('conf-subtext');
     if (titel) titel.textContent = 'ENQUIRY RECEIVED';
     if (text) {
-      text.innerHTML = 'Thanks! We have your request and will check the airspace '
-        + 'rules for your location.<br><span style="color:var(--fg)">You will get a '
-        + 'quote and a proposed date at <strong>' + state.email + '</strong>, usually '
-        + 'within 24h.</span><br><span style="color:var(--muted)">Nothing has been '
-        + 'charged.</span>';
+      text.innerHTML = state.service === 'drone'
+        ? 'Thanks! We have your request and will check the airspace '
+          + 'rules for your location.<br><span style="color:var(--fg)">You will get a '
+          + 'quote and a proposed date at <strong>' + state.email + '</strong>, usually '
+          + 'within 24h.</span><br><span style="color:var(--muted)">Nothing has been '
+          + 'charged.</span>'
+        : 'Thanks! We have your request and will put together a plan for your '
+          + 'show.<br><span style="color:var(--fg)">You will get the plan and '
+          + 'proposed recording dates at <strong>' + state.email + '</strong>, usually '
+          + 'within 24h.</span><br><span style="color:var(--muted)">Nothing has been '
+          + 'charged.</span>';
     }
     const gcal = document.getElementById('btn-gcal');
     const ics  = document.getElementById('btn-ics');

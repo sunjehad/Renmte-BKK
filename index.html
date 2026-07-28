@@ -71,10 +71,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:fl
 .btn-primary:hover{transform:translateY(-2px);opacity:.9}
 .btn-ghost{border:1px solid var(--border);color:var(--fg);padding:14px 32px;border-radius:8px;font-weight:500;font-size:15px;transition:border-color .2s,background .2s}
 .btn-ghost:hover{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
-.hero-stats{display:flex;gap:48px;justify-content:center;margin-top:64px;padding-top:40px;border-top:1px solid var(--border);animation:fadeUp .8s .4s var(--ease) both;flex-wrap:wrap}
-.stat-item{text-align:center}
-.stat-num{font-family:var(--font-head);font-size:2.8rem;color:var(--fg);line-height:1}
-.stat-label{font-size:12px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
 
 /* ── TRUST ── */
 #trust{padding:60px 40px;border-bottom:1px solid var(--border)}
@@ -126,7 +122,6 @@ section{padding:100px 40px}
 .service-images.single img{grid-column:1/-1;aspect-ratio:16/7}
 
 /* ── SOCIAL PROOF ── */
-#social-proof{background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 .proof-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
 .proof-numbers{display:grid;grid-template-columns:1fr 1fr;gap:32px}
 .proof-num-item{padding:24px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius)}
@@ -144,7 +139,7 @@ section{padding:100px 40px}
 
 /* ── PRICING HIGHLIGHT ── */
 #pricing{background:var(--bg)}
-.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2px}
 .price-card{background:var(--bg-card);padding:40px 32px;position:relative}
 .price-card.featured{background:linear-gradient(135deg,#1a0a0b 0%,#1a0808 100%);border:1px solid rgba(230,57,70,.3)}
 .price-badge{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:0 0 6px 6px;letter-spacing:.08em;text-transform:uppercase}
@@ -255,13 +250,13 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
   [style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:1fr!important}
   [style*="padding:0 40px"]{padding:0 20px!important}
   nav{padding:14px 20px}
-  .nav-links,.nav-cta{display:none}
+  .nav-links{display:none}
+  .nav-cta{padding:9px 16px;font-size:12px;margin-left:auto;margin-right:14px}
   .hamburger{display:flex}
   section{padding:70px 20px}
   #hero{padding:100px 20px 60px}
   .hero-badge{margin-bottom:12px}
   .hero-address{flex-wrap:wrap;margin-top:4px!important;margin-bottom:16px!important;font-size:11px!important}
-  .hero-stats{gap:24px}
   .proof-numbers{grid-template-columns:1fr 1fr}
   .trust-inner{flex-direction:column;gap:20px}
   .trust-divider{display:none}
@@ -270,6 +265,55 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
 }
 @media(prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
+}
+/* ── Feste Buchungsleiste, nur auf dem Handy ────────────────────────────
+   Dieselbe Idee wie in der Buchungsstrecke: Der wichtigste Knopf gehoert an
+   den Daumen, nicht ans Seitenende. Sie erscheint erst, wenn der Kopfbereich
+   durchgescrollt ist -- oben steht der Knopf ja schon in der Leiste. */
+.mobile-book{display:none}
+@media(max-width:768px){
+  .mobile-book{
+    display:flex;align-items:center;gap:12px;
+    position:fixed;left:0;right:0;bottom:0;z-index:90;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(8,8,8,.94);backdrop-filter:blur(16px);
+    border-top:1px solid var(--border);
+    transform:translateY(110%);transition:transform .3s var(--ease);
+  }
+  .mobile-book.show{transform:translateY(0)}
+  .mobile-book .txt{flex:1;min-width:0}
+  .mobile-book .txt b{display:block;font-size:13px;color:var(--fg)}
+  .mobile-book .txt span{font-size:11px;color:var(--fg-muted)}
+  .mobile-book a{
+    background:var(--accent);color:#fff;border-radius:8px;
+    min-height:46px;display:flex;align-items:center;padding:0 20px;
+    font-size:14px;font-weight:700;letter-spacing:.04em;white-space:nowrap;
+  }
+  /* Platz, damit die Leiste nichts verdeckt */
+  footer{padding-bottom:84px}
+}
+
+/* ── Sprungmarken unter der festen Kopfleiste ──────────────────────────
+   Ohne das verschwindet jede angesprungene Ueberschrift hinter der Leiste. */
+section[id]{scroll-margin-top:84px}
+
+/* ── Fingerbedienung ──────────────────────────────────────────────────── */
+@media(pointer:coarse){
+  .price-btn,.service-cta,.nav-cta,.hero-btn{min-height:46px;display:inline-flex;align-items:center;justify-content:center}
+  .faq-q{min-height:48px}
+}
+
+/* ── Zwischengroesse: Tablet und Handy quer ───────────────────────────── */
+@media(min-width:769px) and (max-width:1024px){
+  .pricing-grid{grid-template-columns:repeat(2,1fr)}
+  .dji-grid-inner{grid-template-columns:repeat(2,1fr)!important}
+}
+
+/* ── Schmale Geraete: die fuenf Preiskarten nicht ausufern lassen ─────── */
+@media(max-width:560px){
+  .price-card{padding:28px 20px}
+  .price-features li{font-size:13px}
+  .section-title{font-size:2rem}
 }
 </style>
 </head>
@@ -284,7 +328,6 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
   <div class="nav-links">
     <a href="#services" data-i18n="nav_services">Services</a>
     <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
-    <a href="#social-proof" data-i18n="nav_about">About</a>
     <a href="#faq" data-i18n="nav_faq">FAQ</a>
     <div class="lang-select">
       <select id="lang-switcher" aria-label="Select language">
@@ -306,7 +349,6 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
 <div class="mobile-nav" id="mobile-nav">
   <a href="#services" onclick="closeMobileNav()" data-i18n="nav_services">Services</a>
   <a href="#pricing" onclick="closeMobileNav()" data-i18n="nav_pricing">Pricing</a>
-  <a href="#social-proof" onclick="closeMobileNav()" data-i18n="nav_about">About</a>
   <a href="#faq" onclick="closeMobileNav()" data-i18n="nav_faq">FAQ</a>
   <a href="booking.html" onclick="closeMobileNav()" class="btn-primary" data-i18n="nav_book">Book Now</a>
 </div>
@@ -336,24 +378,6 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
       <a href="#services" class="btn-primary" data-i18n="hero_cta_primary">Explore Services</a>
       <a href="https://www.instagram.com/bangkok_rentme" target="_blank" class="btn-ghost" data-i18n="hero_cta_secondary">See Our Work</a>
     </div>
-    <div class="hero-stats">
-      <div class="stat-item">
-        <div class="stat-num" data-target="141662" id="stat1">0</div>
-        <div class="stat-label" data-i18n="stat_views">Views / 30 days</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">21</div>
-        <div class="stat-label" data-i18n="stat_posts">Posts Published</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">3</div>
-        <div class="stat-label" data-i18n="stat_services">Core Services</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">BTS</div>
-        <div class="stat-label" data-i18n="stat_location">Makkasan / Asoke</div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -362,7 +386,7 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
   <div class="container">
     <div class="section-header reveal">
       <div class="section-tag" data-i18n="services_tag">What We Offer</div>
-      <h2 class="section-title" data-i18n="services_title">FOUR SERVICES.<br>ONE CREATIVE HUB.</h2>
+      <h2 class="section-title" data-i18n="services_title">STUDIO. PODCAST. GEAR.<br>ONE CREATIVE HUB.</h2>
       <p class="section-sub" data-i18n="services_sub">Whether you're shooting a product, recording your first podcast, or filming aerial footage — we have the space, gear, and skills to make it happen.</p>
     </div>
   </div>
@@ -414,9 +438,14 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
         <span data-i18n="s2_benefit">Walk in with ideas, walk out with a publish-ready episode.</span>
       </div>
       <div style="margin-top:16px;padding:12px 16px;background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.25);border-radius:8px;font-size:13px;line-height:1.5">
-        <div style="font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;font-size:11px;margin-bottom:6px">🎞️ Editing Only — Promo</div>
-        <div style="color:var(--fg)">Already have raw footage? We handle color grading, audio mix, titles & delivery.</div>
-        <div style="margin-top:6px;color:var(--fg-muted)"><span style="color:var(--fg);font-weight:600">฿1,000/episode</span> <span style="text-decoration:line-through;color:var(--fg-muted)">฿2,000</span></div>
+        <div style="font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;font-size:11px;margin-bottom:6px">🎞️ Cut Only — 50% off</div>
+        <div style="color:var(--fg)">Already filmed? Send us the raw files — we handle color grading, audio mix, titles &amp; delivery.</div>
+        <div style="margin-top:10px;display:grid;gap:4px;font-size:12px">
+          <div style="display:flex;justify-content:space-between;gap:12px"><span style="color:var(--fg-muted)">1 camera / hour</span><span><span style="text-decoration:line-through;color:var(--fg-muted)">฿3,000</span> <strong style="color:var(--fg)">฿1,500</strong></span></div>
+          <div style="display:flex;justify-content:space-between;gap:12px"><span style="color:var(--fg-muted)">2 cameras / hour</span><span><span style="text-decoration:line-through;color:var(--fg-muted)">฿4,000</span> <strong style="color:var(--fg)">฿2,000</strong></span></div>
+          <div style="display:flex;justify-content:space-between;gap:12px"><span style="color:var(--fg-muted)">3 cameras / hour</span><span><span style="text-decoration:line-through;color:var(--fg-muted)">฿6,000</span> <strong style="color:var(--fg)">฿3,000</strong></span></div>
+          <div style="color:var(--fg-muted);margin-top:4px">Additional hours: 50% of the promo rate &middot; delivered in 16:9 or 9:16</div>
+        </div>
       </div>
       <a href="booking.html?service=podcast" class="service-cta" style="border-color:rgba(37,99,235,.4);color:#60a5fa;margin-top:16px">
         <span data-i18n="s2_cta">Start Your Podcast</span>
@@ -530,37 +559,6 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
   </div>
 </section>
 
-<!-- ══ SOCIAL PROOF ══ -->
-<section id="social-proof">
-  <div class="container">
-    <div class="proof-grid">
-      <div>
-        <div class="section-tag reveal" data-i18n="proof_tag">Real Results</div>
-        <h2 class="section-title reveal" data-i18n="proof_title">CREATORS LOVE THIS SPACE</h2>
-        <p class="section-sub reveal" data-i18n="proof_sub">Hundreds of creators, brands, and entrepreneurs have used Rent Me Bangkok to launch, grow, and tell their story.</p>
-        <div class="proof-numbers" style="margin-top:40px">
-          <div class="proof-num-item reveal">
-            <div class="big">141<span>K</span></div>
-            <p data-i18n="proof_n1">Views in 30 days</p>
-          </div>
-          <div class="proof-num-item reveal reveal-delay-1">
-            <div class="big">1.6<span>K</span></div>
-            <p data-i18n="proof_n2">IG Followers</p>
-          </div>
-          <div class="proof-num-item reveal reveal-delay-2">
-            <div class="big">฿200</div>
-            <p data-i18n="proof_n3">Promo week rate</p>
-          </div>
-          <div class="proof-num-item reveal reveal-delay-3">
-            <div class="big">4<span>+</span></div>
-            <p data-i18n="proof_n4">Guest podcast setups</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ══ PRICING HIGHLIGHT ══ -->
 <section id="pricing">
   <div class="container">
@@ -575,7 +573,7 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
         <div class="price-title" data-i18n="p1_title">Studio Rental</div>
         <div class="price-amount">
           <span class="amount">฿200</span>
-          <span class="period" data-i18n="p1_period"> / hour (promo)</span>
+          <span class="period" data-i18n="p1_period"> / hour &mdash; promo until 31 Aug</span>
         </div>
         <p class="price-desc" data-i18n="p1_desc">Full studio access with lights, backdrops, and lounge setup. Hourly booking, no minimum.</p>
         <ul class="price-features">
@@ -588,47 +586,85 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
       </div>
 
       <!-- Podcast Studio Setup -->
-      <div class="price-card reveal reveal-delay-1" style="border-color:rgba(37,99,235,.2)">
-        <div class="price-service" style="color:#60a5fa">Podcast Studio</div>
-        <div class="price-title">SET UP YOUR OWN PODCAST</div>
+      <div class="price-card featured reveal reveal-delay-1" style="border-color:rgba(37,99,235,.2)">
+        <div class="price-badge">Most Popular</div>
+        <div class="price-service" style="color:#60a5fa" data-i18n="p2_service">Podcast Studio</div>
+        <div class="price-title" data-i18n="p2_title">RECORD YOUR PODCAST</div>
         <div class="price-amount" style="display:flex;flex-direction:column;gap:6px">
           <div>
-            <span class="amount" style="color:#60a5fa">฿200</span>
-            <span class="period"> / hour</span>
+            <span class="amount" style="color:#60a5fa">฿900</span>
+            <span class="period" data-i18n="p2_period"> / hour (1 camera)</span>
           </div>
           <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.3);border-radius:6px;padding:5px 12px;width:fit-content">
-            <span style="font-size:11px;color:var(--fg-muted)">+ One-time setup</span>
-            <span style="font-family:var(--font-head);font-size:1.1rem;color:var(--accent)">฿1,000</span>
+            <span style="font-size:11px;color:var(--fg-muted)" data-i18n="p2_setup">+ One-time setup</span>
+            <span style="font-family:var(--font-head);font-size:1.1rem;color:var(--accent)">฿1,500</span>
           </div>
         </div>
-        <p class="price-desc" style="margin-top:12px">You run the show — we set up everything. Mics, lighting, sofa & table, decorations. Choose your camera package when booking.</p>
+        <p class="price-desc" style="margin-top:12px" data-i18n="p2_desc">You run the show — we set up everything, film it, edit it, and cut you an intro clip. Choose your camera package when booking.</p>
         <ul class="price-features">
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>3 microphones always included</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Professional lighting rig</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Sofa & table setup</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Decorations & studio design</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Fully customisable style</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p2_f1">3 microphones always included</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p2_f2">Professional lighting rig</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p2_f3">Sofa & table setup</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p2_f4">Decorations & studio design</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p2_f5">Full edit of your episode</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p2_f6">Intro clip included</li>
         </ul>
-        <a href="booking.html?service=podcast_setup" class="price-btn ghost">Set Up My Podcast</a>
+        <a href="booking.html?service=podcast_setup" class="price-btn ghost" data-i18n="p2_btn">Record My Podcast</a>
       </div>
 
       <!-- Full Podcast Package — Most Popular -->
-      <div class="price-card featured reveal reveal-delay-2">
-        <div class="price-badge">Most Popular</div>
-        <div class="price-service">Podcast Package</div>
-        <div class="price-title">Full Podcast Service</div>
+      <div class="price-card reveal reveal-delay-2">
+        <div class="price-service" data-i18n="p3_service">Podcast Package</div>
+        <div class="price-title" data-i18n="p3_title">Full Podcast Service</div>
         <div class="price-amount">
-          <span class="amount">฿10,000</span>
-          <span class="period"> / month</span>
+          <span class="amount">฿19,000</span>
+          <span class="period" data-i18n="p3_period"> / 5 episodes &middot; <strong style="color:#60a5fa">on request only</strong></span>
         </div>
-        <p class="price-desc">4 sessions/month. Full filming, editing, color grade & delivery. Was ฿18,000 — save ฿8,000.</p>
+        <p class="price-desc" data-i18n="p3_desc">Five episodes, done end to end — we plan the run with you. Filming, editing, intro and reels included.</p>
         <ul class="price-features">
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Videographer on set</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Full video editing</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Color grading & sound design</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Studio rental included</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p3_f1">Videographer on set</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p3_f2">Full edit of every episode</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p3_f3">Intro clip &amp; reels for social</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p3_f4">Studio, mics &amp; decor included</li>
         </ul>
-        <a href="booking.html" class="price-btn primary">Get This Deal</a>
+        <a href="booking.html?service=full_podcast" class="price-btn primary" data-i18n="p3_btn">Enquire About the Package</a>
+      </div>
+
+      <!-- Cut Only -->
+      <div class="price-card reveal reveal-delay-3" style="border-color:rgba(230,57,70,.25)">
+        <div class="price-badge" style="background:var(--accent)" data-i18n="p4_badge">50% Launch Offer</div>
+        <div class="price-service" style="color:var(--accent)" data-i18n="p4_service">Podcast Editing</div>
+        <div class="price-title" data-i18n="p4_title">WE CUT YOUR PODCAST</div>
+        <div class="price-amount">
+          <span class="amount">฿1,500</span>
+          <span class="period" data-i18n="p4_period"> / hour &mdash; 1 camera</span>
+        </div>
+        <p class="price-desc" data-i18n="p4_desc">You filmed it, we finish it. Clean audio, smooth cuts, ready to publish. Offer runs until 31 August.</p>
+        <ul class="price-features">
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p4_f1">2 cameras ฿2,000/hr &middot; 3 cameras ฿3,000/hr</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p4_f2">Every additional hour at half price</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p4_f3">Delivered in 16:9 or 9:16</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p4_f4">Normally ฿3,000&ndash;฿6,000 per hour</li>
+        </ul>
+        <a href="booking.html?service=podcast" class="price-btn ghost" data-i18n="p4_btn">Send Us Your Footage</a>
+      </div>
+
+      <!-- Reel Editing -->
+      <div class="price-card reveal reveal-delay-3">
+        <div class="price-service" style="color:#60a5fa" data-i18n="p5_service">Social Cuts</div>
+        <div class="price-title" data-i18n="p5_title">REEL EDITING</div>
+        <div class="price-amount">
+          <span class="amount" style="color:#60a5fa">฿300</span>
+          <span class="period" data-i18n="p5_period"> / reel</span>
+        </div>
+        <p class="price-desc" data-i18n="p5_desc">Vertical cuts for Instagram, TikTok and YouTube Shorts &mdash; colour, music and captions. Delivered within 48h.</p>
+        <ul class="price-features">
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p5_f1">5 reels ฿1,200 &mdash; ฿240 each</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p5_f2">10 reels ฿2,100 &mdash; ฿210 each</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p5_f3">Send footage after booking</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg data-i18n="p5_f4">Also available as a podcast add-on</li>
+        </ul>
+        <a href="booking.html?service=reel" class="price-btn ghost" data-i18n="p5_btn">Book Reel Editing</a>
       </div>
 
     </div><!-- end pricing-grid -->
@@ -662,11 +698,11 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
         </ul>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
-            <div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">1 Day</div>
-            <div style="font-family:var(--font-head);font-size:1.5rem;color:var(--fg)">฿500</div>
+            <div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px" data-i18n="dji_day1">First 2 days</div>
+            <div style="font-family:var(--font-head);font-size:1.5rem;color:var(--fg)">฿500<span style="font-size:.7rem">/day</span></div>
           </div>
           <div style="background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:12px;text-align:center">
-            <div style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">3+ Days</div>
+            <div style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px" data-i18n="dji_day3">Every further day</div>
             <div style="font-family:var(--font-head);font-size:1.5rem;color:#60a5fa">฿300<span style="font-size:.7rem">/day</span></div>
           </div>
         </div>
@@ -686,11 +722,11 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
         </ul>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
-            <div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">1 Day</div>
-            <div style="font-family:var(--font-head);font-size:1.5rem;color:var(--fg)">฿700</div>
+            <div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px" data-i18n="dji_day1">First 2 days</div>
+            <div style="font-family:var(--font-head);font-size:1.5rem;color:var(--fg)">฿700<span style="font-size:.7rem">/day</span></div>
           </div>
           <div style="background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:12px;text-align:center">
-            <div style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">3+ Days</div>
+            <div style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px" data-i18n="dji_day3">Every further day</div>
             <div style="font-family:var(--font-head);font-size:1.5rem;color:#60a5fa">฿500<span style="font-size:.7rem">/day</span></div>
           </div>
         </div>
@@ -710,11 +746,11 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
         </ul>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
-            <div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">1 Day</div>
-            <div style="font-family:var(--font-head);font-size:1.5rem;color:var(--fg)">฿500</div>
+            <div style="font-size:10px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px" data-i18n="dji_day1">First 2 days</div>
+            <div style="font-family:var(--font-head);font-size:1.5rem;color:var(--fg)">฿500<span style="font-size:.7rem">/day</span></div>
           </div>
           <div style="background:rgba(37,99,235,.08);border:1px solid var(--border-blue);border-radius:8px;padding:12px;text-align:center">
-            <div style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">3+ Days</div>
+            <div style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px" data-i18n="dji_day3">Every further day</div>
             <div style="font-family:var(--font-head);font-size:1.5rem;color:#60a5fa">฿300<span style="font-size:.7rem">/day</span></div>
           </div>
         </div>
@@ -976,19 +1012,18 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
 // ── i18n ──
 const translations = {
   en: {
-    nav_services:"Services", nav_pricing:"Pricing", nav_about:"About", nav_faq:"FAQ", nav_book:"Book Now",
+    nav_services:"Services", nav_pricing:"Pricing", nav_faq:"FAQ", nav_book:"Book Now",
     hero_badge:"Bangkok · Asoke · Makkasan",
     hero_title:"YOUR SPACE.<br><span>YOUR VISION.</span><br>YOUR STUDIO.",
     hero_sub:"Photo studio, podcast recording & editing, and DJI camera + drone rental — all in one creative hub in the heart of Bangkok.",
     hero_cta_primary:"Explore Services", hero_cta_secondary:"See Our Work",
-    stat_views:"Views / 30 days", stat_posts:"Posts Published", stat_services:"Core Services", stat_location:"Makkasan / Asoke",
     trust_label:"Why creators choose us",
     trust_1:"<strong>Professional gear</strong> — DJI, studio lights, mics",
     trust_2:"<strong>Flexible hours</strong> — book by the session",
     trust_3:"<strong>All skill levels</strong> — beginners welcome",
     trust_4:"<strong>Central Bangkok</strong> — 5 min from Asoke BTS",
     trust_5:"<strong>Full editing service</strong> — we handle post-production",
-    services_tag:"What We Offer", services_title:"FOUR SERVICES.<br>ONE CREATIVE HUB.",
+    services_tag:"What We Offer", services_title:"STUDIO. PODCAST. GEAR.<br>ONE CREATIVE HUB.",
     services_sub:"Whether you're shooting a product, recording your first podcast, or filming aerial footage — we have the space, gear, and skills to make it happen.",
     s1_for:"For photographers, brands & content creators", s1_title:"PHOTO STUDIO RENTAL",
     s1_desc:"A fully equipped photography studio in central Bangkok you can rent by the hour or day. Comes with studio strobe lights, softboxes, seamless backdrop in multiple colors, and a lounge setup for lifestyle shoots. No hidden fees — just show up and shoot.",
@@ -1002,9 +1037,6 @@ const translations = {
     s4_for:"For property agents, venues, event organisers & brands", s4_title:"AERIAL / DRONE FILMING",
     s4_desc:"You don't fly — we do. We come to your building, venue or event, film it from the air, and hand you the footage. Add editing and you get a finished film instead: cut, colour graded, with music and titles. We check the airspace rules for your location before we quote, so you don't have to.",
     s4_benefit:"A finished aerial film of your property — you just pick the day.", s4_cta:"Get a Quote",
-    proof_tag:"Real Results", proof_title:"CREATORS LOVE THIS SPACE",
-    proof_sub:"Hundreds of creators, brands, and entrepreneurs have used Rent Me Bangkok to launch, grow, and tell their story.",
-    proof_n1:"Views in 30 days", proof_n2:"IG Followers", proof_n3:"Promo week rate", proof_n4:"Guest podcast setups",
     r1_text:'"The podcast studio is insane for the price. The ON AIR setup, the lighting, the mics — everything was ready when I arrived. Recorded two episodes in one session."',
     r1_role:"Podcast Host, Bangkok",
     r2_text:'"Rented the DJI for a real estate shoot in Pattaya. Everything was charged, calibrated, and came with a quick tutorial. Saved me thousands vs. buying. Will definitely rent again."',
@@ -1012,18 +1044,55 @@ const translations = {
     r3_text:'"First time using a professional studio and they made it so easy. Multiple backdrop colors, great lights, and flexible timing. My brand photos finally look like real brand photos."',
     r3_role:"Fashion Brand Founder",
     pricing_tag:"Transparent Pricing", pricing_title:"SIMPLE RATES.<br>NO SURPRISES.",
-    p1_service:"Photo Studio", p1_title:"Studio Rental", p1_period:" / hour (promo)",
+    p1_service:"Photo Studio", p1_title:"Studio Rental", p1_period:" / hour — promo until 31 Aug",
     p1_desc:"Full studio access with lights, backdrops, and lounge setup. Hourly booking, no minimum.",
     p1_f1:"Studio strobes + softboxes", p1_f2:"Multiple backdrop colors", p1_f3:"Lounge props & furniture", p1_f4:"Ring light + accessories",
     p1_btn:"Book Studio",
-    p2_service:"Podcast Package", p2_title:"Monthly Podcast", p2_period:" / month", p2_badge:"Most Popular",
-    p2_desc:"4 sessions per month (max 2hrs each). Full filming, editing, color grade, and delivery. Was ฿18,000 — save ฿8,000.",
-    p2_f1:"Professional cameras & mics", p2_f2:"Video editing included", p2_f3:"Videographer on set", p2_f4:"Full podcast setup", p2_f5:"Studio rental included",
-    p2_btn:"Get This Deal",
-    p3_service:"DJI Rental", p3_title:"Camera & Drone", p3_amount:"Ask us", p3_period:" / day rate",
-    p3_desc:"Flexible daily rental for DJI cameras and drones. Rates vary by model. All gear checked and ready.",
-    p3_f1:"DJI cameras & drones", p3_f2:"Charged & calibrated on pickup", p3_f3:"Quick orientation session", p3_f4:"Flexible multi-day rates",
-    p3_btn:"Get a Quote",
+    mb_title:"Studio from ฿200 / hour",
+    mb_sub:"Podcast editing 50% off until 31 Aug",
+    mb_btn:"Book now",
+    dji_day1:"First 2 days",
+    dji_day3:"Every further day",
+    p2_service:"Podcast Studio",
+    p2_title:"RECORD YOUR PODCAST",
+    p2_period:" / hour (1 camera)",
+    p2_setup:"+ One-time setup",
+    p2_desc:"You run the show — we set up everything, film it, edit it, and cut you an intro clip. Choose your camera package when booking.",
+    p2_f1:"3 microphones always included",
+    p2_f2:"Professional lighting rig",
+    p2_f3:"Sofa &amp; table setup",
+    p2_f4:"Decorations &amp; studio design",
+    p2_f5:"Full edit of your episode",
+    p2_f6:"Intro clip included",
+    p2_btn:"Record My Podcast",
+    p3_service:"Podcast Package",
+    p3_title:"Full Podcast Service",
+    p3_period:" / 5 episodes &middot; <strong style='color:#60a5fa'>on request only</strong>",
+    p3_desc:"Five episodes, done end to end — we plan the run with you. Filming, editing, intro and reels included.",
+    p3_f1:"Videographer on set",
+    p3_f2:"Full edit of every episode",
+    p3_f3:"Intro clip &amp; reels for social",
+    p3_f4:"Studio, mics &amp; decor included",
+    p3_btn:"Enquire About the Package",
+    p4_badge:"50% Launch Offer",
+    p4_service:"Podcast Editing",
+    p4_title:"WE CUT YOUR PODCAST",
+    p4_period:" / hour — 1 camera",
+    p4_desc:"You filmed it, we finish it. Clean audio, smooth cuts, ready to publish. Offer runs until 31 August.",
+    p4_f1:"2 cameras ฿2,000/hr &middot; 3 cameras ฿3,000/hr",
+    p4_f2:"Every additional hour at half price",
+    p4_f3:"Delivered in 16:9 or 9:16",
+    p4_f4:"Normally ฿3,000–฿6,000 per hour",
+    p4_btn:"Send Us Your Footage",
+    p5_service:"Social Cuts",
+    p5_title:"REEL EDITING",
+    p5_period:" / reel",
+    p5_desc:"Vertical cuts for Instagram, TikTok and YouTube Shorts — colour, music and captions. Delivered within 48h.",
+    p5_f1:"5 reels ฿1,200 — ฿240 each",
+    p5_f2:"10 reels ฿2,100 — ฿210 each",
+    p5_f3:"Send footage after booking",
+    p5_f4:"Also available as a podcast add-on",
+    p5_btn:"Book Reel Editing",
     faq_tag:"FAQ", faq_title:"GOT QUESTIONS?",
     faq_sub:"Here are the answers we get asked the most. Still have one? Message us on Instagram.",
     faq_ig:"@bangkok_rentme",
@@ -1039,19 +1108,18 @@ const translations = {
     cta_location:"Makkasan Station · Asoke · Bangkok, Thailand"
   },
   fr: {
-    nav_services:"Services", nav_pricing:"Tarifs", nav_about:"À propos", nav_faq:"FAQ", nav_book:"Réserver",
+    nav_services:"Services", nav_pricing:"Tarifs", nav_faq:"FAQ", nav_book:"Réserver",
     hero_badge:"Bangkok · Asoke · Makkasan",
     hero_title:"VOTRE ESPACE.<br><span>VOTRE VISION.</span><br>VOTRE STUDIO.",
     hero_sub:"Studio photo, enregistrement & montage podcast, et location de caméras DJI + drones — tout en un seul hub créatif au cœur de Bangkok.",
     hero_cta_primary:"Découvrir nos services", hero_cta_secondary:"Voir notre travail",
-    stat_views:"Vues / 30 jours", stat_posts:"Publications", stat_services:"Services principaux", stat_location:"Makkasan / Asoke",
     trust_label:"Pourquoi les créateurs nous choisissent",
     trust_1:"<strong>Équipement pro</strong> — DJI, éclairages studio, micros",
     trust_2:"<strong>Horaires flexibles</strong> — réservez à la session",
     trust_3:"<strong>Tous niveaux</strong> — débutants bienvenus",
     trust_4:"<strong>Centre de Bangkok</strong> — 5 min du BTS Asoke",
     trust_5:"<strong>Service montage complet</strong> — on gère la post-prod",
-    services_tag:"Ce que nous offrons", services_title:"QUATRE SERVICES.<br>UN SEUL HUB CRÉATIF.",
+    services_tag:"Ce que nous offrons", services_title:"STUDIO. PODCAST. MATÉRIEL.<br>UN SEUL HUB CRÉATIF.",
     services_sub:"Que vous photographiez un produit, enregistriez votre premier podcast, ou filmiez des prises de vue aériennes — nous avons l'espace, le matériel et les compétences pour le réaliser.",
     s1_for:"Pour photographes, marques et créateurs de contenu", s1_title:"LOCATION DE STUDIO PHOTO",
     s1_desc:"Un studio photo entièrement équipé au centre de Bangkok que vous pouvez louer à l'heure ou à la journée. Fourni avec éclairages stroboscopiques, boîtes à lumière, fonds sans couture en plusieurs couleurs et décor lounge pour shootings lifestyle.",
@@ -1065,22 +1133,58 @@ const translations = {
     s4_for:"Pour agents immobiliers, lieux, organisateurs d'événements & marques", s4_title:"TOURNAGE AÉRIEN / DRONE",
     s4_desc:"Vous ne pilotez pas — c'est nous. Nous venons sur votre bâtiment, votre lieu ou votre événement, filmons depuis les airs et vous remettons les images. Ajoutez le montage et vous obtenez un film fini : monté, étalonné, avec musique et titres. Nous vérifions les règles de l'espace aérien pour votre site avant de vous faire une offre.",
     s4_benefit:"Un film aérien fini de votre bien — vous choisissez seulement le jour.", s4_cta:"Demander un devis",
-    proof_tag:"Résultats réels", proof_title:"LES CRÉATEURS ADORENT CET ESPACE",
-    proof_sub:"Des centaines de créateurs, marques et entrepreneurs ont utilisé Rent Me Bangkok pour lancer, grandir et raconter leur histoire.",
-    proof_n1:"Vues en 30 jours", proof_n2:"Abonnés Instagram", proof_n3:"Tarif promo semaine", proof_n4:"Invités podcast max",
     r1_text:'"Le studio podcast est incroyable pour le prix. Le setup ON AIR, l\'éclairage, les micros — tout était prêt à mon arrivée. Deux épisodes enregistrés en une seule session."', r1_role:"Podcasteur, Bangkok",
     r2_text:'"Loué le DJI pour un shooting immobilier à Pattaya. Tout était chargé, calibré, avec un tutoriel rapide. Économisé des milliers vs l\'achat. Je re-louerai."', r2_role:"Photographe immobilier",
     r3_text:'"Première fois dans un studio pro et ils ont tout rendu si simple. Plusieurs couleurs de fond, bons éclairages, timing flexible. Mes photos de marque ressemblent enfin à de vraies photos de marque."', r3_role:"Fondatrice de marque mode",
     pricing_tag:"Tarifs transparents", pricing_title:"TARIFS SIMPLES.<br>SANS SURPRISES.",
-    p1_service:"Studio photo", p1_title:"Location studio", p1_period:" / heure (promo)",
+    p1_service:"Studio photo", p1_title:"Location studio", p1_period:" / heure — promo jusqu'au 31 août",
     p1_desc:"Accès complet au studio avec éclairages, fonds et décor lounge. Réservation à l'heure, sans minimum.",
     p1_f1:"Stroboscopes + boîtes à lumière", p1_f2:"Plusieurs couleurs de fond", p1_f3:"Accessoires lounge", p1_f4:"Ring light + accessoires", p1_btn:"Réserver le studio",
-    p2_service:"Pack podcast", p2_title:"Podcast mensuel", p2_period:" / mois", p2_badge:"Le plus populaire",
-    p2_desc:"4 sessions par mois (max 2h chacune). Tournage, montage, étalonnage et livraison complets. Était ฿18 000 — économisez ฿8 000.",
-    p2_f1:"Caméras & micros pro", p2_f2:"Montage vidéo inclus", p2_f3:"Vidéaste sur place", p2_f4:"Setup podcast complet", p2_f5:"Location studio incluse", p2_btn:"Profiter de cette offre",
-    p3_service:"Location DJI", p3_title:"Caméra & Drone", p3_amount:"Nous contacter", p3_period:" / tarif journalier",
-    p3_desc:"Location journalière flexible pour caméras et drones DJI. Tarifs selon le modèle. Tout le matériel vérifié et prêt.",
-    p3_f1:"Caméras & drones DJI", p3_f2:"Chargé & calibré à l'enlèvement", p3_f3:"Session d'orientation rapide", p3_f4:"Tarifs multi-jours flexibles", p3_btn:"Obtenir un devis",
+    mb_title:"Studio dès ฿200 / heure",
+    mb_sub:"Montage podcast −50 % jusqu'au 31 août",
+    mb_btn:"Réserver",
+    dji_day1:"2 premiers jours",
+    dji_day3:"Chaque jour suivant",
+    p2_service:"Studio podcast",
+    p2_title:"ENREGISTREZ VOTRE PODCAST",
+    p2_period:" / heure (1 caméra)",
+    p2_setup:"+ Installation unique",
+    p2_desc:"Vous animez — nous installons tout, filmons, montons et vous créons un clip d’intro. Choisissez votre formule caméra à la réservation.",
+    p2_f1:"3 microphones toujours inclus",
+    p2_f2:"Éclairage professionnel",
+    p2_f3:"Canapé &amp; table",
+    p2_f4:"Décoration &amp; design du studio",
+    p2_f5:"Montage complet de l’épisode",
+    p2_f6:"Clip d’intro inclus",
+    p2_btn:"Enregistrer mon podcast",
+    p3_service:"Formule podcast",
+    p3_title:"Service podcast complet",
+    p3_period:" / 5 épisodes &middot; <strong style='color:#60a5fa'>sur demande uniquement</strong>",
+    p3_desc:"Cinq épisodes de A à Z — nous planifions la série avec vous. Tournage, montage, intro et reels inclus.",
+    p3_f1:"Vidéaste sur place",
+    p3_f2:"Montage complet de chaque épisode",
+    p3_f3:"Clip d’intro &amp; reels",
+    p3_f4:"Studio, micros &amp; décor inclus",
+    p3_btn:"Demander la formule",
+    p4_badge:"Offre de lancement −50 %",
+    p4_service:"Montage podcast",
+    p4_title:"NOUS MONTONS VOTRE PODCAST",
+    p4_period:" / heure — 1 caméra",
+    p4_desc:"Vous avez filmé, nous finissons. Son propre, montage fluide, prêt à publier. Offre valable jusqu’au 31 août.",
+    p4_f1:"2 caméras ฿2 000/h &middot; 3 caméras ฿3 000/h",
+    p4_f2:"Chaque heure supplémentaire à moitié prix",
+    p4_f3:"Livré en 16:9 ou 9:16",
+    p4_f4:"Normalement ฿3 000–฿6 000 par heure",
+    p4_btn:"Envoyez vos rushes",
+    p5_service:"Formats sociaux",
+    p5_title:"MONTAGE DE REELS",
+    p5_period:" / reel",
+    p5_desc:"Montages verticaux pour Instagram, TikTok et YouTube Shorts — couleur, musique et sous-titres. Livrés sous 48 h.",
+    p5_f1:"5 reels ฿1 200 — ฿240 pièce",
+    p5_f2:"10 reels ฿2 100 — ฿210 pièce",
+    p5_f3:"Envoyez les rushes après réservation",
+    p5_f4:"Aussi en option podcast",
+    p5_btn:"Réserver un montage",
     faq_tag:"FAQ", faq_title:"DES QUESTIONS ?",
     faq_sub:"Voici les réponses aux questions les plus fréquentes. Une autre question ? Écrivez-nous sur Instagram.",
     faq_ig:"@bangkok_rentme",
@@ -1096,19 +1200,18 @@ const translations = {
     cta_location:"Gare Makkasan · Asoke · Bangkok, Thaïlande"
   },
   de: {
-    nav_services:"Leistungen", nav_pricing:"Preise", nav_about:"Über uns", nav_faq:"FAQ", nav_book:"Jetzt buchen",
+    nav_services:"Leistungen", nav_pricing:"Preise", nav_faq:"FAQ", nav_book:"Jetzt buchen",
     hero_badge:"Bangkok · Asoke · Makkasan",
     hero_title:"DEIN RAUM.<br><span>DEINE VISION.</span><br>DEIN STUDIO.",
     hero_sub:"Fotostudio, Podcast-Aufnahme & Schnitt, und DJI-Kamera- + Drohnenverleih — alles in einem kreativen Hub im Herzen von Bangkok.",
     hero_cta_primary:"Leistungen entdecken", hero_cta_secondary:"Unsere Arbeit sehen",
-    stat_views:"Aufrufe / 30 Tage", stat_posts:"Beiträge", stat_services:"Kernleistungen", stat_location:"Makkasan / Asoke",
     trust_label:"Warum Kreative uns wählen",
     trust_1:"<strong>Professionelles Equipment</strong> — DJI, Studioleuchten, Mikros",
     trust_2:"<strong>Flexible Zeiten</strong> — sessionweise buchen",
     trust_3:"<strong>Alle Niveaus</strong> — Anfänger willkommen",
     trust_4:"<strong>Zentral Bangkok</strong> — 5 Min. vom Asoke BTS",
     trust_5:"<strong>Vollständiger Schnittservice</strong> — wir übernehmen die Postproduktion",
-    services_tag:"Was wir anbieten", services_title:"VIER LEISTUNGEN.<br>EIN KREATIVER HUB.",
+    services_tag:"Was wir anbieten", services_title:"STUDIO. PODCAST. TECHNIK.<br>EIN KREATIVER HUB.",
     services_sub:"Egal ob Produktfoto, erster Podcast oder Luftaufnahmen — wir haben den Raum, das Equipment und das Know-how.",
     s1_for:"Für Fotografen, Marken & Content Creator", s1_title:"FOTOSTUDIO-VERLEIH",
     s1_desc:"Ein voll ausgestattetes Fotostudio in Bangkoks Zentrum, das du stunden- oder tageweise mieten kannst. Mit Studioblitzen, Softboxen, nahtlosem Hintergrund in mehreren Farben und Lounge-Setup für Lifestyle-Shootings.",
@@ -1122,22 +1225,58 @@ const translations = {
     s4_for:"Für Makler, Locations, Eventveranstalter & Marken", s4_title:"LUFTAUFNAHMEN / DROHNENFLUG",
     s4_desc:"Sie fliegen nicht — wir. Wir kommen zu Ihrem Gebäude, Ihrer Location oder Ihrem Event, filmen aus der Luft und übergeben Ihnen das Material. Mit Schnitt wird daraus ein fertiger Film: geschnitten, farbkorrigiert, mit Musik und Titeln. Die Luftraumregeln für Ihren Standort prüfen wir vor dem Angebot.",
     s4_benefit:"Ein fertiger Luftfilm Ihrer Immobilie — Sie wählen nur den Tag.", s4_cta:"Angebot anfordern",
-    proof_tag:"Echte Ergebnisse", proof_title:"KREATIVE LIEBEN DIESEN ORT",
-    proof_sub:"Hunderte von Kreativen, Marken und Unternehmern haben Rent Me Bangkok genutzt, um zu starten, zu wachsen und ihre Geschichte zu erzählen.",
-    proof_n1:"Aufrufe in 30 Tagen", proof_n2:"Instagram-Follower", proof_n3:"Aktionswochenpreis", proof_n4:"Podcast-Gäste max.",
     r1_text:'"Das Podcast-Studio ist unglaublich für den Preis. Das ON AIR-Setup, das Licht, die Mikros — alles war bereit als ich ankam. Zwei Folgen in einer Session aufgenommen."', r1_role:"Podcast-Host, Bangkok",
     r2_text:'"Die DJI für ein Immobilien-Shooting in Pattaya gemietet. Alles war geladen, kalibriert und mit Kurzanleitung. Tausende gespart vs. Kauf. Komme definitiv wieder."', r2_role:"Immobilienfotograf",
     r3_text:'"Erstes Mal in einem Profi-Studio und sie haben alles so einfach gemacht. Mehrere Hintergrundfarben, tolle Lichter, flexible Zeiten. Meine Markenfotos sehen endlich wie echte Markenfotos aus."', r3_role:"Mode-Marken-Gründerin",
     pricing_tag:"Transparente Preise", pricing_title:"EINFACHE PREISE.<br>KEINE ÜBERRASCHUNGEN.",
-    p1_service:"Fotostudio", p1_title:"Studio-Verleih", p1_period:" / Stunde (Aktionspreis)",
+    p1_service:"Fotostudio", p1_title:"Studio-Verleih", p1_period:" / Stunde — Aktion bis 31. Aug.",
     p1_desc:"Voller Studio-Zugang mit Lichtern, Hintergründen und Lounge-Setup. Stundenbuching, kein Minimum.",
     p1_f1:"Studioblitze + Softboxen", p1_f2:"Mehrere Hintergrundfarben", p1_f3:"Lounge-Requisiten", p1_f4:"Ringlicht + Zubehör", p1_btn:"Studio buchen",
-    p2_service:"Podcast-Paket", p2_title:"Monatlicher Podcast", p2_period:" / Monat", p2_badge:"Beliebteste Option",
-    p2_desc:"4 Sessions pro Monat (max. 2h je Session). Vollständiges Filmen, Schneiden, Color Grading und Lieferung. War ฿18.000 — spare ฿8.000.",
-    p2_f1:"Profi-Kameras & Mikros", p2_f2:"Videobearbeitung inbegriffen", p2_f3:"Videograf vor Ort", p2_f4:"Komplettes Podcast-Setup", p2_f5:"Studio-Miete inbegriffen", p2_btn:"Dieses Angebot sichern",
-    p3_service:"DJI-Verleih", p3_title:"Kamera & Drohne", p3_amount:"Auf Anfrage", p3_period:" / Tagessatz",
-    p3_desc:"Flexibler Tagesverleih für DJI-Kameras und Drohnen. Preise je nach Modell. Alles geprüft und bereit.",
-    p3_f1:"DJI-Kameras & Drohnen", p3_f2:"Geladen & kalibriert bei Abholung", p3_f3:"Kurze Einweisung", p3_f4:"Flexible Mehrtagespreise", p3_btn:"Angebot anfragen",
+    mb_title:"Studio ab ฿200 / Stunde",
+    mb_sub:"Podcast-Schnitt 50 % bis 31. Aug.",
+    mb_btn:"Jetzt buchen",
+    dji_day1:"Erste 2 Tage",
+    dji_day3:"Jeder weitere Tag",
+    p2_service:"Podcast-Studio",
+    p2_title:"NIMM DEINEN PODCAST AUF",
+    p2_period:" / Stunde (1 Kamera)",
+    p2_setup:"+ Einmalige Einrichtung",
+    p2_desc:"Du machst die Sendung — wir richten alles ein, filmen, schneiden und bauen dir einen Intro-Clip. Das Kamerapaket wählst du bei der Buchung.",
+    p2_f1:"3 Mikrofone immer inklusive",
+    p2_f2:"Professionelles Lichtset",
+    p2_f3:"Sofa &amp; Tisch",
+    p2_f4:"Deko &amp; Studiogestaltung",
+    p2_f5:"Vollständiger Schnitt deiner Folge",
+    p2_f6:"Intro-Clip inklusive",
+    p2_btn:"Podcast aufnehmen",
+    p3_service:"Podcast-Paket",
+    p3_title:"Full Podcast Service",
+    p3_period:" / 5 Folgen &middot; <strong style='color:#60a5fa'>nur auf Anfrage</strong>",
+    p3_desc:"Fünf Folgen von Anfang bis Ende — wir planen die Reihe mit dir. Dreh, Schnitt, Intro und Reels inklusive.",
+    p3_f1:"Videograf vor Ort",
+    p3_f2:"Vollständiger Schnitt jeder Folge",
+    p3_f3:"Intro-Clip &amp; Reels für Social",
+    p3_f4:"Studio, Mikrofone &amp; Deko inklusive",
+    p3_btn:"Paket anfragen",
+    p4_badge:"50 % Launch-Aktion",
+    p4_service:"Podcast-Schnitt",
+    p4_title:"WIR SCHNEIDEN DEINEN PODCAST",
+    p4_period:" / Stunde — 1 Kamera",
+    p4_desc:"Du hast gefilmt, wir machen es fertig. Sauberer Ton, flüssiger Schnitt, veröffentlichungsreif. Die Aktion läuft bis 31. August.",
+    p4_f1:"2 Kameras ฿2.000/Std. &middot; 3 Kameras ฿3.000/Std.",
+    p4_f2:"Jede weitere Stunde zum halben Preis",
+    p4_f3:"Lieferung in 16:9 oder 9:16",
+    p4_f4:"Normalpreis ฿3.000–฿6.000 pro Stunde",
+    p4_btn:"Material schicken",
+    p5_service:"Social Cuts",
+    p5_title:"REEL-SCHNITT",
+    p5_period:" / Reel",
+    p5_desc:"Hochkant-Schnitte für Instagram, TikTok und YouTube Shorts — Farbe, Musik und Untertitel. Lieferung in 48 Stunden.",
+    p5_f1:"5 Reels ฿1.200 — ฿240 pro Stück",
+    p5_f2:"10 Reels ฿2.100 — ฿210 pro Stück",
+    p5_f3:"Material nach der Buchung schicken",
+    p5_f4:"Auch als Podcast-Zusatz",
+    p5_btn:"Reel-Schnitt buchen",
     faq_tag:"FAQ", faq_title:"FRAGEN?",
     faq_sub:"Hier sind die am häufigsten gestellten Fragen. Noch eine? Schreib uns auf Instagram.",
     faq_ig:"@bangkok_rentme",
@@ -1153,19 +1292,18 @@ const translations = {
     cta_location:"Makkasan Station · Asoke · Bangkok, Thailand"
   },
   ru: {
-    nav_services:"Услуги", nav_pricing:"Цены", nav_about:"О нас", nav_faq:"FAQ", nav_book:"Забронировать",
+    nav_services:"Услуги", nav_pricing:"Цены", nav_faq:"FAQ", nav_book:"Забронировать",
     hero_badge:"Бангкок · Асок · Макасан",
     hero_title:"ТВОЁ ПРОСТРАНСТВО.<br><span>ТВОЯ ИДЕЯ.</span><br>ТВОЯ СТУДИЯ.",
     hero_sub:"Фотостудия, запись и монтаж подкастов, а также аренда камер DJI и дронов — всё в одном творческом пространстве в сердце Бангкока.",
     hero_cta_primary:"Наши услуги", hero_cta_secondary:"Посмотреть работы",
-    stat_views:"Просмотров / 30 дней", stat_posts:"Публикаций", stat_services:"Основных услуги", stat_location:"Макасан / Асок",
     trust_label:"Почему нас выбирают",
     trust_1:"<strong>Профессиональное оборудование</strong> — DJI, студийный свет, микрофоны",
     trust_2:"<strong>Гибкое время</strong> — бронирование по сессиям",
     trust_3:"<strong>Любой уровень</strong> — новички приветствуются",
     trust_4:"<strong>Центр Бангкока</strong> — 5 мин от BTS Асок",
     trust_5:"<strong>Полный монтаж</strong> — мы берём постпродакшен на себя",
-    services_tag:"Что мы предлагаем", services_title:"ЧЕТЫРЕ УСЛУГИ.<br>ОДИН ТВОРЧЕСКИЙ ХАБ.",
+    services_tag:"Что мы предлагаем", services_title:"СТУДИЯ. ПОДКАСТ. ТЕХНИКА.<br>ОДИН ТВОРЧЕСКИЙ ХАБ.",
     services_sub:"Съёмка продукта, первый подкаст или аэросъёмка — у нас есть пространство, оборудование и навыки.",
     s1_for:"Для фотографов, брендов и контент-мейкеров", s1_title:"АРЕНДА ФОТОСТУДИИ",
     s1_desc:"Полностью оснащённая фотостудия в центре Бангкока — аренда на час или день. Студийные вспышки, софтбоксы, бесшовный фон нескольких цветов, лаундж для лайфстайл-съёмок. Без скрытых платежей.",
@@ -1179,22 +1317,58 @@ const translations = {
     s4_for:"Для риелторов, площадок, организаторов мероприятий и брендов", s4_title:"АЭРОСЪЁМКА С ДРОНА",
     s4_desc:"Летаете не вы — летаем мы. Мы приезжаем к вашему зданию, площадке или мероприятию, снимаем с воздуха и передаём вам материал. Добавьте монтаж — и получите готовый фильм: смонтированный, с цветокоррекцией, музыкой и титрами. Правила воздушного пространства для вашего объекта мы проверяем до расчёта.",
     s4_benefit:"Готовый аэрофильм вашего объекта — вы выбираете только день.", s4_cta:"Запросить расчёт",
-    proof_tag:"Реальные результаты", proof_title:"СОЗДАТЕЛИ ЛЮБЯТ ЭТО МЕСТО",
-    proof_sub:"Сотни создателей контента, брендов и предпринимателей использовали Rent Me Bangkok для старта и роста.",
-    proof_n1:"Просмотров за 30 дней", proof_n2:"Подписчиков в Instagram", proof_n3:"Промо-цена недели", proof_n4:"Гостей подкаста макс.",
     r1_text:'"Подкаст-студия невероятная за такую цену. Сетап ON AIR, свет, микрофоны — всё было готово, когда я пришёл. Записал два эпизода за одну сессию."', r1_role:"Подкастер, Бангкок",
     r2_text:'"Арендовал DJI для съёмки недвижимости в Паттайе. Всё заряжено, откалибровано, с кратким инструктажем. Сэкономил тысячи по сравнению с покупкой."', r2_role:"Фотограф недвижимости",
     r3_text:'"Первый раз в профессиональной студии и они сделали всё таким простым. Несколько цветов фонов, хороший свет, гибкое время. Мои фото бренда наконец выглядят как настоящие."', r3_role:"Основательница модного бренда",
     pricing_tag:"Прозрачные цены", pricing_title:"ПРОСТЫЕ ЦЕНЫ.<br>БЕЗ СЮРПРИЗОВ.",
-    p1_service:"Фотостудия", p1_title:"Аренда студии", p1_period:" / час (промо)",
+    p1_service:"Фотостудия", p1_title:"Аренда студии", p1_period:" / час — акция до 31 авг.",
     p1_desc:"Полный доступ к студии со светом, фонами и лаунж-декором. Почасовое бронирование без минимума.",
     p1_f1:"Студийные вспышки + софтбоксы", p1_f2:"Несколько цветов фона", p1_f3:"Лаундж-реквизит и мебель", p1_f4:"Кольцевой свет + аксессуары", p1_btn:"Забронировать студию",
-    p2_service:"Пакет подкаста", p2_title:"Ежемесячный подкаст", p2_period:" / месяц", p2_badge:"Самый популярный",
-    p2_desc:"4 сессии в месяц (макс. 2ч каждая). Полная съёмка, монтаж, цветокоррекция и доставка. Было ฿18 000 — экономия ฿8 000.",
-    p2_f1:"Профкамеры и микрофоны", p2_f2:"Видеомонтаж включён", p2_f3:"Видеооператор на съёмке", p2_f4:"Полный сетап подкаста", p2_f5:"Аренда студии включена", p2_btn:"Получить это предложение",
-    p3_service:"Аренда DJI", p3_title:"Камера и дрон", p3_amount:"Спросите нас", p3_period:" / дневная ставка",
-    p3_desc:"Гибкая аренда на день для камер и дронов DJI. Ставки зависят от модели. Всё оборудование проверено и готово.",
-    p3_f1:"Камеры и дроны DJI", p3_f2:"Заряжены и откалиброваны при выдаче", p3_f3:"Краткий инструктаж", p3_f4:"Гибкие ставки на несколько дней", p3_btn:"Получить расчёт",
+    mb_title:"Студия от ฿200 / час",
+    mb_sub:"Монтаж подкаста −50 % до 31 авг.",
+    mb_btn:"Забронировать",
+    dji_day1:"Первые 2 дня",
+    dji_day3:"Каждый следующий день",
+    p2_service:"Подкаст-студия",
+    p2_title:"ЗАПИШИТЕ СВОЙ ПОДКАСТ",
+    p2_period:" / час (1 камера)",
+    p2_setup:"+ Разовая подготовка",
+    p2_desc:"Вы ведёте — мы всё настраиваем, снимаем, монтируем и делаем заставку. Пакет камер выбираете при бронировании.",
+    p2_f1:"3 микрофона всегда включены",
+    p2_f2:"Профессиональный свет",
+    p2_f3:"Диван &amp; стол",
+    p2_f4:"Декор и оформление студии",
+    p2_f5:"Полный монтаж выпуска",
+    p2_f6:"Заставка включена",
+    p2_btn:"Записать подкаст",
+    p3_service:"Пакет подкаста",
+    p3_title:"Полный сервис подкаста",
+    p3_period:" / 5 выпусков &middot; <strong style='color:#60a5fa'>только по запросу</strong>",
+    p3_desc:"Пять выпусков под ключ — план составляем вместе. Съёмка, монтаж, заставка и reels включены.",
+    p3_f1:"Видеооператор на площадке",
+    p3_f2:"Полный монтаж каждого выпуска",
+    p3_f3:"Заставка и reels для соцсетей",
+    p3_f4:"Студия, микрофоны и декор включены",
+    p3_btn:"Запросить пакет",
+    p4_badge:"Старт −50 %",
+    p4_service:"Монтаж подкаста",
+    p4_title:"МЫ СМОНТИРУЕМ ВАШ ПОДКАСТ",
+    p4_period:" / час — 1 камера",
+    p4_desc:"Вы сняли — мы доводим до ума. Чистый звук, плавный монтаж, готово к публикации. Акция до 31 августа.",
+    p4_f1:"2 камеры ฿2 000/час &middot; 3 камеры ฿3 000/час",
+    p4_f2:"Каждый следующий час за полцены",
+    p4_f3:"Отдаём в 16:9 или 9:16",
+    p4_f4:"Обычная цена ฿3 000–฿6 000 в час",
+    p4_btn:"Прислать материал",
+    p5_service:"Соцсети",
+    p5_title:"МОНТАЖ REELS",
+    p5_period:" / reel",
+    p5_desc:"Вертикальные ролики для Instagram, TikTok и YouTube Shorts — цвет, музыка и субтитры. Готово за 48 часов.",
+    p5_f1:"5 reels ฿1 200 — ฿240 за штуку",
+    p5_f2:"10 reels ฿2 100 — ฿210 за штуку",
+    p5_f3:"Материал присылаете после брони",
+    p5_f4:"Также доступно как допуслуга к подкасту",
+    p5_btn:"Заказать монтаж",
     faq_tag:"FAQ", faq_title:"ВОПРОСЫ?",
     faq_sub:"Вот ответы на самые частые вопросы. Остались другие? Пишите нам в Instagram.",
     faq_ig:"@bangkok_rentme",
@@ -1210,19 +1384,18 @@ const translations = {
     cta_location:"Станция Макасан · Асок · Бангкок, Таиланд"
   },
   th: {
-    nav_services:"บริการ", nav_pricing:"ราคา", nav_about:"เกี่ยวกับเรา", nav_faq:"FAQ", nav_book:"จองเลย",
+    nav_services:"บริการ", nav_pricing:"ราคา", nav_faq:"FAQ", nav_book:"จองเลย",
     hero_badge:"กรุงเทพฯ · อโศก · มักกะสัน",
     hero_title:"พื้นที่ของคุณ<br><span>วิสัยทัศน์ของคุณ</span><br>สตูดิโอของคุณ",
     hero_sub:"สตูดิโอถ่ายภาพ บันทึกและตัดต่อพอดแคสต์ และเช่ากล้อง DJI + โดรน — ทุกอย่างในที่เดียวใจกลางกรุงเทพฯ",
     hero_cta_primary:"ดูบริการทั้งหมด", hero_cta_secondary:"ดูผลงานของเรา",
-    stat_views:"วิว / 30 วัน", stat_posts:"โพสต์", stat_services:"บริการหลัก", stat_location:"มักกะสัน / อโศก",
     trust_label:"ทำไมครีเอเตอร์ถึงเลือกเรา",
     trust_1:"<strong>อุปกรณ์มืออาชีพ</strong> — DJI, ไฟสตูดิโอ, ไมค์",
     trust_2:"<strong>เวลาที่ยืดหยุ่น</strong> — จองเป็นเซสชัน",
     trust_3:"<strong>ทุกระดับ</strong> — ยินดีต้อนรับมือใหม่",
     trust_4:"<strong>ใจกลางกรุงเทพฯ</strong> — 5 นาทีจาก BTS อโศก",
     trust_5:"<strong>บริการตัดต่อครบ</strong> — เราดูแล post-production ให้",
-    services_tag:"สิ่งที่เราให้บริการ", services_title:"สี่บริการ<br>หนึ่งฮับครีเอทีฟ",
+    services_tag:"สิ่งที่เราให้บริการ", services_title:"สตูดิโอ พอดแคสต์ อุปกรณ์<br>หนึ่งฮับครีเอทีฟ",
     services_sub:"ไม่ว่าจะถ่ายภาพสินค้า บันทึกพอดแคสต์แรก หรือถ่ายภาพทางอากาศ — เรามีพื้นที่ อุปกรณ์ และทักษะพร้อมให้",
     s1_for:"สำหรับช่างภาพ แบรนด์ และครีเอเตอร์", s1_title:"เช่าสตูดิโอถ่ายภาพ",
     s1_desc:"สตูดิโอถ่ายภาพครบครันในใจกลางกรุงเทพฯ เช่าได้รายชั่วโมงหรือรายวัน พร้อมไฟสตูดิโอ ซอฟต์บ็อกซ์ ฉากหลังหลายสี และพื้นที่ไลฟ์สไตล์",
@@ -1236,22 +1409,58 @@ const translations = {
     s4_for:"สำหรับนายหน้าอสังหาฯ สถานที่จัดงาน ผู้จัดอีเวนต์ และแบรนด์", s4_title:"ถ่ายทำทางอากาศ / โดรน",
     s4_desc:"คุณไม่ต้องบินเอง — เราบินให้ เราไปที่อาคาร สถานที่ หรืออีเวนต์ของคุณ ถ่ายจากมุมสูง แล้วส่งไฟล์ให้คุณ เพิ่มบริการตัดต่อ คุณจะได้หนังที่เสร็จสมบูรณ์ ทั้งตัดต่อ ปรับสี ใส่เพลงและตัวอักษร เราตรวจสอบกฎการบินของพื้นที่ให้ก่อนเสนอราคา",
     s4_benefit:"หนังทางอากาศที่เสร็จสมบูรณ์ของอสังหาฯ คุณ — คุณแค่เลือกวัน", s4_cta:"ขอใบเสนอราคา",
-    proof_tag:"ผลลัพธ์จริง", proof_title:"ครีเอเตอร์รักพื้นที่นี้",
-    proof_sub:"ครีเอเตอร์ แบรนด์ และผู้ประกอบการหลายร้อยรายใช้ Rent Me Bangkok เพื่อเปิดตัว เติบโต และเล่าเรื่องราวของพวกเขา",
-    proof_n1:"วิวใน 30 วัน", proof_n2:"ผู้ติดตาม Instagram", proof_n3:"ราคาโปรโมชัน", proof_n4:"ผู้ร่วมพอดแคสต์สูงสุด",
     r1_text:'"สตูดิโอพอดแคสต์น่าทึ่งมากสำหรับราคานี้ เซตอัป ON AIR แสง ไมค์ — ทุกอย่างพร้อมตอนฉันมาถึง บันทึกได้ 2 ตอนในเซสชันเดียว"', r1_role:"พอดแคสเตอร์ กรุงเทพฯ",
     r2_text:'"เช่า DJI สำหรับถ่ายอสังหาฯ ที่พัทยา ทุกอย่างชาร์จแล้ว ปรับเทียบแล้ว มีคู่มือสั้นๆ ประหยัดเงินได้มากเมื่อเทียบกับการซื้อ จะมาเช่าอีกแน่นอน"', r2_role:"ช่างภาพอสังหาฯ",
     r3_text:'"ครั้งแรกที่ใช้สตูดิโอมืออาชีพและพวกเขาทำให้มันง่ายมาก ฉากหลังหลายสี ไฟดี เวลาที่ยืดหยุ่น รูปภาพแบรนด์ดูเป็นมืออาชีพแล้วในที่สุด"', r3_role:"ผู้ก่อตั้งแบรนด์แฟชั่น",
     pricing_tag:"ราคาโปร่งใส", pricing_title:"ราคาง่ายๆ<br>ไม่มีค่าใช้จ่ายซ่อนเร้น",
-    p1_service:"สตูดิโอถ่ายภาพ", p1_title:"เช่าสตูดิโอ", p1_period:" / ชั่วโมง (โปรโมชัน)",
+    p1_service:"สตูดิโอถ่ายภาพ", p1_title:"เช่าสตูดิโอ", p1_period:" / ชั่วโมง — โปรถึง 31 ส.ค.",
     p1_desc:"เข้าใช้สตูดิโอเต็มรูปแบบพร้อมไฟ ฉากหลัง และเซตอัปเลานจ์ จองรายชั่วโมง ไม่มีขั้นต่ำ",
     p1_f1:"ไฟสตูดิโอ + ซอฟต์บ็อกซ์", p1_f2:"ฉากหลังหลายสี", p1_f3:"อุปกรณ์และเฟอร์นิเจอร์เลานจ์", p1_f4:"ไฟวงกลม + อุปกรณ์เสริม", p1_btn:"จองสตูดิโอ",
-    p2_service:"แพ็คเกจพอดแคสต์", p2_title:"พอดแคสต์รายเดือน", p2_period:" / เดือน", p2_badge:"ยอดนิยมที่สุด",
-    p2_desc:"4 เซสชันต่อเดือน (สูงสุด 2 ชม. ต่อครั้ง) ถ่ายทำ ตัดต่อ ปรับสี และส่งมอบครบ เดิม ฿18,000 — ประหยัด ฿8,000",
-    p2_f1:"กล้องและไมค์มืออาชีพ", p2_f2:"รวมการตัดต่อวิดีโอ", p2_f3:"ช่างภาพวิดีโอในเซต", p2_f4:"เซตอัปพอดแคสต์ครบ", p2_f5:"รวมค่าเช่าสตูดิโอ", p2_btn:"รับดีลนี้",
-    p3_service:"เช่า DJI", p3_title:"กล้องและโดรน", p3_amount:"สอบถามราคา", p3_period:" / อัตรารายวัน",
-    p3_desc:"เช่ากล้องและโดรน DJI รายวันที่ยืดหยุ่น ราคาแตกต่างตามรุ่น อุปกรณ์ทุกชิ้นตรวจสอบแล้วและพร้อมใช้",
-    p3_f1:"กล้องและโดรน DJI", p3_f2:"ชาร์จและปรับเทียบก่อนรับ", p3_f3:"เซสชันปฐมนิเทศสั้นๆ", p3_f4:"อัตราหลายวันที่ยืดหยุ่น", p3_btn:"ขอใบเสนอราคา",
+    mb_title:"สตูดิโอเริ่ม ฿200 / ชม.",
+    mb_sub:"ตัดต่อพอดแคสต์ ลด 50% ถึง 31 ส.ค.",
+    mb_btn:"จองเลย",
+    dji_day1:"2 วันแรก",
+    dji_day3:"ทุกวันถัดไป",
+    p2_service:"สตูดิโอพอดแคสต์",
+    p2_title:"บันทึกพอดแคสต์ของคุณ",
+    p2_period:" / ชั่วโมง (1 กล้อง)",
+    p2_setup:"+ ค่าจัดเตรียมครั้งเดียว",
+    p2_desc:"คุณดำเนินรายการ เราจัดเตรียมทุกอย่าง ถ่าย ตัดต่อ และทำคลิปอินโทรให้ เลือกแพ็กเกจกล้องตอนจอง",
+    p2_f1:"ไมโครโฟน 3 ตัว รวมอยู่เสมอ",
+    p2_f2:"ชุดไฟระดับมืออาชีพ",
+    p2_f3:"โซฟาและโต๊ะ",
+    p2_f4:"ของตกแต่งและการจัดสตูดิโอ",
+    p2_f5:"ตัดต่อเต็มรูปแบบทั้งตอน",
+    p2_f6:"รวมคลิปอินโทร",
+    p2_btn:"จองบันทึกพอดแคสต์",
+    p3_service:"แพ็กเกจพอดแคสต์",
+    p3_title:"บริการพอดแคสต์ครบวงจร",
+    p3_period:" / 5 ตอน &middot; <strong style='color:#60a5fa'>เฉพาะสอบถามเท่านั้น</strong>",
+    p3_desc:"ห้าตอนครบจบ เราวางแผนไปด้วยกัน รวมถ่ายทำ ตัดต่อ อินโทร และรีล",
+    p3_f1:"ช่างวิดีโอประจำกอง",
+    p3_f2:"ตัดต่อเต็มรูปแบบทุกตอน",
+    p3_f3:"คลิปอินโทรและรีลสำหรับโซเชียล",
+    p3_f4:"รวมสตูดิโอ ไมค์ และของตกแต่ง",
+    p3_btn:"สอบถามแพ็กเกจ",
+    p4_badge:"เปิดตัว ลด 50%",
+    p4_service:"ตัดต่อพอดแคสต์",
+    p4_title:"เราตัดต่อพอดแคสต์ให้คุณ",
+    p4_period:" / ชั่วโมง — 1 กล้อง",
+    p4_desc:"คุณถ่ายมาแล้ว เราจัดการต่อให้ เสียงสะอาด ตัดต่อลื่นไหล พร้อมเผยแพร่ โปรถึง 31 ส.ค.",
+    p4_f1:"2 กล้อง ฿2,000/ชม. &middot; 3 กล้อง ฿3,000/ชม.",
+    p4_f2:"ชั่วโมงถัดไปลดครึ่งราคา",
+    p4_f3:"ส่งงานแบบ 16:9 หรือ 9:16",
+    p4_f4:"ราคาปกติ ฿3,000–฿6,000 ต่อชั่วโมง",
+    p4_btn:"ส่งไฟล์ให้เรา",
+    p5_service:"คลิปโซเชียล",
+    p5_title:"ตัดต่อรีล",
+    p5_period:" / รีล",
+    p5_desc:"คลิปแนวตั้งสำหรับ Instagram TikTok และ YouTube Shorts ปรับสี ใส่เพลงและคำบรรยาย ส่งงานภายใน 48 ชม.",
+    p5_f1:"5 รีล ฿1,200 — ฿240 ต่อรีล",
+    p5_f2:"10 รีล ฿2,100 — ฿210 ต่อรีล",
+    p5_f3:"ส่งไฟล์หลังจอง",
+    p5_f4:"เลือกเป็นบริการเสริมของพอดแคสต์ได้",
+    p5_btn:"จองตัดต่อรีล",
     faq_tag:"FAQ", faq_title:"มีคำถาม?",
     faq_sub:"นี่คือคำตอบสำหรับคำถามที่พบบ่อยที่สุด ยังมีคำถาม? ส่งข้อความหาเราทาง Instagram",
     faq_ig:"@bangkok_rentme",
@@ -1308,25 +1517,19 @@ function closeMobileNav() {
 }
 
 // ── Counter animation ──
-function animateCounter(el, target, duration = 2000) {
-  let start = 0;
-  const step = target / (duration / 16);
-  const timer = setInterval(() => {
-    start += step;
-    if (start >= target) { el.textContent = target.toLocaleString(); clearInterval(timer); return; }
-    el.textContent = Math.floor(start).toLocaleString();
-  }, 16);
-}
-const heroObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      animateCounter(document.getElementById('stat1'), 141662);
-      heroObserver.disconnect();
-    }
-  });
-}, { threshold: 0.5 });
-const stat1El = document.getElementById('stat1');
-if (stat1El) heroObserver.observe(stat1El);
+// Die feste Buchungsleiste erscheint, sobald der Kopfbereich durchgescrollt
+// ist -- oben in der Kopfleiste steht der Knopf ja schon.
+(function bucheLeiste() {
+  const leiste = document.getElementById('mobile-book');
+  const held = document.getElementById('hero');
+  if (!leiste || !held) return;
+  const beobachter = new IntersectionObserver(
+    ([eintrag]) => leiste.classList.toggle('show', !eintrag.isIntersecting),
+    { threshold: 0 },
+  );
+  beobachter.observe(held);
+})();
+
 
 // ── Navbar shrink on scroll ──
 window.addEventListener('scroll', () => {
@@ -1457,5 +1660,14 @@ window.miniCalNav=function(dir,e){
   };
 })();
 </script>
+<!-- Feste Buchungsleiste, nur auf dem Handy sichtbar -->
+<div class="mobile-book" id="mobile-book">
+  <div class="txt">
+    <b data-i18n="mb_title">Studio from ฿200 / hour</b>
+    <span data-i18n="mb_sub">Podcast editing 50% off until 31 Aug</span>
+  </div>
+  <a href="booking.html" data-i18n="mb_btn">Book now</a>
+</div>
+
 </body>
 </html>
