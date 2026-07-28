@@ -24,29 +24,13 @@ mitbestätigt.
 
 ## Dringend — betrifft Geld
 
-### [ ] T-12 — Die neuen Podcast-Preise sind **gebaut, aber nicht ausgespielt**
+### [x] T-12 — Ausgespielt am 2026-07-28
 
-Angelegt 2026-07-28. `supabase/functions/_shared/preise.ts` ist geaendert,
-**deployt laeuft weiterhin die alte Fassung.**
+`stripe-checkout` **v8**, `stripe-paymentlink` **v11**, seit 16:19:29 UTC.
+Frontend auf `fac0d74`, über Vercel automatisch. Vorher der Ist-Stand
+festgehalten (v7 / v10), damit die Auskunft darüber nicht verlorengeht.
 
-**Solange nicht ausgespielt ist, zieht Cut Only den falschen Betrag ein.** Die
-Buchungsstrecke zeigt ฿3.000 an und meldet ฿3.000 -- die deployte Function
-rechnet aber noch `1.000 x duration_hours` und zieht bei zwei Stunden Material
-**฿2.000** ein. Der serverseitig errechnete Betrag gilt (das ist die
-Sicherheitseigenschaft aus T-1), also gewinnt hier die alte Zahl.
-
-Fuer `full_podcast` ist es ungefaehrlich: Der Dienst ist eine Anfrage, die
-Strecke ruft die Function gar nicht auf.
-
-**Zu tun** (Reihenfolge aus `docs/decisions.md`, 2026-07-27):
-
-```bash
-supabase functions list                       # erst den Ist-Stand festhalten
-supabase functions deploy stripe-checkout stripe-paymentlink --use-api
-```
-
-Danach hier abhaken und die Versionsnummern notieren.
-
+Reihenfolge und Begründung stehen in `docs/deploy.md`.
 
 ### [x] T-1 — Der Zahlbetrag kam aus dem Browser — **behoben und live**
 

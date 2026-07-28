@@ -9,9 +9,9 @@ Was **nicht** feststellbar war, steht ausdrücklich als solches darin.
 
 | Teil | Wo | Stand im Repo | Deployed? |
 |---|---|---|---|
-| Frontend (HTML) | **www.rentme-bkk.com**, Vercel | `d5dca2e` | **= `origin/main`**, automatisch |
+| Frontend (HTML) | **www.rentme-bkk.com**, Vercel | `fac0d74` | **= `origin/main`**, automatisch |
 | Supabase-Projekt | `nghsyxwhczvwaorssgoh` | — | läuft |
-| Stripe-Functions | Supabase Edge Functions | 27. Juli | **ja — seit 2026-07-27 05:59:40 UTC** |
+| Stripe-Functions | Supabase Edge Functions | 28. Juli | **ja — `stripe-checkout` v8, `stripe-paymentlink` v11, seit 2026-07-28 16:19:29 UTC** |
 | Datenbankschema | Supabase | `*.sql`, Juni | vermutlich angewandt |
 
 > ## ⚠️ Die zwei Deploys sind getrennt
@@ -256,3 +256,36 @@ ausgelöst — selbst wenn die Function aktuell ist. **Das ist noch offen.**
 - Wo die Domain registriert ist und wem das Vercel-Konto gehört.
 - Der Datenbank-Zugang, mit dem sich der Vorfall auswerten lässt —
   `docs/vorfall-2026-07-27-preisluecke.md`.
+
+---
+
+## Ausgespielt am 2026-07-28
+
+**Reihenfolge: erst der Push, dann die Functions** — und zwar bewusst.
+
+Zwischen beiden Schritten laufen Anzeige und Abbuchung kurz auseinander. Die
+Frage war nur, in welche Richtung. Bei dieser Reihenfolge zeigt die Seite kurz
+die neuen Preise, während der Server noch die alten rechnet: Der Kunde zahlt
+**weniger** als angezeigt. Umgekehrt hätte er beim Podcast-Setup ฿1.500 gezahlt
+und ฿1.000 gesehen — **mehr** als angezeigt. Zu wenig einziehen ist ein
+Ärgernis, zu viel einziehen ist eine Beschwerde.
+
+Bei „We Cut Your Podcast" gab es in diesem Fenster gar keinen Fehlbetrag: Die
+alte Function kennt `editing_only_2cam` nicht und lehnt fail-closed ab. Eine
+Buchung, die nicht zustande kommt, ist behebbar.
+
+| | vorher | nachher |
+|---|---|---|
+| `origin/main` | `d5dca2e` | **`fac0d74`** |
+| `stripe-checkout` | v7 | **v8** |
+| `stripe-paymentlink` | v10 | **v11** |
+| `stripe-webhook` | v10 | v10 — unberührt |
+
+`stripe-webhook` wurde **nicht** mit ausgespielt. An ihm hat sich nichts
+geändert, und ein Deploy ohne Anlass ist bei Zahlungswegen unnötiges Risiko
+(`decisions.md`, 2026-07-27).
+
+**Nachgeprüft an der Live-Seite**, nicht am Repo: neue Preise, Gerätestaffel,
+Reel-Pakete, Aktionsfrist, fünf Sprachen, drei Dienstgruppen, keine erfundenen
+Kennzahlen mehr. Der Doku-Commit `73e7841`, der seit dem 27. Juli lokal lag,
+ist mit gepusht.
