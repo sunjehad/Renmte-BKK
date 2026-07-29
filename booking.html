@@ -375,21 +375,21 @@ input[type=date]{color-scheme:dark}
     <div class="svc-group">
       <div class="svc-group-head">
         <div class="svc-group-title">YOU SEND US THE FOOTAGE</div>
-        <div class="svc-group-sub">Already filmed? No studio time needed — send the files after booking.</div>
+        <div class="svc-group-sub">Already filmed? No studio time needed — send the files via Dropbox after booking.</div>
       </div>
       <div class="service-cards">
       <div class="svc-card" onclick="selectService('podcast',this)">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="svc-icon">🎞️</div>
         <div class="svc-title">WE CUT YOUR PODCAST</div>
-        <div class="svc-desc">Already filmed? Send us the raw files — clean audio, smooth cuts, ready to publish. Delivered in 16:9 or 9:16. No studio time needed.</div>
+        <div class="svc-desc">Already filmed? Send us the raw files via Dropbox — clean audio, smooth cuts, ready to publish. Ready 3–5 days after your files reach us. Delivered in 16:9 or 9:16. No studio time needed.</div>
         <div class="svc-price">From ฿1,500 / hour <span style="color:var(--accent);font-weight:700">50% OFF UNTIL 31 AUG</span></div>
       </div>
       <div class="svc-card" onclick="selectService('reel',this)">
         <div class="check-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div class="svc-icon">📱</div>
         <div class="svc-title">REEL EDITING</div>
-        <div class="svc-desc">Send us the footage — we cut, color grade, add music &amp; captions. Delivered within 48h.</div>
+        <div class="svc-desc">Send us the footage via Dropbox — we cut, color grade, add music &amp; captions. Delivered within 48h of your files reaching us.</div>
         <div class="svc-price">฿300 <span style="color:var(--muted);font-weight:400">per reel · cheaper in packs</span></div>
       </div>
       </div>
@@ -495,8 +495,17 @@ input[type=date]{color-scheme:dark}
     <div id="details-podcast" style="display:none">
       <div style="background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.25);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--muted)">
         🎞️ <strong style="color:var(--fg)">No studio time needed.</strong>
-        Send us your raw files via Google Drive or WeTransfer after booking. We handle
-        color grading, audio mix, titles and delivery.
+        After booking you send us your raw files via <strong style="color:var(--fg)">Dropbox</strong> —
+        the upload link is on your confirmation page. We handle color grading, audio mix and titles,
+        and we email you a private Dropbox link to your finished cut.
+        <div style="margin-top:8px">
+          ⏱️ <strong style="color:var(--fg)">Ready 3–5 days after your files reach us</strong>
+          — not from the day you book. The sooner your footage arrives, the sooner you get it back.
+        </div>
+        <div style="margin-top:8px;font-size:12px">
+          We keep your footage and the finished cut for 30 days after delivery, then remove them.
+          Please keep your own copy — we are not a backup.
+        </div>
       </div>
 
       <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.4);border-radius:6px;padding:6px 14px;margin-bottom:20px">
@@ -836,7 +845,10 @@ input[type=date]{color-scheme:dark}
   <!-- REEL DETAILS -->
   <div id="details-reel" style="display:none;padding:0 0 16px">
     <div style="background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.25);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--fg-muted)">
-      📱 Send us your raw footage via Google Drive or WeTransfer after booking. We cut, color grade, add music & captions, and deliver within 48h.
+      📱 After booking you send us your raw footage via <strong style="color:var(--fg)">Dropbox</strong> — the upload link is on your confirmation page.
+      We cut, color grade, add music &amp; captions, and email you a private Dropbox link to the finished cut
+      <strong style="color:var(--fg)">within 48h of your files reaching us</strong> — not from the day you book.
+      We keep everything for 30 days after delivery, then remove it. Please keep your own copy.
     </div>
     <label style="margin-bottom:10px;display:block">Select Package</label>
     <div class="sub-grid" style="grid-template-columns:repeat(3,1fr)">
@@ -1087,6 +1099,38 @@ const EMAILJS_PUBLIC_KEY       = 'n-YxOGgL8mPVUaoBP';
 const EMAILJS_SERVICE_ID       = 'service_jwnx06q';
 const EMAILJS_CUSTOMER_TEMPLATE = 'template_n7rkhjd';
 const EMAILJS_ADMIN_TEMPLATE   = 'template_thqicqi';
+
+// ═══════════════════════════════════════════════
+// DATEIUEBERGABE (Cut Only + Reel Editing)
+// ═══════════════════════════════════════════════
+// !!! HIER MUSS ANDY DEN ECHTEN DROPBOX-LINK EINTRAGEN !!!
+//
+// Solange hier der Platzhalter steht, blendet die Seite den Link **nicht** an,
+// sondern nennt nur den Weg ("Dropbox") und bittet um Abwarten der E-Mail.
+// Das ist Absicht: Lieber keine Anweisung als eine, die ins Leere zeigt --
+// genau dieser Fehler stand bis 2026-07-29 fuenfmal auf der Seite
+// ("send the files after booking", ohne je ein Ziel zu nennen).
+//
+// Empfohlen ist eine Dropbox **Dateianfrage** ("file request"): Der Kunde laedt
+// hoch, ohne den Ordnerinhalt zu sehen. Fuer den Rueckweg -- das fertige
+// Ergebnis liegt laut Festlegung im selben Ordner -- braucht er zusaetzlich
+// einen Freigabelink mit Leserecht.
+const DROPBOX_UPLOAD_LINK = 'https://www.dropbox.com/request/m57wa6jgt237yabql2pb';
+const DROPBOX_LINK_GESETZT =
+  DROPBOX_UPLOAD_LINK !== 'PLATZHALTER_DROPBOX_LINK_BITTE_EINTRAGEN' &&
+  /^https:\/\//.test(DROPBOX_UPLOAD_LINK);
+
+// Derselbe Text fuer die E-Mail. Die Vorlage liegt extern bei EmailJS und muss
+// den Parameter `uebergabe_hinweis` erst ausgeben -- siehe WO-38.
+const UEBERGABE_TEXT_MAIL = DROPBOX_LINK_GESETZT
+  ? 'Send us your raw files via Dropbox: ' + DROPBOX_UPLOAD_LINK +
+    ' — please name the folder with your booking reference. ' +
+    'We email you a private Dropbox link to the finished cut, ' +
+    '3–5 days after your files arrive.'
+  : 'We will email you a Dropbox link for your raw files. ' +
+    'Please name the folder with your booking reference. ' +
+    'We email you a private Dropbox link to the finished cut, ' +
+    '3–5 days after your files arrive.';
 
 // ═══════════════════════════════════════════════
 // STRIPE
@@ -1373,6 +1417,20 @@ function updateDroneSummary() {
 const ANFRAGE_DIENSTE = ['drone', 'full_podcast'];
 function istAnfrageDienst() { return ANFRAGE_DIENSTE.includes(state.service); }
 
+// Dienste, die **bezahlt** werden, aber keinen Studiotermin haben: Der Kunde
+// schickt Material und bekommt es geschnitten zurueck. Bis 2026-07-29 kannte
+// der Ablauf nur "Anfrage" und "Termin" -- diese Faelle fielen deshalb in den
+// Termin-Zweig und bekamen leere Datums- und Uhrzeitzeilen sowie
+// Kalenderknoepfe, die auf ein Datum zeigten, das es nicht gibt (`booking_date`
+// ist leer, also wurde aus dem Zeitstempel "T090000" -- ungueltig in der
+// Google-URL wie in der ICS-Datei).
+//
+// ACHTUNG: Das ist bewusst eine **zweite, unabhaengige** Liste und keine
+// Erweiterung von ANFRAGE_DIENSTE. Jene steuert auch, ob ueberhaupt gezahlt
+// wird; stuenden `podcast` oder `reel` dort, fiele der Zahlschritt weg.
+const DIENSTE_OHNE_TERMIN = ['podcast', 'reel'];
+function hatKeinenTermin() { return DIENSTE_OHNE_TERMIN.includes(state.service); }
+
 // Thema und Zeitplan stehen in keiner eigenen Spalte -- ohne sie waere die
 // Anfrage in der Verwaltung nicht zu beantworten.
 function fullPodcastNotes() {
@@ -1440,7 +1498,7 @@ function setupStep2() {
     // `_shared/preise.ts` seit jeher.
     document.getElementById('details-podcast').style.display = '';
     document.getElementById('s2-heading').textContent = 'CUT ONLY';
-    document.getElementById('s2-sub').textContent = 'Tell us how much raw footage you have — no studio time needed.';
+    document.getElementById('s2-sub').textContent = 'Tell us how much raw footage you have — no studio time needed. You send the files via Dropbox after booking.';
     selectCutCameras(1, document.querySelector('#cut-camera-chips .chip'));
     selectCutFootage(1, document.querySelector('#cut-footage-chips .chip'));
   } else if (state.service === 'full_podcast') {
@@ -1460,7 +1518,7 @@ function setupStep2() {
   } else if (state.service === 'reel') {
     document.getElementById('details-reel').style.display = '';
     document.getElementById('s2-heading').textContent = 'REEL EDITING';
-    document.getElementById('s2-sub').textContent = 'Choose your package — send us the footage after booking.';
+    document.getElementById('s2-sub').textContent = 'Choose your package — you send us the footage via Dropbox after booking.';
   } else if (state.service === 'drone') {
     document.getElementById('details-drone').style.display = '';
     document.getElementById('s2-heading').textContent = 'AERIAL / DRONE FILMING';
@@ -2623,8 +2681,10 @@ async function finalizeBooking(payload, existingBooking, skipEmail) {
   // Send emails (non-blocking)
   if (!skipEmail) sendEmails(data).catch(() => {});
 
-  // Build calendar links
-  buildCalendarLinks(data);
+  // Build calendar links -- nur, wenn es ueberhaupt einen Termin gibt.
+  // Ohne diese Bedingung baute die Funktion aus einem leeren `booking_date`
+  // den ungueltigen Zeitstempel "T090000" in Google-Link und ICS-Datei.
+  if (!hatKeinenTermin()) buildCalendarLinks(data);
 
   // Show confirmation screen
   document.getElementById('wizard-wrap').style.display = 'none';
@@ -2661,12 +2721,29 @@ async function finalizeBooking(payload, existingBooking, skipEmail) {
     if (ics && !gcal) ics.style.display = 'none';
   }
 
+  // Dasselbe fuer die bezahlten Dienste ohne Termin. Bis 2026-07-29 blieben die
+  // Knoepfe hier stehen und trugen "T090000" statt eines Datums -- der Kunde
+  // bekam eine Einladung zu einem Termin, den es nicht gibt, an die
+  // Studioadresse, zu der er gar nicht kommen muss, samt Wecker 24 h vorher.
+  if (hatKeinenTermin()) {
+    const gcal = document.getElementById('btn-gcal');
+    const ics  = document.getElementById('btn-ics');
+    if (gcal && gcal.parentElement) gcal.parentElement.style.display = 'none';
+    if (ics && !gcal) ics.style.display = 'none';
+  }
+
   // podcast_setup, reel und drone fehlten hier bis 2026-07-27 -- die
   // Bestaetigung zeigte fuer sie "undefined" als Service. Dieser Block steht
   // zweimal in der Datei; beide Stellen sind gleich gepflegt.
+  //
+  // `podcast` heisst seit 2026-07-28 "Cut Only" (reiner Schnitt, keine
+  // Studiozeit). Hier stand bis 2026-07-29 "Podcast Session" -- der Kunde
+  // buchte "WE CUT YOUR PODCAST" und bekam eine Bestaetigung ueber einen
+  // Studiotermin. Der Datenbankwert bleibt `podcast`, nur die Anzeige aendert
+  // sich.
   const svcLabel = {
     studio_rental: 'Photo Studio Rental',
-    podcast: 'Podcast Session',
+    podcast: 'Cut Only',
     podcast_setup: 'Podcast Setup / Service',
     equipment: 'Equipment Rental',
     reel: 'Reel Editing',
@@ -2675,7 +2752,11 @@ async function finalizeBooking(payload, existingBooking, skipEmail) {
 
   let confRows = `<div class="review-row"><span class="review-label">Reference</span><span class="review-value" style="color:var(--blue-l)">${data.booking_ref}</span></div>`;
   confRows += `<div class="review-row"><span class="review-label">Service</span><span class="review-value">${svcLabel[state.service]}</span></div>`;
-  if (state.service !== 'equipment') {
+  if (hatKeinenTermin()) {
+    // Kein Termin: Datum und Uhrzeit wuerden hier leer bleiben. Stattdessen
+    // steht da, was der Kunde tatsaechlich wissen muss.
+    confRows += `<div class="review-row"><span class="review-label">Delivery</span><span class="review-value">3–5 days after your files arrive</span></div>`;
+  } else if (state.service !== 'equipment') {
     confRows += `<div class="review-row"><span class="review-label">Date</span><span class="review-value">${formatDate(state.date)}</span></div>`;
     confRows += `<div class="review-row"><span class="review-label">Time</span><span class="review-value">${state.startTime}${state.endTime ? ' – ' + state.endTime : ''}</span></div>`;
   } else {
@@ -2709,6 +2790,48 @@ async function finalizeBooking(payload, existingBooking, skipEmail) {
       </ul>`;
     document.getElementById('conf-details').after(notice);
   }
+
+  // Dateiuebergabe fuer die Dienste ohne Termin. Bis 2026-07-29 stand hier
+  // nichts: Der Kunde hatte bezahlt und erfuhr an keiner Stelle, wohin sein
+  // Material soll -- obwohl erst seine Dateien die Leistung ausloesen. Die
+  // Geraeteausleihe hatte an derselben Stelle laengst ihren Kasten.
+  if (hatKeinenTermin()) {
+    const uebergabe = document.createElement('div');
+    uebergabe.style.cssText = 'background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.35);border-radius:10px;padding:16px 18px;max-width:480px;margin:0 auto 24px;text-align:left';
+
+    const ziel = DROPBOX_LINK_GESETZT
+      ? '<a href="' + DROPBOX_UPLOAD_LINK + '" target="_blank" rel="noopener" style="color:#60a5fa;font-weight:700">Upload your files to Dropbox →</a>'
+      : '<span style="color:#f5f5f5">We are sending you a <strong>Dropbox</strong> link by email right now.</span>';
+
+    uebergabe.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span style="font-size:12px;font-weight:700;color:#60a5fa;letter-spacing:.08em">NEXT STEP — SEND US YOUR FILES</span>
+      </div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#888">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="margin-top:1px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>${ziel}</span>
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#888">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="margin-top:1px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Name the folder with your reference <strong style="color:#f5f5f5">${data.booking_ref}</strong> so we can match it to your booking.</span>
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#888">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="margin-top:1px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+          <span><strong style="color:#f5f5f5">You get it back 3–5 days after your files arrive</strong> — not from today. The clock starts when your footage reaches us.</span>
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#888">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="margin-top:1px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>We email you a private Dropbox link to your finished cut.</span>
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#888">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" style="margin-top:1px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>We keep your footage and the finished cut for <strong style="color:#f5f5f5">30 days after delivery</strong>, then remove them. <strong style="color:#f5f5f5">Please keep your own copy</strong> — we are not a backup.</span>
+        </li>
+      </ul>`;
+    document.getElementById('conf-details').after(uebergabe);
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -2716,9 +2839,11 @@ async function finalizeBooking(payload, existingBooking, skipEmail) {
 // CALENDAR BUTTONS
 // ═══════════════════════════════════════════════
 function buildCalendarLinks(booking) {
+  // Nur Dienste mit Termin gehoeren hierher. `podcast` (Cut Only) und `reel`
+  // fehlen bewusst: fuer sie wird diese Funktion seit 2026-07-29 gar nicht
+  // mehr aufgerufen, weil es keinen Termin gibt, den man eintragen koennte.
   const svcLabel = {
     studio_rental:  'Photo Studio – Rent Me Bangkok',
-    podcast:        'Podcast Session – Rent Me Bangkok',
     podcast_setup:  'Podcast Studio Setup – Rent Me Bangkok',
     equipment:      'Equipment Rental – Rent Me Bangkok'
   };
@@ -2810,7 +2935,7 @@ async function sendEmails(booking) {
   // zweimal in der Datei; beide Stellen sind gleich gepflegt.
   const svcLabel = {
     studio_rental: 'Photo Studio Rental',
-    podcast: 'Podcast Session',
+    podcast: 'Cut Only',
     podcast_setup: 'Podcast Setup / Service',
     equipment: 'Equipment Rental',
     reel: 'Reel Editing',
@@ -2838,16 +2963,33 @@ async function sendEmails(booking) {
   }
   const gcalLink = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${gcalTitle}&dates=${gcalDates}&details=${gcalDetails}&location=${gcalLoc}`;
 
+  // Dienste ohne Termin (Cut Only, Reel Editing): `booking_date` ist leer und
+  // `start_time` stand auf "See booking details" -- ein Verweis auf Angaben,
+  // die es nicht gibt. Stattdessen tragen die Felder jetzt, was fuer diese
+  // Dienste an die Stelle des Termins tritt.
+  //
+  // ACHTUNG: Die Textbausteine liegen im EmailJS-Konto und sind von hier aus
+  // nicht einsehbar. Diese Parameter kommen nur an, wenn die Vorlage sie auch
+  // ausgibt -- `uebergabe_hinweis` und `lieferfrist` sind **neu** und muessen
+  // dort erst eingebaut werden.
+  const ohneTermin = DIENSTE_OHNE_TERMIN.includes(booking.service_type);
+
   const params = {
     booking_ref:    booking.booking_ref,
     customer_name:  customerName,
     customer_email: customerEmail,
     customer_phone: customerPhone,
     service:        svcLabel[booking.service_type] || booking.service_type,
-    booking_date:   booking.booking_date || booking.equipment_start_date || '',
-    start_time:     booking.start_time || 'See booking details',
+    booking_date:   ohneTermin
+                      ? 'No studio date — send us your files'
+                      : (booking.booking_date || booking.equipment_start_date || ''),
+    start_time:     ohneTermin
+                      ? '3–5 days after your files arrive'
+                      : (booking.start_time || 'See booking details'),
+    lieferfrist:    ohneTermin ? '3–5 days after your files arrive' : '',
+    uebergabe_hinweis: ohneTermin ? UEBERGABE_TEXT_MAIL : '',
     source:         booking.source || 'website',
-    gcal_link:      gcalLink
+    gcal_link:      ohneTermin ? '' : gcalLink
   };
 
   try {
