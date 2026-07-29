@@ -2988,6 +2988,17 @@ async function sendEmails(booking) {
                       : (booking.start_time || 'See booking details'),
     lieferfrist:    ohneTermin ? '3–5 days after your files arrive' : '',
     uebergabe_hinweis: ohneTermin ? UEBERGABE_TEXT_MAIL : '',
+    // Der Standort-Block der Vorlage nannte fest die Studioadresse. Fuer Cut
+    // Only und Reel Editing kommt niemand ins Studio -- direkt unter
+    // "No studio date" stand also eine Anfahrt. Diese drei Felder ersetzen den
+    // festen Text; die Vorlage gibt sie aus, die Gestaltung bleibt.
+    ort_titel:      ohneTermin ? 'HOW IT WORKS' : 'LOCATION',
+    ort_zeile1:     ohneTermin
+                      ? 'No studio visit needed — everything runs through Dropbox.'
+                      : '51 Kamphaeng Phet 7 Rd, Makkasan, Ratchathewi, Bangkok 10400',
+    ort_zeile2:     ohneTermin
+                      ? 'Send your footage, we send the finished cut back.'
+                      : '5 min from Asoke BTS · Phetchaburi MRT',
     source:         booking.source || 'website',
     gcal_link:      ohneTermin ? '' : gcalLink
   };
