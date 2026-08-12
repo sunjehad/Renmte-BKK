@@ -306,7 +306,7 @@ input[type=date]{color-scheme:dark}
 <div class="wizard-wrap" id="wizard-wrap">
 
   <!-- PROGRESS -->
-  <div class="step-counter" id="step-counter">Schritt 1 von 5</div>
+  <div class="step-counter" id="step-counter">Step 1 of 5 — Service</div>
   <div class="progress-bar" id="progress-bar">
     <div class="step-item active" id="pi-1">
       <div class="step-circle">1</div>
@@ -1300,10 +1300,24 @@ function goStep(n) {
 const SCHRITT_NAMEN = ['Service', 'Details', 'Your Info', 'Review', 'Payment'];
 
 function updateProgress(n) {
+  // Anfrage-Dienste (Drohne, Full Podcast) haben **keinen** Zahlschritt:
+  // `goToPayment()` legt die Anfrage an und ueberspringt Schritt 5. Bis
+  // 2026-08-12 zeigte die Leiste ihnen trotzdem durchgehend "Step n of 5"
+  // mit "Payment" als letztem Punkt -- ausgerechnet den zwei Diensten, bei
+  // denen der Kunde ohnehin unsicher ist, ob er gerade etwas kauft. Auf der
+  // Karte steht "Price on request", die Leiste widersprach dem.
+  const gesamt = istAnfrageDienst() ? 4 : 5;
   const zaehler = document.getElementById('step-counter');
-  if (zaehler) zaehler.textContent = 'Step ' + n + ' of 5 — ' + SCHRITT_NAMEN[n - 1];
+  if (zaehler) zaehler.textContent = 'Step ' + n + ' of ' + gesamt + ' — ' + SCHRITT_NAMEN[n - 1];
   for (let i = 1; i <= 5; i++) {
     const pi = document.getElementById('pi-' + i);
+    // Schritte jenseits des letzten ausblenden -- und wieder einblenden,
+    // wenn der Kunde auf einen zahlpflichtigen Dienst zurueckwechselt.
+    const ueberzaehlig = i > gesamt;
+    pi.style.display = ueberzaehlig ? 'none' : '';
+    const davor = document.getElementById('pl-' + (i - 1));
+    if (davor) davor.style.display = ueberzaehlig ? 'none' : '';
+    if (ueberzaehlig) continue;
     pi.classList.remove('active', 'done');
     if (i < n) pi.classList.add('done');
     else if (i === n) pi.classList.add('active');
