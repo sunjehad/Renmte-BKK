@@ -844,79 +844,214 @@ section[id]{scroll-margin-top:84px}
   </div>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
+  // ═══════════════════════════════════════════════════════════════════
+  // VERFUEGBARKEIT — ECHT, NICHT ERFUNDEN
+  // ═══════════════════════════════════════════════════════════════════
+  // Bis 2026-08-12 stand hier ein Zahlenspiel:
+  //     function isBooked(y,m,d){ return (y*31+m*7+d*13)%10 < 3; }
+  // Es faerbte rund 30 % der Tage und jeden fuenften Zeitschlitz rot ein --
+  // frei erfunden, ohne jeden Datenbankzugriff. Ueber der Anzeige stand
+  // "Available Now" und "CHECK AVAILABILITY". Kunden, die einen freien Tag
+  // als "Booked" sahen, gingen wieder.
+  //
+  // Jetzt liest diese Seite dieselbe Ansicht wie `booking.html`
+  // (`availability`, keine Kundendaten darin) und wendet **dieselben Regeln**
+  // an. Weichen beide Seiten voneinander ab, ist das ein Fehler -- vorher war
+  // die Abweichung der Normalfall.
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const TIMES = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'];
+  const TIMES  = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'];
 
-  // Simulate booked slots: weekends partially booked, some weekday slots taken
-  function isBooked(y, m, d) {
-    const seed = (y * 31 + m * 7 + d * 13) % 10;
-    return seed < 3; // ~30% booked
-  }
-  function isSlotBooked(h, d, m, y) {
-    const seed = (h * 17 + d * 7 + m * 3 + y) % 5;
-    return seed === 0;
-  }
+  // Alle raumgebundenen Dienste teilen sich denselben Raum -- exakt wie
+  // ROOM_SERVICES in booking.html.
+  const RAUM_DIENSTE = ['studio_rental','podcast','podcast_setup'];
+  // Ein Tag gilt erst als voll, wenn alle 14 Stunden weg sind (booking.html
+  // rechnet genauso). Teilbelegte Tage bleiben waehlbar -- sie sind es ja.
+  const VOLL_AB_STUNDEN = 14;
+
+  // Die drei Knoepfe hier oben auf ihre Dienste in booking.html abbilden.
+  // "Podcast" meint die **Aufnahme im Studio** (`podcast_setup`); der
+  // Schluessel `podcast` ist drueben der Schnitt ohne Studiotermin und hat
+  // ueberhaupt keinen Kalender.
+  const DIENST_SCHLUESSEL = {
+    'Photo Studio': 'studio_rental',
+    'Podcast':      'podcast_setup',
+    'DJI Rental':   'equipment'
+  };
+
+  const sb = supabase.createClient(
+    'https://nghsyxwhczvwaorssgoh.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5naHN5eHdoY3p2d2FvcnNzZ29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNDA3NDIsImV4cCI6MjA5NzYxNjc0Mn0.3EV00ggHV5domLBbJpTrdIiWatOyhNpFVJo42FqppPk'
+  );
 
   let cur = new Date(), selDate = null, selSlot = null;
+  let vollBelegt = new Set();
   cur.setDate(1);
+
+  const zp = n => String(n).padStart(2,'0');
+  const datumStr = (y,m,d) => y + '-' + zp(m+1) + '-' + zp(d);
+
+  function gewaehlterDienst(){
+    const r = document.querySelector('#service-picks input[name="svc"]:checked');
+    return r ? DIENST_SCHLUESSEL[r.value] || null : null;
+  }
+  const istGeraeteMiete = () => gewaehlterDienst() === 'equipment';
+
+  // ── Monatsbelegung ───────────────────────────────────────────────────
+  async function ladeMonatsbelegung(){
+    try {
+      const { data, error } = await sb.from('availability')
+        .select('booking_date, duration_hours')
+        .in('service_type', RAUM_DIENSTE);
+      if (error) throw error;
+      const stundenProTag = {};
+      (data || []).forEach(b => {
+        if (!b.booking_date) return;
+        stundenProTag[b.booking_date] = (stundenProTag[b.booking_date] || 0) + (b.duration_hours || 1);
+      });
+      vollBelegt = new Set(Object.keys(stundenProTag).filter(d => stundenProTag[d] >= VOLL_AB_STUNDEN));
+    } catch (e) {
+      // Keine Verbindung: dann wird **nichts** als belegt behauptet. Lieber
+      // eine Anfrage zu viel als ein abgewiesener Kunde -- und auf keinen Fall
+      // wieder eine erfundene Belegung.
+      vollBelegt = new Set();
+      console.warn('Verfuegbarkeit nicht ladbar, es wird nichts als belegt angezeigt:', e && e.message);
+    }
+    render();
+  }
 
   function render() {
     const y = cur.getFullYear(), m = cur.getMonth();
     document.getElementById('cal-month').textContent = MONTHS[m] + ' ' + y;
     const first = new Date(y, m, 1).getDay();
-    const days = new Date(y, m+1, 0).getDate();
+    const days  = new Date(y, m+1, 0).getDate();
     const today = new Date();
     let html = '';
-    for(let i=0;i<first;i++) html += '<div></div>';
-    for(let d=1;d<=days;d++){
-      const past = new Date(y,m,d) < new Date(today.getFullYear(),today.getMonth(),today.getDate());
-      const booked = !past && isBooked(y,m,d);
-      const sel = selDate && selDate.d===d && selDate.m===m && selDate.y===y;
-      let bg='transparent', border='rgba(255,255,255,.06)', color='var(--fg-muted)', cursor='default';
-      if(past){ color='rgba(255,255,255,.18)'; }
-      else if(sel){ bg='var(--accent)'; border='var(--accent)'; color='#fff'; cursor='pointer'; }
-      else if(booked){ bg='rgba(230,57,70,.15)'; border='rgba(230,57,70,.35)'; color='rgba(230,57,70,.7)'; cursor='default'; }
+    for (let i=0; i<first; i++) html += '<div></div>';
+    for (let d=1; d<=days; d++){
+      const past   = new Date(y,m,d) < new Date(today.getFullYear(),today.getMonth(),today.getDate());
+      const booked = !past && vollBelegt.has(datumStr(y,m,d));
+      const sel    = selDate && selDate.d===d && selDate.m===m && selDate.y===y;
+      let bg='transparent', border='rgba(255,255,255,.06)', color='var(--fg-muted)', cursor='default', titel='';
+      if (past){ color='rgba(255,255,255,.18)'; }
+      else if (sel){ bg='var(--accent)'; border='var(--accent)'; color='#fff'; cursor='pointer'; }
+      else if (booked){ bg='rgba(230,57,70,.15)'; border='rgba(230,57,70,.35)'; color='rgba(230,57,70,.7)'; cursor='default'; titel=' title="Fully booked"'; }
       else { bg='rgba(37,99,235,.12)'; border='rgba(37,99,235,.35)'; color='var(--fg)'; cursor='pointer'; }
-      const click = (!past && !booked) ? `onclick="calPick(${d},${m},${y})"` : '';
-      html += `<div ${click} style="padding:6px 0;border-radius:6px;font-size:.8rem;background:${bg};border:1px solid ${border};color:${color};cursor:${cursor};transition:all .15s">${d}</div>`;
+      const click = (!past && !booked) ? 'onclick="calPick(' + d + ',' + m + ',' + y + ')"' : '';
+      html += '<div ' + click + titel + ' style="padding:6px 0;border-radius:6px;font-size:.8rem;background:' + bg + ';border:1px solid ' + border + ';color:' + color + ';cursor:' + cursor + ';transition:all .15s">' + d + '</div>';
     }
     document.getElementById('cal-days').innerHTML = html;
   }
 
   window.calNav = function(dir){ cur.setMonth(cur.getMonth()+dir); render(); };
 
-  window.calPick = function(d,m,y){
-    selDate={d,m,y}; selSlot=null;
+  // ── Tag gewaehlt ─────────────────────────────────────────────────────
+  window.calPick = async function(d,m,y){
+    selDate = {d,m,y}; selSlot = null;
     render();
-    document.getElementById('slot-hint').style.display='none';
-    document.getElementById('slot-content').style.display='block';
-    document.getElementById('slot-date-label').textContent = MONTHS[m]+' '+d+', '+y;
-    document.getElementById('book-cta').style.display='none';
-    let html='';
-    TIMES.forEach(t=>{
-      const h=parseInt(t);
-      const taken = isSlotBooked(h,d,m,y);
-      if(taken){
-        html+=`<div style="padding:8px 4px;border-radius:8px;font-size:.78rem;text-align:center;background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.25);color:rgba(230,57,70,.5);">${t}<br><span style="font-size:.65rem">Booked</span></div>`;
+    document.getElementById('slot-hint').style.display = 'none';
+    document.getElementById('slot-content').style.display = 'block';
+    document.getElementById('slot-date-label').textContent = MONTHS[m] + ' ' + d + ', ' + y;
+    document.getElementById('book-cta').style.display = 'none';
+    await zeigeSlots();
+  };
+
+  async function zeigeSlots(){
+    if (!selDate) return;
+    const grid = document.getElementById('slots-grid');
+
+    // Geraetemiete geht **tageweise**, nicht stundenweise -- Zeitschlitze
+    // waeren hier eine zweite Falschaussage. booking.html fuehrt dafuer einen
+    // eigenen Kalender (`equipment_start_date` / `_end_date`).
+    if (istGeraeteMiete()){
+      grid.style.display = 'none';
+      hinweis('Camera &amp; drone rental is booked by the day — pick your dates on the booking page.');
+      zeigeCta('Continue to Booking →');
+      return;
+    }
+    grid.style.display = 'grid';
+    hinweis('');
+    grid.innerHTML = '<div style="grid-column:1/-1;color:var(--fg-muted);font-size:.78rem;padding:6px 0">Checking availability…</div>';
+
+    const ds = datumStr(selDate.y, selDate.m, selDate.d);
+    let belegt = new Set(), geladen = true;
+    try {
+      const { data, error } = await sb.from('availability')
+        .select('start_time, duration_hours')
+        .in('service_type', RAUM_DIENSTE)
+        .eq('booking_date', ds);
+      if (error) throw error;
+      (data || []).forEach(b => {
+        const start = parseInt(b.start_time);
+        const dauer = b.duration_hours || 1;
+        for (let i=0; i<dauer; i++) belegt.add(zp(start+i) + ':00');
+      });
+    } catch (e) {
+      geladen = false;
+      console.warn('Zeitschlitze nicht ladbar:', e && e.message);
+    }
+
+    // Ein bereits angebrochener Tag: Stunden, die heute schon vorbei sind,
+    // sind nicht buchbar. Das stand vorher nirgends.
+    const jetzt = new Date();
+    const heute = ds === datumStr(jetzt.getFullYear(), jetzt.getMonth(), jetzt.getDate());
+
+    let html = '';
+    TIMES.forEach(t => {
+      const stunde = parseInt(t);
+      const vorbei = heute && stunde <= jetzt.getHours();
+      if (belegt.has(t) || vorbei){
+        html += '<div title="' + (vorbei ? 'Already past' : 'Already booked') + '" style="padding:8px 4px;border-radius:8px;font-size:.78rem;text-align:center;background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.25);color:rgba(230,57,70,.5);">' + t + '<br><span style="font-size:.65rem">' + (vorbei ? 'Past' : 'Booked') + '</span></div>';
       } else {
-        html+=`<div onclick="pickSlot('${t}')" style="padding:8px 4px;border-radius:8px;font-size:.78rem;text-align:center;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.3);color:var(--fg);cursor:pointer;transition:all .15s" id="slot-${t.replace(':','')}">​${t}</div>`;
+        html += '<div onclick="pickSlot(\'' + t + '\')" style="padding:8px 4px;border-radius:8px;font-size:.78rem;text-align:center;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.3);color:var(--fg);cursor:pointer;transition:all .15s" id="slot-' + t.replace(':','') + '">' + t + '</div>';
       }
     });
-    document.getElementById('slots-grid').innerHTML=html;
-  };
+    grid.innerHTML = html;
+    hinweis(geladen ? '' : 'Live availability is temporarily unavailable — we confirm your slot by email.');
+  }
+
+  function hinweis(text){
+    let el = document.getElementById('slot-note');
+    if (!el){
+      el = document.createElement('div');
+      el.id = 'slot-note';
+      el.style.cssText = 'font-size:.78rem;color:var(--fg-muted);line-height:1.5;margin-top:2px';
+      document.getElementById('slots-grid').parentNode.insertBefore(el, document.getElementById('book-cta'));
+    }
+    el.innerHTML = text;
+    el.style.display = text ? 'block' : 'none';
+  }
+
+  function zeigeCta(beschriftung){
+    const cta = document.getElementById('book-cta');
+    if (beschriftung) cta.textContent = beschriftung;
+    // Den gewaehlten Dienst mitgeben -- `booking.html` wertet `?service=` aus
+    // und waehlt die passende Karte vor.
+    const dienst = gewaehlterDienst();
+    cta.href = 'booking.html' + (dienst ? '?service=' + dienst : '');
+    cta.style.display = 'block';
+  }
 
   window.pickSlot = function(t){
-    if(selSlot) document.getElementById('slot-'+selSlot.replace(':',''))?.style && (document.getElementById('slot-'+selSlot.replace(':','')).style.background='rgba(37,99,235,.1)',document.getElementById('slot-'+selSlot.replace(':','')).style.borderColor='rgba(37,99,235,.3)',document.getElementById('slot-'+selSlot.replace(':','')).style.color='var(--fg)');
-    selSlot=t;
-    const el=document.getElementById('slot-'+t.replace(':',''));
-    if(el){el.style.background='var(--accent)';el.style.borderColor='var(--accent)';el.style.color='#fff';}
-    document.getElementById('book-cta').style.display='block';
+    if (selSlot){
+      const alt = document.getElementById('slot-' + selSlot.replace(':',''));
+      if (alt){ alt.style.background='rgba(37,99,235,.1)'; alt.style.borderColor='rgba(37,99,235,.3)'; alt.style.color='var(--fg)'; }
+    }
+    selSlot = t;
+    const el = document.getElementById('slot-' + t.replace(':',''));
+    if (el){ el.style.background='var(--accent)'; el.style.borderColor='var(--accent)'; el.style.color='#fff'; }
+    zeigeCta('Book This Slot →');
   };
 
+  // Dienstwechsel: Geraetemiete und Studiozeit sind verschiedene Dinge.
+  document.querySelectorAll('#service-picks input[name="svc"]').forEach(r => {
+    r.addEventListener('change', () => { selSlot = null; zeigeSlots(); });
+  });
 
   render();
+  ladeMonatsbelegung();
 })();
 </script>
 
