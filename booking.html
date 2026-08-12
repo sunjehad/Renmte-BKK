@@ -566,6 +566,7 @@ input[type=date]{color-scheme:dark}
       <div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.3);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--muted)">
         🚀 <strong style="color:var(--fg)">This is an enquiry, not an instant booking.</strong>
         Nothing is charged now. We reply with a plan and proposed dates.
+        <div style="margin-top:10px;font-size:12.5px">Questions first? Message us on <a href="https://www.instagram.com/bangkok_rentme" target="_blank" rel="noopener" style="color:var(--blue-l);font-weight:600">@bangkok_rentme</a> on Instagram — no booking needed.</div>
       </div>
 
       <div style="background:rgba(230,57,70,.06);border:1px solid rgba(230,57,70,.25);border-radius:10px;padding:16px 20px;margin-bottom:20px">
@@ -804,6 +805,7 @@ input[type=date]{color-scheme:dark}
       Tell us about the location and what you need. We check the airspace rules for
       your site, confirm the date and send you a fixed quote — usually within 24h.
       <span style="color:var(--blue-l)">No payment now.</span>
+      <div style="margin-top:10px;font-size:12.5px">Questions first? Message us on <a href="https://www.instagram.com/bangkok_rentme" target="_blank" rel="noopener" style="color:var(--blue-l);font-weight:600">@bangkok_rentme</a> on Instagram — no booking needed.</div>
     </div>
 
     <label style="margin-bottom:10px;display:block">Choose a package <span style="color:var(--muted);font-weight:400">(you can change this later)</span></label>
@@ -1511,7 +1513,7 @@ function setupStep2() {
     // `editing_only` -- so heisst der Fall in der Datenbank und in
     // `_shared/preise.ts` seit jeher.
     document.getElementById('details-podcast').style.display = '';
-    document.getElementById('s2-heading').textContent = 'CUT ONLY';
+    document.getElementById('s2-heading').textContent = 'WE CUT YOUR PODCAST';
     document.getElementById('s2-sub').textContent = 'Tell us how much raw footage you have — no studio time needed. You send the files via Dropbox after booking.';
     selectCutCameras(1, document.querySelector('#cut-camera-chips .chip'));
     selectCutFootage(1, document.querySelector('#cut-footage-chips .chip'));
@@ -2757,8 +2759,8 @@ async function finalizeBooking(payload, existingBooking, skipEmail) {
   // sich.
   const svcLabel = {
     studio_rental: 'Photo Studio Rental',
-    podcast: 'Cut Only',
-    podcast_setup: 'Podcast Setup / Service',
+    podcast: 'We Cut Your Podcast',
+    podcast_setup: 'Record Your Podcast',
     equipment: 'Equipment Rental',
     reel: 'Reel Editing',
     drone: 'Aerial / Drone Filming'
@@ -2858,7 +2860,7 @@ function buildCalendarLinks(booking) {
   // mehr aufgerufen, weil es keinen Termin gibt, den man eintragen koennte.
   const svcLabel = {
     studio_rental:  'Photo Studio – Rent Me Bangkok',
-    podcast_setup:  'Podcast Studio Setup – Rent Me Bangkok',
+    podcast_setup:  'Record Your Podcast – Rent Me Bangkok',
     equipment:      'Equipment Rental – Rent Me Bangkok'
   };
 
@@ -2949,8 +2951,8 @@ async function sendEmails(booking) {
   // zweimal in der Datei; beide Stellen sind gleich gepflegt.
   const svcLabel = {
     studio_rental: 'Photo Studio Rental',
-    podcast: 'Cut Only',
-    podcast_setup: 'Podcast Setup / Service',
+    podcast: 'We Cut Your Podcast',
+    podcast_setup: 'Record Your Podcast',
     equipment: 'Equipment Rental',
     reel: 'Reel Editing',
     drone: 'Aerial / Drone Filming'
