@@ -11,6 +11,33 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
 };
 
+// Fires from the webhook, not the customer's browser -- runs even if they
+// close the tab right after paying. Never throws: a failed notification
+// must not turn a successful payment into a 500 (Stripe would retry it).
+async function notifyTelegram(booking, method) {
+  const token = Deno.env.get('TELEGRAM_BOT_TOKEN');
+  const chatId = Deno.env.get('TELEGRAM_CHAT_ID');
+  if (!token || !chatId || !booking) return;
+  const when = booking.booking_date
+    ? `${booking.booking_date}${booking.start_time ? ' ' + booking.start_time : ''}`
+    : (booking.equipment_start_date ? `${booking.equipment_start_date} → ${booking.equipment_end_date}` : 'no date');
+  const text = [
+    `💰 Booking paid (${method})`,
+    `${booking.service_type} — ${booking.guest_name || 'unknown'}`,
+    when,
+    `Ref: ${booking.booking_ref}`,
+  ].join('\n');
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text }),
+    });
+  } catch (_err) {
+    // Best-effort. Booking is already saved; a Telegram outage isn't a webhook failure.
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
@@ -29,23 +56,25 @@ Deno.serve(async (req) => {
       const session = event.data.object;
       const bookingId = session.metadata?.booking_id;
       if (bookingId) {
-        await supabase.from('bookings').update({
+        const { data: updated } = await supabase.from('bookings').update({
           booking_status: 'paid', payment_status: 'paid', status: 'confirmed',
           stripe_session_id: session.id, stripe_payment_intent: session.payment_intent,
           stripe_customer_id: session.customer, paid_at: new Date().toISOString()
-        }).eq('id', bookingId);
+        }).eq('id', bookingId).select().single();
         await supabase.rpc('cancel_competing_pending_bookings', { p_booking_id: bookingId });
+        await notifyTelegram(updated, 'card');
       }
     } else if (event.type === 'payment_intent.succeeded') {
       // PromptPay QR payments
       const intent = event.data.object;
       const bookingId = intent.metadata?.booking_id;
       if (bookingId && intent.payment_method_types?.includes('promptpay')) {
-        await supabase.from('bookings').update({
+        const { data: updated } = await supabase.from('bookings').update({
           booking_status: 'paid', payment_status: 'paid', status: 'confirmed',
           stripe_payment_intent: intent.id, paid_at: new Date().toISOString()
-        }).eq('id', bookingId);
+        }).eq('id', bookingId).select().single();
         await supabase.rpc('cancel_competing_pending_bookings', { p_booking_id: bookingId });
+        await notifyTelegram(updated, 'PromptPay');
       }
     } else if (event.type === 'checkout.session.expired') {
       const session = event.data.object;
