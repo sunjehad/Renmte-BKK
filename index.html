@@ -158,6 +158,29 @@ section{padding:100px 40px}
 .price-btn.ghost{border:1px solid var(--border);color:var(--fg)}
 .price-btn.ghost:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.04)}
 
+/* ── Studio equipment modal ── */
+.equip-trigger{display:flex;align-items:center;gap:8px;background:none;border:none;padding:0;font-family:var(--font-body);font-size:13px;color:var(--accent);cursor:pointer;text-align:left}
+.equip-trigger svg{flex-shrink:0}
+.equip-trigger span{text-decoration:underline;text-underline-offset:2px}
+.equip-trigger:hover{opacity:.8}
+.equip-modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(4,4,6,.8);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px}
+.equip-modal-overlay.open{display:flex}
+.equip-modal{background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;padding:36px 32px;position:relative}
+.equip-modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:none;color:var(--fg-muted);font-size:18px;line-height:1;cursor:pointer;transition:.2s var(--ease)}
+.equip-modal-close:hover{color:var(--fg);border-color:rgba(255,255,255,.2)}
+.equip-modal h3{font-family:var(--font-head);font-size:1.6rem;color:var(--fg);letter-spacing:.02em;margin-bottom:6px}
+.equip-modal-sub{font-size:13px;color:var(--fg-muted);margin-bottom:24px;line-height:1.5}
+.equip-group{margin-bottom:20px}
+.equip-group:last-of-type{margin-bottom:28px}
+.equip-cat{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.equip-row{display:flex;align-items:baseline;gap:10px;font-size:13px;color:var(--fg);line-height:1.5;padding:6px 0;border-bottom:1px solid var(--border)}
+.equip-row:last-child{border-bottom:none}
+.equip-qty{flex-shrink:0;min-width:28px;font-family:var(--font-head);font-size:14px;color:var(--fg-muted);letter-spacing:.02em}
+.equip-modal-cta{margin-top:4px}
+@media (max-width:480px){
+  .equip-modal{padding:28px 20px}
+}
+
 /* ── FAQ ── */
 #faq{background:var(--bg-card);border-top:1px solid var(--border)}
 .faq-layout{display:grid;grid-template-columns:1fr 2fr;gap:80px;align-items:start}
@@ -652,6 +675,7 @@ section[id]{scroll-margin-top:84px}
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p1_f2">Multiple backdrop colors</span></li>
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p1_f3">Lounge props & furniture</span></li>
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p1_f4">Ring light + accessories</span></li>
+          <li><button type="button" class="equip-trigger" onclick="openEquipModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span data-i18n="p1_f5">See full equipment list</span></button></li>
         </ul>
         <a href="booking.html?service=studio_rental" class="price-btn ghost" data-i18n="p1_btn">Book Studio</a>
       </div>
@@ -1144,6 +1168,7 @@ section[id]{scroll-margin-top:84px}
     <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
     <a href="#faq" data-i18n="nav_faq">FAQ</a>
     <a href="https://www.instagram.com/bangkok_rentme" target="_blank">@bangkok_rentme</a>
+    <a href="mailto:info@rentme-bkk.com">info@rentme-bkk.com</a>
   </div>
   <p style="font-size:13px;color:var(--fg-muted);margin-bottom:8px">51 Kamphaeng Phet 7 Rd, Makkasan, Ratchathewi, Bangkok 10400</p>
   <p class="footer-copy">© 2026 Rent Me Bangkok. All rights reserved.</p>
@@ -1188,7 +1213,17 @@ const translations = {
     p1_service:"Photo Studio", p1_title:"Studio Rental", p1_period:" / hour — promo until 31 Aug",
     p1_desc:"Full studio access with lights, backdrops, and lounge setup. Hourly booking, no minimum.",
     p1_f1:"Studio strobes + softboxes", p1_f2:"Multiple backdrop colors", p1_f3:"Lounge props & furniture", p1_f4:"Ring light + accessories",
+    p1_f5:"See full equipment list",
     p1_btn:"Book Studio",
+    equip_title:"Studio Equipment", equip_sub:"Included with every studio booking — no extra fee.",
+    equip_cat_stands:"Stands &amp; Tripods", equip_cat_light:"Lighting", equip_cat_mods:"Modifiers",
+    equip_i1:"Light Stands — for LED panels &amp; lighting gear",
+    equip_i2:"Large Camera Tripods — height-adjustable, with video heads",
+    equip_i3:"Small Camera Tripods — compact, for low-angle shots",
+    equip_i4:"Softboxes — large, for soft even light",
+    equip_i5:"RGBW LED Panels — adjustable color temperature",
+    equip_i6:"Neewer LED Lights — compact, tripod-mounted",
+    equip_i7:"Reflectors — for focused, directional light",
     p3_amount:"On request",
     s2_cut_cta:"Send us your footage &rarr;",
     p3_f5:"Studio, mics, decor &amp; reels included",
@@ -1284,7 +1319,17 @@ const translations = {
     pricing_tag:"Tarifs transparents", pricing_title:"TARIFS SIMPLES.<br>SANS SURPRISES.",
     p1_service:"Studio photo", p1_title:"Location studio", p1_period:" / heure — promo jusqu'au 31 août",
     p1_desc:"Accès complet au studio avec éclairages, fonds et décor lounge. Réservation à l'heure, sans minimum.",
-    p1_f1:"Stroboscopes + boîtes à lumière", p1_f2:"Plusieurs couleurs de fond", p1_f3:"Accessoires lounge", p1_f4:"Ring light + accessoires", p1_btn:"Réserver le studio",
+    p1_f1:"Stroboscopes + boîtes à lumière", p1_f2:"Plusieurs couleurs de fond", p1_f3:"Accessoires lounge", p1_f4:"Ring light + accessoires", p1_f5:"Voir tout l'équipement",
+    p1_btn:"Réserver le studio",
+    equip_title:"Équipement du studio", equip_sub:"Inclus dans la location — aucun coût supplémentaire.",
+    equip_cat_stands:"Trépieds", equip_cat_light:"Éclairage", equip_cat_mods:"Modificateurs",
+    equip_i1:"Pieds d'éclairage — pour panneaux LED et projecteurs",
+    equip_i2:"Grands trépieds caméra — hauteur réglable, avec rotule vidéo",
+    equip_i3:"Petits trépieds caméra — compacts, pour les prises en contre-plongée",
+    equip_i4:"Softbox — grands, pour une lumière douce et homogène",
+    equip_i5:"Panneaux LED RGBW — température de couleur réglable",
+    equip_i6:"Éclairages LED Neewer — compacts, montés sur trépied",
+    equip_i7:"Réflecteurs — pour une lumière dirigée et ciblée",
     p3_amount:"Sur demande",
     s2_cut_cta:"Envoyez vos rushes &rarr;",
     p3_f5:"Studio, micros, décor &amp; reels inclus",
@@ -1380,7 +1425,17 @@ const translations = {
     pricing_tag:"Transparente Preise", pricing_title:"EINFACHE PREISE.<br>KEINE ÜBERRASCHUNGEN.",
     p1_service:"Fotostudio", p1_title:"Studio-Verleih", p1_period:" / Stunde — Aktion bis 31. Aug.",
     p1_desc:"Voller Studio-Zugang mit Lichtern, Hintergründen und Lounge-Setup. Stundenbuching, kein Minimum.",
-    p1_f1:"Studioblitze + Softboxen", p1_f2:"Mehrere Hintergrundfarben", p1_f3:"Lounge-Requisiten", p1_f4:"Ringlicht + Zubehör", p1_btn:"Studio buchen",
+    p1_f1:"Studioblitze + Softboxen", p1_f2:"Mehrere Hintergrundfarben", p1_f3:"Lounge-Requisiten", p1_f4:"Ringlicht + Zubehör", p1_f5:"Vollständige Ausstattung ansehen",
+    p1_btn:"Studio buchen",
+    equip_title:"Studio-Ausstattung", equip_sub:"Im Mietpreis inbegriffen — keine Zusatzkosten.",
+    equip_cat_stands:"Stative", equip_cat_light:"Beleuchtung", equip_cat_mods:"Lichtformer",
+    equip_i1:"Lichtstative — für LED-Panels und Leuchten",
+    equip_i2:"Große Kamerastative — höhenverstellbar, mit Videokopf",
+    equip_i3:"Kleine Kamerastative — kompakt, für tiefe Perspektiven",
+    equip_i4:"Softboxen — groß, für weiches, gleichmäßiges Licht",
+    equip_i5:"RGBW-LED-Panels — mit einstellbarer Farbtemperatur",
+    equip_i6:"Neewer-LED-Leuchten — kompakt, stativmontiert",
+    equip_i7:"Reflektoren — für gezieltes, gerichtetes Licht",
     p3_amount:"Auf Anfrage",
     s2_cut_cta:"Material schicken &rarr;",
     p3_f5:"Studio, Mikrofone, Deko &amp; Reels inklusive",
@@ -1476,7 +1531,17 @@ const translations = {
     pricing_tag:"Прозрачные цены", pricing_title:"ПРОСТЫЕ ЦЕНЫ.<br>БЕЗ СЮРПРИЗОВ.",
     p1_service:"Фотостудия", p1_title:"Аренда студии", p1_period:" / час — акция до 31 авг.",
     p1_desc:"Полный доступ к студии со светом, фонами и лаунж-декором. Почасовое бронирование без минимума.",
-    p1_f1:"Студийные вспышки + софтбоксы", p1_f2:"Несколько цветов фона", p1_f3:"Лаундж-реквизит и мебель", p1_f4:"Кольцевой свет + аксессуары", p1_btn:"Забронировать студию",
+    p1_f1:"Студийные вспышки + софтбоксы", p1_f2:"Несколько цветов фона", p1_f3:"Лаундж-реквизит и мебель", p1_f4:"Кольцевой свет + аксессуары", p1_f5:"Смотреть весь список оборудования",
+    p1_btn:"Забронировать студию",
+    equip_title:"Оборудование студии", equip_sub:"Включено в аренду — без доплат.",
+    equip_cat_stands:"Штативы", equip_cat_light:"Освещение", equip_cat_mods:"Модификаторы света",
+    equip_i1:"Стойки для света — под LED-панели и осветители",
+    equip_i2:"Большие штативы для камер — регулируемые по высоте, с видеоголовкой",
+    equip_i3:"Малые штативы для камер — компактные, для съёмки с низкого ракурса",
+    equip_i4:"Софтбоксы — большие, для мягкого равномерного света",
+    equip_i5:"RGBW LED-панели — с регулируемой цветовой температурой",
+    equip_i6:"LED-осветители Neewer — компактные, на штативе",
+    equip_i7:"Отражатели — для направленного света",
     p3_amount:"По запросу",
     s2_cut_cta:"Прислать материал &rarr;",
     p3_f5:"Студия, микрофоны, декор и reels включены",
@@ -1572,7 +1637,17 @@ const translations = {
     pricing_tag:"ราคาโปร่งใส", pricing_title:"ราคาง่ายๆ<br>ไม่มีค่าใช้จ่ายซ่อนเร้น",
     p1_service:"สตูดิโอถ่ายภาพ", p1_title:"เช่าสตูดิโอ", p1_period:" / ชั่วโมง — โปรถึง 31 ส.ค.",
     p1_desc:"เข้าใช้สตูดิโอเต็มรูปแบบพร้อมไฟ ฉากหลัง และเซตอัปเลานจ์ จองรายชั่วโมง ไม่มีขั้นต่ำ",
-    p1_f1:"ไฟสตูดิโอ + ซอฟต์บ็อกซ์", p1_f2:"ฉากหลังหลายสี", p1_f3:"อุปกรณ์และเฟอร์นิเจอร์เลานจ์", p1_f4:"ไฟวงกลม + อุปกรณ์เสริม", p1_btn:"จองสตูดิโอ",
+    p1_f1:"ไฟสตูดิโอ + ซอฟต์บ็อกซ์", p1_f2:"ฉากหลังหลายสี", p1_f3:"อุปกรณ์และเฟอร์นิเจอร์เลานจ์", p1_f4:"ไฟวงกลม + อุปกรณ์เสริม", p1_f5:"ดูรายการอุปกรณ์ทั้งหมด",
+    p1_btn:"จองสตูดิโอ",
+    equip_title:"อุปกรณ์สตูดิโอ", equip_sub:"รวมอยู่ในค่าเช่าแล้ว ไม่มีค่าใช้จ่ายเพิ่ม",
+    equip_cat_stands:"ขาตั้ง", equip_cat_light:"ไฟ", equip_cat_mods:"ตัวปรับแสง",
+    equip_i1:"ขาตั้งไฟ — สำหรับไฟ LED และอุปกรณ์ไฟ",
+    equip_i2:"ขาตั้งกล้องขนาดใหญ่ — ปรับความสูงได้ พร้อมหัวสำหรับวิดีโอ",
+    equip_i3:"ขาตั้งกล้องขนาดเล็ก — กะทัดรัด สำหรับมุมต่ำ",
+    equip_i4:"ซอฟต์บ็อกซ์ — ขนาดใหญ่ ให้แสงนุ่มสม่ำเสมอ",
+    equip_i5:"แผงไฟ LED RGBW — ปรับอุณหภูมิสีได้",
+    equip_i6:"ไฟ LED Neewer — กะทัดรัด ติดขาตั้งได้",
+    equip_i7:"แผ่นสะท้อนแสง — สำหรับแสงทิศทางเฉพาะจุด",
     p3_amount:"สอบถามราคา",
     s2_cut_cta:"ส่งไฟล์ให้เรา &rarr;",
     p3_f5:"รวมสตูดิโอ ไมค์ ของตกแต่ง และรีล",
@@ -1668,6 +1743,19 @@ function toggleFaq(btn) {
   document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
   if (!isOpen) item.classList.add('open');
 }
+
+// ── Studio equipment modal ──
+function openEquipModal() {
+  document.getElementById('equip-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeEquipModal() {
+  document.getElementById('equip-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeEquipModal();
+});
 
 // ── Mobile nav ──
 document.getElementById('hamburger').addEventListener('click', () => {
@@ -1821,6 +1909,34 @@ window.miniCalNav=function(dir,e){
   };
 })();
 </script>
+<!-- Studio-Ausstattung: vollstaendige Liste im Modal, nicht auf der Preiskarte -->
+<div class="equip-modal-overlay" id="equip-modal" onclick="if(event.target===this)closeEquipModal()">
+  <div class="equip-modal" role="dialog" aria-modal="true" aria-labelledby="equip-modal-title">
+    <button type="button" class="equip-modal-close" onclick="closeEquipModal()" aria-label="Close">&times;</button>
+    <h3 id="equip-modal-title" data-i18n="equip_title">Studio Equipment</h3>
+    <p class="equip-modal-sub" data-i18n="equip_sub">Included with every studio booking — no extra fee.</p>
+
+    <div class="equip-group">
+      <div class="equip-cat" data-i18n="equip_cat_stands">Stands &amp; Tripods</div>
+      <div class="equip-row"><span class="equip-qty">10&times;</span><span data-i18n="equip_i1">Light Stands — for LED panels &amp; lighting gear</span></div>
+      <div class="equip-row"><span class="equip-qty">5&times;</span><span data-i18n="equip_i2">Large Camera Tripods — height-adjustable, with video heads</span></div>
+      <div class="equip-row"><span class="equip-qty">2&times;</span><span data-i18n="equip_i3">Small Camera Tripods — compact, for low-angle shots</span></div>
+    </div>
+    <div class="equip-group">
+      <div class="equip-cat" data-i18n="equip_cat_light">Lighting</div>
+      <div class="equip-row"><span class="equip-qty">2&times;</span><span data-i18n="equip_i4">Softboxes — large, for soft even light</span></div>
+      <div class="equip-row"><span class="equip-qty">2&times;</span><span data-i18n="equip_i5">RGBW LED Panels — adjustable color temperature</span></div>
+      <div class="equip-row"><span class="equip-qty">2&times;</span><span data-i18n="equip_i6">Neewer LED Lights — compact, tripod-mounted</span></div>
+    </div>
+    <div class="equip-group">
+      <div class="equip-cat" data-i18n="equip_cat_mods">Modifiers</div>
+      <div class="equip-row"><span class="equip-qty">2&times;</span><span data-i18n="equip_i7">Reflectors — for focused, directional light</span></div>
+    </div>
+
+    <a href="booking.html?service=studio_rental" class="price-btn primary equip-modal-cta" data-i18n="p1_btn">Book Studio</a>
+  </div>
+</div>
+
 <!-- Feste Buchungsleiste, nur auf dem Handy sichtbar -->
 <div class="mobile-book" id="mobile-book">
   <div class="txt">
