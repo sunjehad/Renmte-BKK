@@ -903,6 +903,25 @@ function renderWatch() {
 // ── STATS ──
 const SVC_NAMES = { studio_rental:'Studio Rental', podcast_setup:'Podcast Setup/Service', podcast:'Podcast', reel:'Reel Editing', equipment:'Equipment', drone:'Drone Filming' };
 
+// podcast_setup laeuft ueber eine feste Online-Anzahlung, Rest zahlt der
+// Kunde vor Ort im Studio -- muss synchron zu PODCAST_AUFBAU in
+// booking.html:1820 bleiben (dort die massgebliche Quelle, hier nur Anzeige).
+const PODCAST_AUFBAU = 1500;
+
+// Zahlungsaufschluesselung fuer die Anzeige. Reine Darstellung, keine neue
+// Berechnung: bestaetigte Anzahlungsbuchungen (podcast_setup) zeigen
+// "gezahlt/offen", alles andere bleibt bei einem einzelnen Betrag.
+function paymentBreakdown(b) {
+  const total = b.total_price || 0;
+  const isDeposit = b.service_type === 'podcast_setup';
+  const isPaid = (b.booking_status || '') === 'paid';
+  if (!isDeposit || !isPaid || !total) return null;
+  const paid = Math.min(PODCAST_AUFBAU, total);
+  const due  = Math.max(total - paid, 0);
+  if (due <= 0) return null; // Anzahlung deckt bereits alles ab, nichts offen
+  return { paid, due };
+}
+
 function renderStats() {
   const today = new Date().toISOString().split('T')[0];
   const now   = new Date();
@@ -972,7 +991,7 @@ function renderTable() {
       <td><span class="badge badge-${cls}">${SVC_NAMES[b.service_type]||b.service_type}</span></td>
       <td><span class="badge badge-pay-${bookingStatus}">${bookingStatus.replace(/_/g,' ')}</span></td>
       <td><span style="font-size:11px;color:var(--muted)">${paymentMethod}</span></td>
-      <td><span style="font-size:12px;font-weight:600">${b.total_price ? '฿'+b.total_price.toLocaleString() : '—'}</span></td>
+      <td><span style="font-size:12px;font-weight:600">${b.total_price ? '฿'+b.total_price.toLocaleString() : '—'}</span>${(() => { const bd = paymentBreakdown(b); return bd ? `<div class="table-meta" style="color:#fbbf24">paid ฿${bd.paid.toLocaleString()} · due ฿${bd.due.toLocaleString()}</div>` : ''; })()}</td>
       <td><span style="font-size:11px;color:var(--muted)">${b.source||'website'}</span></td>
       <td><div style="display:flex;gap:5px;flex-wrap:wrap">
         <button class="action-btn edit"   onclick="openEdit('${b.id}')">Edit</button>
@@ -1045,6 +1064,8 @@ function openEdit(id) {
   if (b.equipment_items && b.equipment_items.length) rows.push('<div><strong>Equipment:</strong> ' + b.equipment_items.join(', ') + '</div>');
   if (b.notes) rows.push('<div><strong>Options / Notes:</strong> ' + b.notes + '</div>');
   if (b.total_price) rows.push('<div><strong>Total:</strong> ฿' + b.total_price.toLocaleString() + '</div>');
+  const bd = paymentBreakdown(b);
+  if (bd) rows.push('<div style="color:#fbbf24"><strong>Paid / Due:</strong> ฿' + bd.paid.toLocaleString() + ' paid · ฿' + bd.due.toLocaleString() + ' due at studio</div>');
   document.getElementById('edit-features-body').innerHTML = rows.length ? rows.join('') : '<span style="color:var(--muted)">No details recorded</span>';
   document.getElementById('edit-msg').style.display = 'none';
   openModal('edit-modal');
