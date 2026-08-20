@@ -351,6 +351,13 @@ danach **beides** ausspielen, Push und `supabase functions deploy`. Die
 durchgestrichenen Preise und alle „until 31 Aug"-Hinweise fallen dann weg,
 in **allen fünf Sprachen**.
 
+⚠️ **Mit dem Preiswechsel muss auch ein Reel von der Website.** `alt08`
+(„Content people actually watch.") steht seit dem 20.08. in der
+Arbeitsproben-Galerie und trägt im Bild „LAUNCH OFFER · 50 % OFF · FROM
+฿1,500 PER HOUR". Andy hat es bewusst ausgewählt (siehe
+`tools/reels-auswahl.json`). Ab dem 1. September steht dort eine falsche
+Zahl — dann austauschen oder aus `work-media.js` nehmen.
+
 ⚠️ **Beim Neusetzen den Abstand zum reinen Schnitt nachrechnen.** Mit der
 jetzigen Staffel (Variante A) unterbietet Filmen + Schnitt ab etwa 1¾ Stunden
 den reinen Schnitt. Das war eine bewusste Entscheidung, ergibt sich aber nicht

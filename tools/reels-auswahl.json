@@ -1,0 +1,213 @@
+{
+ "_": "Andys Auswahl vom 2026-08-20, getroffen im Auswahl-Artefakt ueber alle 63 fertigen Clips. Diese Datei ist die Quelle: tools/reels-web-fassung.py erzeugt daraus images/work/, work-media.js listet dieselben ids.",
+ "_warnungen": {
+  "preis": "Traegt Preise im Bild mit Verfallsdatum 31. August (docs/todo.md T-13).",
+  "kunde": "Kundenmaterial — nur mit ausdruecklicher Freigabe des Kunden."
+ },
+ "baender": [
+  {
+   "k": "studio",
+   "h": "The Podcast Studio",
+   "p": "One to three cameras, lighting set, sound at broadcast level — filmed in our own room in Makkasan."
+  },
+  {
+   "k": "schnitt",
+   "h": "Edit & Delivery",
+   "p": "What happens after the shoot: colour, sound, titles, and both formats from the same session."
+  },
+  {
+   "k": "foto",
+   "h": "Photo & Campaign",
+   "p": "The photo studio, and campaign shoots we run end to end."
+  },
+  {
+   "k": "drohne",
+   "h": "Aerial",
+   "p": "Venues, events and sites from the air — flown by us, not stock."
+  },
+  {
+   "k": "geraet",
+   "h": "Gear Rental",
+   "p": "DJI cameras and drones, charged and current."
+  },
+  {
+   "k": "kunde",
+   "h": "Client Work",
+   "p": "Full episodes for clients — shoot, edit, graphics, delivery."
+  },
+  {
+   "k": "info",
+   "h": "Good to Know",
+   "p": "Where we are, how booking works, and the question everyone asks first."
+  },
+  {
+   "k": "werbung",
+   "h": "Spots",
+   "p": "Our own ads."
+  }
+ ],
+ "reels": [
+  {
+   "id": "n02",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-inhalt-2026-08-09/rentme-n02.mp4",
+   "gruppe": "info",
+   "hook": "Makkasan.",
+   "notiz": "09.08. · Inhalts-Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "n07",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-inhalt-2026-08-09/rentme-n07.mp4",
+   "gruppe": "info",
+   "hook": "“I’ve never recorded a podcast.”",
+   "notiz": "09.08. · Inhalts-Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "n08",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-inhalt-2026-08-09/rentme-n08.mp4",
+   "gruppe": "schnitt",
+   "hook": "Walk in with ideas.",
+   "notiz": "09.08. · Inhalts-Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "n09",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-inhalt-2026-08-09/rentme-n09.mp4",
+   "gruppe": "info",
+   "hook": "เข้ามาพร้อมไอเดีย",
+   "notiz": "09.08. · Inhalts-Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "n10",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-inhalt-2026-08-09/rentme-n10.mp4",
+   "gruppe": "schnitt",
+   "hook": "No lights. No mics. No editor.",
+   "notiz": "09.08. · Inhalts-Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "b13",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-2026-08-09/rentme-b13.mp4",
+   "gruppe": "studio",
+   "hook": "You bring the conversation.",
+   "notiz": "09.08. · A/B/C-Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "c14",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-2026-08-09/rentme-c14.mp4",
+   "gruppe": "foto",
+   "hook": "Most people rent the room.",
+   "notiz": "09.08. · A/B/C-Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "j01",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-2026-07-31/rentme-reel01.mp4",
+   "gruppe": "studio",
+   "hook": "Most studios rent you a room.",
+   "notiz": "31.07. · erste Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "j03",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-2026-07-31/rentme-reel03.mp4",
+   "gruppe": "geraet",
+   "hook": "A drone for one weekend…",
+   "notiz": "31.07. · erste Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "j04",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-2026-07-31/rentme-reel04.mp4",
+   "gruppe": "studio",
+   "hook": "This isn’t a render.",
+   "notiz": "31.07. · erste Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "j05",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-2026-07-31/rentme-reel05.mp4",
+   "gruppe": "foto",
+   "hook": "Everyone books it for a podcast.",
+   "notiz": "31.07. · erste Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "j06",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-2026-07-31/rentme-reel06.mp4",
+   "gruppe": "studio",
+   "hook": "The two hours nobody posts about.",
+   "notiz": "31.07. · erste Staffel",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "dv01",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/drohne-event-2026-08-09/rentme-v01.mp4",
+   "gruppe": "drohne",
+   "hook": "You don’t fly, we do",
+   "notiz": "09.08. · Drohnen-Event",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "dk06",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/drohne-event-2026-08-09/rentme-k06.mp4",
+   "gruppe": "drohne",
+   "hook": "Shot on a DJI Neo",
+   "notiz": "09.08. · Drohnen-Event",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "alt08",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/RentMe_Reel_08_formats_9x16.mp4",
+   "gruppe": "schnitt",
+   "hook": "Content people actually watch.",
+   "notiz": "06.08. · abgeloest von der A-Reihe",
+   "preis": true,
+   "kunde": false
+  },
+  {
+   "id": "werbEN",
+   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/werbung_9x16_en.mp4",
+   "gruppe": "werbung",
+   "hook": "What you send us.",
+   "notiz": "28.07. · Werbung, englisch",
+   "preis": false,
+   "kunde": false
+  },
+  {
+   "id": "jay1",
+   "quelle": "~/Dropbox/Video aller Projekte/podcast-jay/podcast-jay-reel5-40k-to-9k-9x16-2026-08-06.mp4",
+   "gruppe": "kunde",
+   "hook": "From 40k to 9k.",
+   "notiz": "06.08. · Podcast Jay",
+   "preis": false,
+   "kunde": true
+  },
+  {
+   "id": "jay2",
+   "quelle": "~/Dropbox/Video aller Projekte/podcast-jay/podcast-jay-einschub-branding-9x16-2026-08-06.mov",
+   "gruppe": "kunde",
+   "hook": "Branding-Einschub",
+   "notiz": "06.08. · Podcast Jay",
+   "preis": false,
+   "kunde": true
+  }
+ ]
+}

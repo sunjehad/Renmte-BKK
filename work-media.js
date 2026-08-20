@@ -7,114 +7,112 @@
 
    ── Wo die Dateien liegen ───────────────────────────────────────────────
    MEDIA ist die einzige Stelle mit dem Ablageort. Die Videos gehoeren NICHT
-   ins Git-Repo -- 18 Reels sind 23 MB, und Vercel schleppt bei jedem Deploy
+   ins Git-Repo -- 18 Reels sind rund 25 MB, und Vercel schleppt bei jedem Deploy
    alles mit. Sie liegen im oeffentlichen Supabase-Bucket "work" desselben
    Projekts, das die Buchungen haelt.
 
    Zum oertlichen Pruefen steht MEDIA auf 'images/work/'; dieser Ordner ist
    in .gitignore und existiert nur auf dem Entwicklungsrechner.
 
-   ── Was hier NICHT hineingehoert ────────────────────────────────────────
-   Reels mit Preisen im Bild. Die A-Reihe a01-a06 und die acht Reels vom
-   06.08. tragen die Aktionspreise samt "bis 31. August" eingebrannt; ab dem
-   1. September behaupten sie auf der Firmenseite Zahlen, die nicht mehr
-   gelten (siehe docs/todo.md, T-13). Alles hier Gelistete ist preisfrei.
+   ── Zwei Eintraege mit Vorbehalt ────────────────────────────────────────
+   `alt08` traegt Preise im Bild ("LAUNCH OFFER 50% OFF · FROM B1,500 PER
+   HOUR") und ist ab dem 1. September falsch -- vor dem 31.08. austauschen,
+   zusammen mit der Preisanhebung aus docs/todo.md T-13.
+   `jay1` und `jay2` sind Kundenmaterial und brauchen Jays Freigabe.
+   Beide Vorbehalte stehen auch an der jeweiligen Zeile.
    ══════════════════════════════════════════════════════════════════════ */
 
 /* Umstellen auf Supabase, sobald der Bucket steht:
    'https://nghsyxwhczvwaorssgoh.supabase.co/storage/v1/object/public/work/' */
 window.MEDIA = 'images/work/';
 
-/* id     — Dateiname ohne Endung, <id>.mp4 und <id>.jpg
-   t      — der Hook, so wie er im Bild steht
-   lab    — kurze Beschriftung auf der Kachel (nie den Hook wiederholen)
-   kind   — Kategorie, steuert die Baender auf work.html
-   rail   — steht diese Kachel auch in der Schiene der Startseite?           */
+/* Andys Auswahl vom 20.08.2026, getroffen ueber alle 63 fertigen Clips.
+   Die Herkunft jeder Datei steht in tools/reels-auswahl.json -- diese Liste
+   hier ist nur die Anzeige-Seite davon.
+
+   id     Dateiname ohne Endung, <id>.mp4 und <id>.jpg
+   t      der Hook, so wie er im Bild steht
+   lab    kurze Beschriftung auf der Kachel (nie den Hook wiederholen)
+   kind   Kategorie, steuert die Baender auf work.html
+   rail   steht diese Kachel auch in der Schiene der Startseite?
+          Sechs Stueck, je ein Dienst. Kundenmaterial bleibt dort draussen,
+          solange Jays Freigabe fehlt.                                       */
 window.REELS = [
-
-  /* ── Das Podcast-Studio ──────────────────────────────────────────────── */
-  {id:'b11', kind:'studio', rail:1, lab:'The room, undressed',
-   t:'Nothing here is dressed up.',
-   d:'Blue wall, soft light, everything already rigged. This is the room as you will get it.'},
-
-  {id:'b09', kind:'studio', rail:1, lab:'Light & colour',
-   t:'The room changes colour.',
-   d:'The lighting is part of the booking, not an extra you rent somewhere else.'},
-
-  {id:'b12', kind:'studio', rail:1, lab:'One guest, full set',
-   t:'One guest. Full set.',
-   d:'You do not need a crew to look like you have one.'},
-
-  {id:'b10', kind:'studio', rail:1, lab:'Live monitoring',
-   t:'You don’t wait for the dailies.',
-   d:'The frame is on set with you. Live monitoring on every booking.'},
-
-  {id:'b13', kind:'studio', rail:0, lab:'Everything else',
-   t:'You bring the conversation.',
-   d:'Cameras, lights, mics, the edit — we bring the rest.'},
-
-  {id:'n05', kind:'studio', rail:0, lab:'What’s in the room',
-   t:'Ring light. Live monitor. Lounge seating.',
-   d:'It is already in the room. You bring the conversation.'},
-
-  {id:'n06', kind:'studio', rail:0, lab:'Four at the table',
-   t:'Four.',
-   d:'Four guests at the recording table, plus lounge seating for everyone else. Built for a full panel, not a solo mic.'},
-
-  {id:'n01', kind:'studio', rail:0, lab:'Bring your team',
-   t:'Can I bring my team?',
-   d:'Four at the recording table, more on the lounge seating. Co-hosts, guests, your own crew.'},
-
-  /* ── Was danach passiert: Schnitt und Ausgabe ────────────────────────── */
-  {id:'a07', kind:'post', rail:1, lab:'Graded, mixed, mastered',
-   t:'Graded. Mixed. Mastered.',
-   d:'Not just exported. Turn it up — that is the whole point.'},
-
-  {id:'a08', kind:'post', rail:1, lab:'Both formats',
-   t:'Shoot it once, post it everywhere.',
-   d:'16:9 and 9:16 from the same session. YouTube, Spotify, Instagram, TikTok, Facebook.'},
-
-  {id:'n08', kind:'post', rail:0, lab:'Publish-ready',
-   t:'Walk in with ideas.',
-   d:'Walk out with a publish-ready episode.'},
-
-  {id:'n03', kind:'post', rail:0, lab:'Monthly package',
-   t:'Four sessions a month.',
-   d:'Up to two hours each, a videographer on set, professional cameras and mics, and the full edit — colour, sound design, titles.'},
-
-  {id:'n10', kind:'post', rail:0, lab:'What you don’t need',
-   t:'No lights. No mics. No editor.',
-   d:'Nothing to rent, buy or find. Just pick a date.'},
-
-  /* ── Fotostudio und Auftragsdreh ─────────────────────────────────────── */
-  {id:'c14', kind:'photo', rail:1, lab:'Campaign shoot',
-   t:'Most people rent the room.',
-   d:'We also shoot the campaign — strobes, softboxes, seamless backdrop, and a crew that runs the day, tethered so you see every frame as it lands.'},
-
-  /* ── Praktisches: Weg, Ablauf, Sprache ───────────────────────────────── */
-  {id:'n02', kind:'info', rail:0, lab:'Where we are',
+  {id:'n02', kind:'info', lab:'Where we are',
    t:'Makkasan.',
-   d:'A few minutes from Asoke BTS and Phetchaburi MRT, easy from anywhere in the city.'},
-
-  {id:'n04', kind:'info', rail:0, lab:'How booking works',
-   t:'Booking takes one message.',
-   d:'DM us, tell us the service, date and time — we confirm availability within a few hours.'},
-
-  {id:'n07', kind:'info', rail:0, lab:'First time?',
+   d:'Makkasan Station area — minutes from Asoke BTS and Phetchaburi MRT.'},
+  {id:'n07', kind:'info', lab:'First time?',
    t:'“I’ve never recorded a podcast.”',
    d:'Neither had most of the people who sat here first. You just talk, we handle the rest.'},
-
-  {id:'n09', kind:'info', rail:0, lab:'ภาษาไทย',
+  {id:'n08', kind:'schnitt', lab:'Publish-ready',
+   t:'Walk in with ideas.',
+   d:'Walk in with ideas, walk out with a publish-ready episode.'},
+  {id:'n09', kind:'info', lab:'ภาษาไทย',
    t:'เข้ามาพร้อมไอเดีย',
-   d:'ถ่ายทำและตัดต่อพอดแคสต์ · กรุงเทพฯ'}
+   d:'ถ่ายทำและตัดต่อพอดแคสต์ · กรุงเทพฯ'},
+  {id:'n10', rail:1, kind:'schnitt', lab:'What you don’t need',
+   t:'No lights. No mics. No editor.',
+   d:'No lights to rent, no mics to buy, no editor to find. Just pick a date.'},
+  {id:'b13', kind:'studio', lab:'Everything else',
+   t:'You bring the conversation.',
+   d:'Cameras, lights, mics, the edit — we bring the rest.'},
+  {id:'c14', rail:1, kind:'foto', lab:'Campaign shoot',
+   t:'Most people rent the room.',
+   d:'Strobes, softboxes, seamless backdrop — and a crew that runs the day, tethered so you see every frame as it lands.'},
+  {id:'j01', rail:1, kind:'studio', lab:'The room, ready',
+   t:'Most studios rent you a room.',
+   d:'Already lit, wired and sound-treated. Walk in, sit down, record.'},
+  {id:'j03', rail:1, kind:'geraet', lab:'Rent the drone',
+   t:'A drone for one weekend…',
+   d:'DJI Neo, Osmo Pocket 3, Osmo Nano — charged, current, by the day.'},
+  {id:'j04', rail:1, kind:'studio', lab:'Real sessions',
+   t:'This isn’t a render.',
+   d:'No stock footage. Every shot is a session that actually happened here.'},
+  {id:'j05', kind:'foto', lab:'More than podcasts',
+   t:'Everyone books it for a podcast.',
+   d:'Product shots, brand films, UGC, interviews — same room, same lights.'},
+  {id:'j06', kind:'studio', lab:'Zero setup time',
+   t:'The two hours nobody posts about.',
+   d:'Renting lights, carrying stands, rigging, testing. Here that is zero minutes — it is already hanging.'},
+  {id:'dv01', rail:1, kind:'drohne', lab:'We fly it',
+   t:'You don’t fly, we do',
+   d:'Venues, events and sites from the air. Flown by us, not bought as stock.'},
+  {id:'dk06', kind:'drohne', lab:'Shot on a DJI Neo',
+   t:'Shot on a DJI Neo',
+   d:'Authorised DJI rental — the same drone we fly ourselves.'},
+  {id:'alt08', kind:'schnitt', lab:'Made to be watched',
+   t:'Content people actually watch.',
+   d:'Long conversations, cut into something people actually finish.'},   /* ⚠ Preise im Bild, Verfallsdatum 31.08. — docs/todo.md T-13 */
+  {id:'werbEN', kind:'werbung', lab:'What you send us',
+   t:'What you send us.',
+   d:'Send us the raw day — we send back the cut.'},
+  {id:'jay1', kind:'kunde', lab:'Jay — episode cut',
+   t:'From 40k to 9k.',
+   d:'An episode we shot and cut for a client.'},   /* ⚠ Kundenmaterial — nur mit Freigabe des Kunden */
+  {id:'jay2', kind:'kunde', lab:'Jay — branding',
+   t:'Branding-Einschub',
+   d:'Branding worked into the running episode.'},   /* ⚠ Kundenmaterial — nur mit Freigabe des Kunden */
 ];
 
-/* Die Baender auf work.html, in dieser Reihenfolge. */
+/* Die Baender auf work.html, in dieser Reihenfolge. Ein Band ohne
+   Kacheln erscheint gar nicht erst. */
 window.BAENDER = [
-  {k:'studio', h:'The Podcast Studio',  p:'One to three cameras, lighting set, sound at broadcast level — filmed in our own room in Makkasan.'},
-  {k:'post',   h:'Edit & Delivery',     p:'What happens after the shoot: colour, sound, titles, and both formats from the same session.'},
-  {k:'photo',  h:'Photo & Campaign',    p:'The photo studio, and campaign shoots we run end to end.'},
-  {k:'info',   h:'Good to Know',        p:'Where we are, how booking works, and the answer to the question everyone asks first.'}
+  {k:'studio', h:'The Podcast Studio',
+   p:'One to three cameras, lighting set, sound at broadcast level — filmed in our own room in Makkasan.'},
+  {k:'schnitt', h:'Edit & Delivery',
+   p:'What happens after the shoot: colour, sound, titles, and both formats from the same session.'},
+  {k:'foto', h:'Photo & Campaign',
+   p:'The photo studio, and campaign shoots we run end to end.'},
+  {k:'drohne', h:'Aerial',
+   p:'Venues, events and sites from the air — flown by us, not stock.'},
+  {k:'geraet', h:'Gear Rental',
+   p:'DJI cameras and drones, charged and current.'},
+  {k:'kunde', h:'Client Work',
+   p:'Full episodes for clients — shoot, edit, graphics, delivery.'},
+  {k:'info', h:'Good to Know',
+   p:'Where we are, how booking works, and the question everyone asks first.'},
+  {k:'werbung', h:'Spots',
+   p:'Our own ads.'},
 ];
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -125,7 +123,7 @@ window.BAENDER = [
            + '<polygon points="6 3 20 12 6 21"/></svg>';
 
   /* Eine Kachel. Das Video wird erst geladen, wenn jemand darauf zeigt --
-     sonst zoege die Startseite 23 MB hinter sich her. */
+     sonst zoege die Startseite alle Reels auf einmal hinter sich her. */
   window.reelKachel = function(r){
     var b = document.createElement('button');
     b.type = 'button';
