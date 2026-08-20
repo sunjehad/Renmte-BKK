@@ -209,6 +209,38 @@ wenigstens auffällt statt still Geld zu kosten.
 Sinnvoll wäre, die Beträge von dort auszuliefern (eine schlanke Function oder
 eine erzeugte JSON-Datei) statt sie im HTML zu wiederholen.
 
+
+### [ ] T-14 — `work.html` traegt eine Teilkopie der Grundgestaltung
+
+Angelegt 2026-08-20 mit der Arbeitsproben-Galerie.
+
+`work.html` wiederholt Farbwerte, Leiste, Knoepfe und Fusszeile aus
+`index.html`, weil dort alles inline im `<style>` steht und es keinen
+Bauschritt gibt. **Wer an der Gestaltung dreht, muss beide Stellen aendern.**
+
+Kein Zeitdruck, aber der Weg heraus ist klar: den `<style>`-Block aus
+`index.html` in eine `site.css` ziehen, die beide Seiten laden. Das fasst
+allerdings die laufende Buchungsseite an -- deshalb bewusst nicht
+nebenbei erledigt.
+
+Nicht betroffen sind Kacheln, Schiene und Leuchtkasten: die stehen in
+`work-media.css` und `work-media.js` und werden wirklich geteilt.
+
+### [ ] T-15 — Preiskarten auf dem Handy: gestapelt oder wischbar?
+
+Angelegt 2026-08-20. Nach der Kuerzung ist die Startseite auf dem Handy
+**11.065 px statt 13.773 px** lang (13,1 statt 16,3 Bildschirme) --
+und das **einschliesslich** des neuen Arbeitsproben-Abschnitts.
+
+Der groesste verbliebene Posten sind die fuenf gestapelten Preiskarten
+(1.898 px). Als wischbare Reihe -- wie jetzt schon die DJI-Geraete --
+waeren es rund 500 px, also **nochmal 1.400 px weniger**.
+
+**Bewusst nicht gemacht.** Preise sind Vergleichsinhalt: In einer Schiene
+sieht man drei der fuenf Angebote nie. Auf einer Seite, die echtes Geld
+einnimmt, ist das Andys Entscheidung, nicht meine. Wenn er sie will,
+sind es zwei Zeilen CSS -- dieselbe Regel wie `.dji-rail`.
+
 ---
 
 **Stand 2026-07-28:** Beim Umbau des Podcast-Angebots sind die Preise erneut an
@@ -219,6 +251,34 @@ Schuld ist damit nicht getilgt, aber sie ist jetzt **geprüft**: 22 Tests in
 ändert, schon.
 
 ## Erledigt
+
+- [x] **2026-08-20** — **Arbeitsproben-Galerie.** Neue Seite `work.html` mit
+      18 Reels in vier Baendern, dazu eine wischbare Schiene direkt unter dem
+      Kopfbereich der Startseite. Liste und Verhalten in `work-media.js`,
+      Gestaltung in `work-media.css` -- beide Seiten teilen sie sich.
+      `See Our Work` im Kopfbereich zeigte bis dahin auf Instagram und zeigt
+      jetzt auf die eigene Seite; `Work` steht in beiden Navigationen und in
+      der Fusszeile, in allen fuenf Sprachen.
+      **Nur preisfreie Reels** (n-Reihe, a07, a08, b09-b13, c14) -- die
+      A-Reihe a01-a06 und die acht vom 06.08. tragen Preise mit Verfallsdatum
+      31. August im Bild, siehe T-13.
+- [x] **2026-08-20** — **Waagerechter Ueberlauf auf dem Handy behoben.** Das
+      Buchungsraster stand inline auf `1fr 1fr` und passte bei 375 px nicht:
+      `scrollWidth` war 444 statt 375, wodurch der ganze Kopfbereich verschoben
+      und rechts abgeschnitten war. Jetzt einspaltig (`.booking-grid`).
+- [x] **2026-08-20** — **Startseite auf dem Handy gekuerzt**, 13.773 -> 11.065 px
+      (16,3 -> 13,1 Bildschirme), einschliesslich des neuen Galerie-Abschnitts.
+      Drei gestapelte DJI-Karten wurden eine wischbare Reihe (-1.155 px), die
+      Merkmalslisten der Preiskarten sind einklappbar, Leistungstexte auf drei
+      Zeilen gekuerzt (antippen klappt auf), Abschnittspolster 70 -> 44 px.
+      Dabei aufgefallen: `.dji-grid-inner` in der CSS traf im ganzen Dokument
+      **kein Element** -- der Container war klassenlos.
+- [x] **2026-08-20** — **Tippziele vergroessert**: Kalendertage waren 22x34,
+      die Monatspfeile 32x32, Fusszeilen- und Menuelinks 21 px hoch. Alles
+      unter 44 px liegt unter der Fingerbreite.
+- [x] **2026-08-20** — `tools/mobil-messen.html` angelegt: misst Ueberlauf,
+      Seitenlaenge und Tippziele bei 390 px. `work.html` in `tools/pruefe.py`
+      aufgenommen.
 
 - [x] **2026-07-27** — `customerName` wurde in `booking.html` zweimal im selben
       Objekt gesetzt; die zweite Angabe (`state.name`) überschrieb die erste,

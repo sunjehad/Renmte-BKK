@@ -15,3 +15,7 @@
 
 # Sicherungskopien — Git ist die Versionierung (docs/decisions.md R-004)
 *.backup
+# (tools/mobil-messen.html ist die Nachfolgerin und gehoert ins Git)
+
+# Web-Fassungen der Reels: liegen in Supabase Storage, nicht im Repo
+images/work/

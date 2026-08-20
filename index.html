@@ -7,6 +7,7 @@
 <meta name="description" content="Professional photo studio, podcast filming & editing, and DJI camera rental in Bangkok's Asoke/Makkasan area.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="work-media.css">
 <style>
 :root {
   --bg: #070709;
@@ -338,6 +339,131 @@ section[id]{scroll-margin-top:84px}
   .price-features li{font-size:13px}
   .section-title{font-size:2rem}
 }
+/* ══════════════════════════════════════════════════════════════════════
+   HANDY — die Seite kuerzer machen   (Andys Auftrag vom 2026-08-20)
+
+   Gemessen vorher auf einem 390er Geraet: 13.773 px = 16,3 Bildschirme.
+   Die Laenge sass in dreizehn gestapelten Karten: Preise 2.647 px,
+   Leistungen 3.262 px, DJI-Geraete 1.695 px -- zusammen 55 % der Seite.
+
+   Gekuerzt wird die Verpackung, nicht die Aussage: Polster, Bildhoehen und
+   ausufernde Beschreibungstexte. Preis, Titel und Knopf jeder Karte bleiben
+   ungekuerzt sichtbar -- das ist der verkaufende Teil.
+   ══════════════════════════════════════════════════════════════════════ */
+@media(max-width:768px){
+
+  /* ── Abschnittspolster: 70 → 44 ─────────────────────────────────────── */
+  section{padding:44px 20px}
+  #hero{padding:96px 20px 44px}
+  .section-header{margin-bottom:32px}
+  .section-sub{font-size:14px}
+
+  /* ── Buchungsbereich: zwei Spalten passen auf 375 px nicht ────────────
+     Das war die Ursache des waagerechten Ueberlaufs (scrollWidth 444 statt
+     375): Die Rasterung steht inline, deshalb !important. */
+  #booking{padding:44px 16px!important}
+  .booking-grid{grid-template-columns:1fr!important;gap:16px!important}
+  .booking-grid > div{padding:18px!important}
+  #slot-panel{min-height:0!important;padding:18px!important}
+  #slot-hint{padding-top:0!important;text-align:left!important}
+
+  /* ── Leistungskarten: Bild kleiner, Text auf drei Zeilen ─────────────── */
+  .service-card{padding:26px 20px}
+  .service-images{max-height:170px}
+  .service-images img{max-height:170px;object-fit:cover}
+  .service-desc{
+    font-size:14px;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .service-card.offen .service-desc{-webkit-line-clamp:unset;overflow:visible}
+
+  /* ── Preiskarten: Polster runter, Merkmalsliste einklappbar ──────────── */
+  .price-card{padding:22px 18px}
+  .price-desc{
+    font-size:13px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .price-features{gap:7px;margin-bottom:18px}
+  .price-features li{font-size:12.5px}
+
+  /* ── DJI-Geraete: drei gestapelte Karten → eine wischbare Reihe ──────
+     Der Container trug bis 2026-08-20 keine Klasse; die vorhandene Regel
+     .dji-grid-inner traf im ganzen Dokument kein Element. */
+  .dji-rail{
+    display:flex!important;
+    gap:12px!important;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    padding-bottom:10px;
+    margin-right:-20px;padding-right:20px;      /* letzte Karte bis zum Rand */
+    -webkit-overflow-scrolling:touch;
+  }
+  .dji-rail > *{
+    flex:0 0 78%;                                /* die naechste Karte lugt hervor */
+    scroll-snap-align:start;
+  }
+  .dji-rail > * img{aspect-ratio:16/10!important;margin-bottom:14px!important}
+
+  /* ── Musikvideo-Band: 684 px sind eine ganze Bildschirmhoehe ──────────
+     !important, weil das Video ein Inline-max-height:600px traegt -- das
+     schlaegt jede Regel aus dem Stylesheet. */
+  #music-video video{max-height:380px!important}
+  #music-video > div{padding:1.4rem!important}
+  #music-video h2{font-size:clamp(1.6rem,7vw,2.4rem)!important;margin-bottom:.5rem!important}
+  #music-video p{font-size:.86rem!important;margin-bottom:1.1rem!important}
+
+  /* ── Karte am Seitenende: 360 px sind fast ein halber Bildschirm ─────── */
+  body > section:last-of-type iframe{height:220px!important}
+
+  /* ── Schlussaufruf ──────────────────────────────────────────────────── */
+  #final-cta{padding:52px 20px}
+  #final-cta .cta-title{font-size:clamp(2rem,9vw,3rem)}
+}
+
+/* ── Arbeitsproben-Schiene ──────────────────────────────────────────────
+   Das Polster steht hier statt inline, sonst kaeme die Handy-Regel nicht
+   dagegen an. Auf dem Handy nur 20 px, wie in allen anderen Abschnitten. */
+#work{padding:56px 40px}
+@media(max-width:768px){
+  #work{padding:36px 20px}
+}
+
+/* ── Der eingeklappte Teil einer Preiskarte ─────────────────────────────
+   Der Schalter wird auf dem Handy per JS erzeugt (siehe kompaktMobil()),
+   damit an den fuenf Karten und ihren Uebersetzungen nichts umgebaut wird. */
+.merkmal-schalter{display:none}
+@media(max-width:768px){
+  .merkmal-schalter{
+    display:flex;align-items:center;justify-content:space-between;
+    width:100%;min-height:44px;
+    margin:0 0 14px;padding:0;
+    background:none;border:none;border-top:1px solid var(--border);
+    color:var(--fg-muted);font-family:var(--font-body);
+    font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    cursor:pointer;
+  }
+  .merkmal-schalter svg{transition:transform .25s var(--ease);flex-shrink:0}
+  .merkmal-schalter[aria-expanded="true"] svg{transform:rotate(180deg)}
+  .merkmal-schalter[aria-expanded="false"] + .price-features{display:none}
+}
+
+/* ── Fingerbedienung: Tippziele unter 44 px vergroessern ────────────────
+   Gemessen: Kalendertage 22x34, Monatspfeile 32x32, zwei Textlinks 16-18 px
+   hoch. Alles darunter trifft man auf dem Handy nur mit Glueck. */
+@media(pointer:coarse){
+  #cal-days > div{
+    min-height:42px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #cal-prev,#cal-next{width:42px!important;height:42px!important}
+  .equip-trigger,.footage-link{
+    min-height:44px;display:inline-flex;align-items:center;
+  }
+  .footer-links a,.nav-links a{min-height:44px;display:inline-flex;align-items:center}
+}
+
 </style>
 </head>
 <body>
@@ -350,6 +476,7 @@ section[id]{scroll-margin-top:84px}
   </div>
   <div class="nav-links">
     <a href="#services" data-i18n="nav_services">Services</a>
+    <a href="work.html" data-i18n="nav_work">Work</a>
     <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
     <a href="#faq" data-i18n="nav_faq">FAQ</a>
     <a href="https://www.instagram.com/bangkok_rentme" target="_blank" rel="noopener" data-i18n="nav_contact">Contact</a>
@@ -372,6 +499,7 @@ section[id]{scroll-margin-top:84px}
 <!-- Mobile menu -->
 <div class="mobile-nav" id="mobile-nav">
   <a href="#services" onclick="closeMobileNav()" data-i18n="nav_services">Services</a>
+  <a href="work.html" data-i18n="nav_work">Work</a>
   <a href="#pricing" onclick="closeMobileNav()" data-i18n="nav_pricing">Pricing</a>
   <a href="#faq" onclick="closeMobileNav()" data-i18n="nav_faq">FAQ</a>
   <a href="https://www.instagram.com/bangkok_rentme" target="_blank" rel="noopener" data-i18n="nav_contact">Contact</a>
@@ -401,7 +529,35 @@ section[id]{scroll-margin-top:84px}
     <p class="hero-sub" data-i18n="hero_sub">Photo studio, podcast recording & editing, and DJI camera + drone rental — all in one creative hub in the heart of Bangkok.</p>
     <div class="hero-actions">
       <a href="#services" class="btn-primary" data-i18n="hero_cta_primary">Explore Services</a>
-      <a href="https://www.instagram.com/bangkok_rentme" target="_blank" class="btn-ghost" data-i18n="hero_cta_secondary">See Our Work</a>
+      <a href="work.html" class="btn-ghost" data-i18n="hero_cta_secondary">See Our Work</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ ARBEITSPROBEN ══ ───────────────────────────────────────────────────
+     Bewusst direkt unter dem Kopfbereich: Andy will die Arbeit weit oben.
+     Vier bis sechs Kacheln als wischbare Schiene, alles Weitere auf
+     work.html. Die Liste steht in work-media.js, nicht hier. -->
+<section id="work" style="border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:26px">
+      <div>
+        <div class="section-tag" data-i18n="work_tag">Our Work</div>
+        <h2 class="section-title" style="font-size:clamp(1.8rem,4vw,2.8rem);margin-bottom:10px" data-i18n="work_title">SHOT IN THIS ROOM</h2>
+        <p class="section-sub" style="margin:0;max-width:46ch" data-i18n="work_sub">Every clip was filmed, cut and delivered in our own studio.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <a href="work.html" class="btn-ghost" style="padding:11px 22px;font-size:14px;white-space:nowrap" data-i18n="work_all">See all work</a>
+        <div class="reel-pfeile">
+          <button class="reel-pfeil" id="work-links" aria-label="Previous"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <button class="reel-pfeil" id="work-rechts" aria-label="Next"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+    </div>
+    <div class="reel-rail-wrap">
+      <div class="reel-rail" id="work-rail"></div>
+      <div class="reel-rail-fade r"></div>
     </div>
   </div>
 </section>
@@ -447,7 +603,7 @@ section[id]{scroll-margin-top:84px}
           <div style="display:flex;justify-content:space-between;gap:12px"><span style="color:var(--fg-muted)">3 cameras / hour</span><span><span style="text-decoration:line-through;color:var(--fg-muted)">฿6,000</span> <strong style="color:var(--fg)">฿3,000</strong></span></div>
           <div style="color:var(--fg-muted);margin-top:4px">Additional hours: 50% of the promo rate &middot; delivered in 16:9 or 9:16</div>
         </div>
-        <a href="booking.html?service=podcast" style="display:inline-block;margin-top:12px;font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.04em" data-i18n="s2_cut_cta">Send us your footage &rarr;</a>
+        <a href="booking.html?service=podcast" class="footage-link" style="display:inline-block;margin-top:12px;font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.04em" data-i18n="s2_cut_cta">Send us your footage &rarr;</a>
       </div>
       <a href="booking.html?service=podcast_setup" class="service-cta" style="border-color:rgba(37,99,235,.4);color:#60a5fa;margin-top:16px">
         <span data-i18n="s2_cta">Start Your Podcast</span>
@@ -713,7 +869,7 @@ section[id]{scroll-margin-top:84px}
         <span style="font-size:12px;color:#60a5fa;font-weight:600;letter-spacing:.08em">AUTHORIZED DJI RETAILER</span>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
+    <div class="dji-rail" style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
 
       <!-- Osmo Pocket 3 -->
       <div class="dji-card reveal" style="background:var(--bg-card);padding:32px;position:relative;overflow:hidden">
@@ -817,7 +973,7 @@ section[id]{scroll-margin-top:84px}
       <p class="section-sub">Pick a date to see open time slots. Book instantly online.</p>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;max-width:900px;margin:0 auto">
+    <div class="booking-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;max-width:900px;margin:0 auto">
 
       <!-- Calendar -->
       <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px;">
@@ -846,7 +1002,7 @@ section[id]{scroll-margin-top:84px}
       <!-- Time slots + service picker -->
       <div>
         <div id="slot-panel" style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px;min-height:280px">
-          <p id="slot-hint" style="color:var(--fg-muted);font-size:.9rem;margin:0;padding-top:40px;text-align:center">← Select a date to see available slots</p>
+          <p id="slot-hint" style="color:var(--fg-muted);font-size:.9rem;margin:0;padding-top:40px;text-align:center">Select a date to see available slots</p>
           <div id="slot-content" style="display:none">
             <div id="slot-date-label" style="font-family:var(--font-head);font-size:1.1rem;color:var(--fg);margin-bottom:18px;letter-spacing:.04em"></div>
             <div style="margin-bottom:18px">
@@ -1165,6 +1321,7 @@ section[id]{scroll-margin-top:84px}
   <div class="footer-logo">RENT<span>ME</span> BANGKOK</div>
   <div class="footer-links">
     <a href="#services" data-i18n="nav_services">Services</a>
+    <a href="work.html" data-i18n="nav_work">Work</a>
     <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
     <a href="#faq" data-i18n="nav_faq">FAQ</a>
     <a href="https://www.instagram.com/bangkok_rentme" target="_blank">@bangkok_rentme</a>
@@ -1178,7 +1335,7 @@ section[id]{scroll-margin-top:84px}
 // ── i18n ──
 const translations = {
   en: {
-    nav_services:"Services", nav_pricing:"Pricing", nav_faq:"FAQ", nav_contact:"Contact", nav_book:"Book Now",
+    nav_services:"Services", nav_work:"Work", work_tag:"Our Work", work_title:"SHOT IN THIS ROOM", work_sub:"Every clip was filmed, cut and delivered in our own studio.", work_all:"See all work", nav_pricing:"Pricing", nav_faq:"FAQ", nav_contact:"Contact", nav_book:"Book Now",
     hero_badge:"Bangkok · Asoke · Makkasan",
     hero_title:"YOUR SPACE.<br><span>YOUR VISION.</span><br>YOUR STUDIO.",
     hero_sub:"Photo studio, podcast recording & editing, and DJI camera + drone rental — all in one creative hub in the heart of Bangkok.",
@@ -1288,7 +1445,7 @@ const translations = {
     cta_location:"Makkasan Station · Asoke · Bangkok, Thailand"
   },
   fr: {
-    nav_services:"Services", nav_pricing:"Tarifs", nav_faq:"FAQ", nav_contact:"Contact", nav_book:"Réserver",
+    nav_services:"Services", nav_work:"Nos travaux", work_tag:"Nos travaux", work_title:"TOURNÉ DANS CETTE SALLE", work_sub:"Chaque clip a été filmé, monté et livré dans notre propre studio.", work_all:"Voir tout", nav_pricing:"Tarifs", nav_faq:"FAQ", nav_contact:"Contact", nav_book:"Réserver",
     hero_badge:"Bangkok · Asoke · Makkasan",
     hero_title:"VOTRE ESPACE.<br><span>VOTRE VISION.</span><br>VOTRE STUDIO.",
     hero_sub:"Studio photo, enregistrement & montage podcast, et location de caméras DJI + drones — tout en un seul hub créatif au cœur de Bangkok.",
@@ -1394,7 +1551,7 @@ const translations = {
     cta_location:"Gare Makkasan · Asoke · Bangkok, Thaïlande"
   },
   de: {
-    nav_services:"Leistungen", nav_pricing:"Preise", nav_faq:"FAQ", nav_contact:"Kontakt", nav_book:"Jetzt buchen",
+    nav_services:"Leistungen", nav_work:"Arbeiten", work_tag:"Unsere Arbeit", work_title:"HIER GEDREHT", work_sub:"Jeder Clip wurde in unserem eigenen Studio gefilmt, geschnitten und geliefert.", work_all:"Alles ansehen", nav_pricing:"Preise", nav_faq:"FAQ", nav_contact:"Kontakt", nav_book:"Jetzt buchen",
     hero_badge:"Bangkok · Asoke · Makkasan",
     hero_title:"DEIN RAUM.<br><span>DEINE VISION.</span><br>DEIN STUDIO.",
     hero_sub:"Fotostudio, Podcast-Aufnahme & Schnitt, und DJI-Kamera- + Drohnenverleih — alles in einem kreativen Hub im Herzen von Bangkok.",
@@ -1500,7 +1657,7 @@ const translations = {
     cta_location:"Makkasan Station · Asoke · Bangkok, Thailand"
   },
   ru: {
-    nav_services:"Услуги", nav_pricing:"Цены", nav_faq:"FAQ", nav_contact:"Контакты", nav_book:"Забронировать",
+    nav_services:"Услуги", nav_work:"Работы", work_tag:"Наши работы", work_title:"СНЯТО ЗДЕСЬ", work_sub:"Каждый ролик снят, смонтирован и сдан в нашей студии.", work_all:"Смотреть все", nav_pricing:"Цены", nav_faq:"FAQ", nav_contact:"Контакты", nav_book:"Забронировать",
     hero_badge:"Бангкок · Асок · Макасан",
     hero_title:"ТВОЁ ПРОСТРАНСТВО.<br><span>ТВОЯ ИДЕЯ.</span><br>ТВОЯ СТУДИЯ.",
     hero_sub:"Фотостудия, запись и монтаж подкастов, а также аренда камер DJI и дронов — всё в одном творческом пространстве в сердце Бангкока.",
@@ -1606,7 +1763,7 @@ const translations = {
     cta_location:"Станция Макасан · Асок · Бангкок, Таиланд"
   },
   th: {
-    nav_services:"บริการ", nav_pricing:"ราคา", nav_faq:"FAQ", nav_contact:"ติดต่อ", nav_book:"จองเลย",
+    nav_services:"บริการ", nav_work:"ผลงาน", work_tag:"ผลงานของเรา", work_title:"ถ่ายทำในห้องนี้", work_sub:"ทุกคลิปถ่ายทำ ตัดต่อ และส่งมอบในสตูดิโอของเราเอง", work_all:"ดูผลงานทั้งหมด", nav_pricing:"ราคา", nav_faq:"FAQ", nav_contact:"ติดต่อ", nav_book:"จองเลย",
     hero_badge:"กรุงเทพฯ · อโศก · มักกะสัน",
     hero_title:"พื้นที่ของคุณ<br><span>วิสัยทัศน์ของคุณ</span><br>สตูดิโอของคุณ",
     hero_sub:"สตูดิโอถ่ายภาพ บันทึกและตัดต่อพอดแคสต์ และเช่ากล้อง DJI + โดรน — ทุกอย่างในที่เดียวใจกลางกรุงเทพฯ",
@@ -1946,5 +2103,83 @@ window.miniCalNav=function(dir,e){
   <a href="booking.html" data-i18n="mb_btn">Book now</a>
 </div>
 
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   Handy: Merkmalslisten der Preiskarten einklappen  (2026-08-20)
+
+   Der Schalter wird hier erzeugt statt im HTML, damit an den fuenf
+   Preiskarten und ihren fuenf Uebersetzungen nichts umgebaut werden muss.
+   Die <ul> selbst wird nur verschoben, nie neu geschrieben -- alle
+   data-i18n-Angaben darin bleiben also erhalten.
+
+   Auf dem Rechner passiert nichts: .merkmal-schalter ist dort display:none
+   und die Liste steht ohnehin offen.
+   ══════════════════════════════════════════════════════════════════════ */
+(function kompaktMobil(){
+  var PFEIL = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" '
+            + 'stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>';
+
+  document.querySelectorAll('.price-card .price-features').forEach(function(liste){
+    var n = liste.querySelectorAll('li').length;
+    if (!n) return;
+
+    var knopf = document.createElement('button');
+    knopf.type = 'button';
+    knopf.className = 'merkmal-schalter';
+    knopf.setAttribute('aria-expanded', 'false');
+    knopf.innerHTML = '<span>What’s included (' + n + ')</span>' + PFEIL;
+
+    liste.parentNode.insertBefore(knopf, liste);
+    knopf.addEventListener('click', function(){
+      var offen = knopf.getAttribute('aria-expanded') === 'true';
+      knopf.setAttribute('aria-expanded', offen ? 'false' : 'true');
+    });
+  });
+
+  /* Der gekuerzte Leistungstext laesst sich aufklappen -- ein Tipp auf den
+     Text selbst, damit die Karte keinen zweiten Knopf bekommt. */
+  document.querySelectorAll('.service-card .service-desc').forEach(function(text){
+    text.addEventListener('click', function(e){
+      if (window.matchMedia('(max-width:768px)').matches){
+        e.stopPropagation();
+        text.closest('.service-card').classList.toggle('offen');
+      }
+    });
+  });
+})();
+</script>
+
+<script src="work-media.js"></script>
+<script>
+/* Die Schiene auf der Startseite: nur die als rail markierten Kacheln,
+   plus eine letzte, die auf die volle Galerie fuehrt. */
+(function(){
+  var rail = document.getElementById('work-rail');
+  if (!rail || !window.REELS) return;
+
+  window.REELS.filter(function(r){ return r.rail; })
+              .forEach(function(r){ rail.appendChild(window.reelKachel(r)); });
+
+  var mehr = document.createElement('a');
+  mehr.href = 'work.html';
+  mehr.className = 'reel reel-mehr';
+  mehr.setAttribute('aria-label', 'See all work');
+  mehr.innerHTML =
+      '<span style="position:absolute;inset:0;display:flex;flex-direction:column;'
+    + 'align-items:center;justify-content:center;gap:10px;text-align:center;padding:18px">'
+    + '<span style="font-family:var(--font-head);font-size:2.4rem;line-height:1;color:var(--fg)">'
+    + window.REELS.length + '</span>'
+    + '<span style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-muted)">'
+    + 'clips in total</span>'
+    + '<span style="margin-top:6px;font-size:.8rem;font-weight:600;color:var(--accent)">See all work &rarr;</span>'
+    + '</span>';
+  rail.appendChild(mehr);
+
+  var schub = function(n){ rail.scrollBy({left:n*222, behavior:'smooth'}); };
+  document.getElementById('work-links').addEventListener('click',  function(){ schub(-2); });
+  document.getElementById('work-rechts').addEventListener('click', function(){ schub(2); });
+})();
+</script>
 </body>
 </html>

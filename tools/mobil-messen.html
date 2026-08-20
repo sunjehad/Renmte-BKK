@@ -1,0 +1,41 @@
+<!doctype html><meta charset="utf-8">
+<title>Handy-Messung</title>
+<!-- ══════════════════════════════════════════════════════════════════════
+     Misst die Seiten bei Handy-Breite, ohne ein echtes Geraet.
+
+     Warum ein Rahmen und nicht der Browser selbst: Headless-Chrome haelt
+     sich nicht zuverlaessig an --window-size, und ein verkleinertes Fenster
+     laesst sich nicht von aussen abfragen. Ein 390 Pixel breiter iframe auf
+     derselben Herkunft laesst sich beides -- genau vermessen und ansehen.
+
+     Benutzung:  python3 serve.py, dann localhost:3456/tools/mobil-messen.html
+     In der Konsole:
+       laden('/index.html')   Seite (neu) laden, ohne Zwischenspeicher
+       scan()                 waagerechter Ueberlauf + Gesamthoehe in Bildschirmen
+       tap()                  Tippziele unter 40 px
+       abschnitte()           Hoehe je Abschnitt -- zeigt, wo die Laenge sitzt
+
+     Angelegt 2026-08-20 bei der Handy-Kuerzung (13.773 -> 11.065 px).
+     ══════════════════════════════════════════════════════════════════════ -->
+<body style="margin:0;background:#111">
+<iframe id="f" src="/index.html" style="width:390px;height:844px;border:0"></iframe>
+<script>
+window.laden=function(u){document.getElementById('f').src=u+'?v='+Math.random();return 'ok'};
+window.scan=function(){
+  const d=document.getElementById('f').contentDocument, vw=d.documentElement.clientWidth, bad=[];
+  d.querySelectorAll('*').forEach(el=>{const r=el.getBoundingClientRect();
+    if(r.width>0&&(r.right>vw+1||r.left<-1))bad.push({t:el.tagName.toLowerCase(),c:(el.getAttribute('class')||'').slice(0,30),id:el.id||'',l:Math.round(r.left),r:Math.round(r.right)});});
+  return {vw,scrollW:d.documentElement.scrollWidth,hoehe:d.body.scrollHeight,schirme:+(d.body.scrollHeight/844).toFixed(1),n:bad.length,bad:bad.slice(0,12)};
+};
+window.tap=function(){
+  const d=document.getElementById('f').contentDocument,s=[];
+  d.querySelectorAll('a,button,select,input,[onclick]').forEach(el=>{const r=el.getBoundingClientRect();
+    if(r.width>0&&r.height>0&&(r.height<40||r.width<40))s.push({t:el.tagName.toLowerCase(),c:(el.getAttribute('class')||'').slice(0,24),x:(el.textContent||'').trim().slice(0,22),w:Math.round(r.width),h:Math.round(r.height)});});
+  return {n:s.length,s:s.slice(0,14)};
+};
+window.abschnitte=function(){
+  const d=document.getElementById('f').contentDocument;
+  return [...d.querySelectorAll('body > section, body > header, body > main, body > footer')]
+    .map(e=>({id:e.id||e.tagName.toLowerCase(),h:Math.round(e.getBoundingClientRect().height)}));
+};
+</script>

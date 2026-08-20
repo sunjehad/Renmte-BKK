@@ -1,0 +1,169 @@
+/* ══════════════════════════════════════════════════════════════════════
+   RentMe — Kacheln, Schiene und Leuchtkasten der Arbeitsproben
+   Angelegt 2026-08-20. Von index.html (Schiene) und work.html (Galerie)
+   gemeinsam benutzt. Farben kommen aus den Variablen in index.html.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Eine Kachel ─────────────────────────────────────────────────────── */
+.reel{
+  position:relative;
+  display:block;
+  width:100%;
+  aspect-ratio:9/16;
+  padding:0;
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  background:var(--bg-card);
+  cursor:pointer;
+  transition:transform .45s var(--ease),border-color .3s var(--ease);
+}
+.reel:hover,.reel:focus-visible{transform:translateY(-5px);border-color:rgba(255,255,255,.16)}
+.reel img,.reel video{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  display:block;
+}
+.reel video{opacity:0;transition:opacity .35s var(--ease)}
+.reel.laeuft video{opacity:1}
+.reel-veil{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(7,7,9,.9) 0%,rgba(7,7,9,.22) 44%,rgba(7,7,9,0) 72%);
+}
+.reel-meta{
+  position:absolute;left:0;right:0;bottom:0;
+  padding:13px 14px;
+  text-align:left;
+}
+.reel-meta b{
+  display:block;
+  font-family:var(--font-body);
+  font-size:.86rem;font-weight:600;line-height:1.3;
+  color:var(--fg);
+  text-wrap:balance;
+}
+.reel-play{
+  position:absolute;top:11px;right:11px;
+  width:30px;height:30px;
+  border-radius:50%;
+  background:rgba(7,7,9,.55);
+  border:1px solid rgba(255,255,255,.16);
+  display:grid;place-items:center;
+  color:var(--fg);
+  transition:background .25s var(--ease),border-color .25s var(--ease);
+}
+.reel:hover .reel-play{background:var(--accent);border-color:var(--accent)}
+
+/* ── Die Schiene auf der Startseite ──────────────────────────────────── */
+.reel-rail-wrap{position:relative}
+.reel-rail{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  padding:4px 4px 16px;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,.16) transparent;
+  -webkit-overflow-scrolling:touch;
+}
+.reel-rail > *{flex:0 0 208px;scroll-snap-align:start}
+.reel-rail::-webkit-scrollbar{height:5px}
+.reel-rail::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:99px}
+.reel-rail-fade{
+  position:absolute;top:0;bottom:16px;width:56px;
+  pointer-events:none;
+}
+.reel-rail-fade.r{right:0;background:linear-gradient(to left,var(--bg),transparent)}
+
+.reel-pfeile{display:flex;gap:8px}
+.reel-pfeil{
+  width:42px;height:42px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.16);
+  background:none;color:var(--fg);
+  display:grid;place-items:center;
+  cursor:pointer;
+  transition:background .2s var(--ease),border-color .2s var(--ease);
+}
+.reel-pfeil:hover{background:var(--accent);border-color:var(--accent)}
+
+/* ── Raster auf work.html ────────────────────────────────────────────── */
+.reel-raster{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(178px,1fr));
+  gap:16px;
+}
+
+/* ── Leuchtkasten ────────────────────────────────────────────────────── */
+.reel-box[hidden]{display:none}
+.reel-box{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(4,4,6,.95);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  display:grid;place-items:center;
+  padding:26px;
+  animation:reelEin .25s var(--ease);
+}
+@keyframes reelEin{from{opacity:0}to{opacity:1}}
+.reel-box-inner{
+  display:flex;gap:30px;align-items:center;
+  max-width:940px;width:100%;
+}
+.reel-box-media{
+  flex:0 0 auto;
+  width:min(320px,42vw);
+  aspect-ratio:9/16;
+  border-radius:12px;
+  overflow:hidden;
+  background:#000;
+  border:1px solid rgba(255,255,255,.14);
+  position:relative;
+}
+.reel-box-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.reel-box-txt{flex:1;min-width:0;display:grid;gap:13px;align-content:center}
+.reel-box-txt .k{
+  margin:0;
+  font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);font-weight:600;
+}
+.reel-box-txt h3{
+  margin:0;
+  font-family:var(--font-head);
+  font-size:clamp(1.7rem,3.4vw,2.7rem);line-height:1;letter-spacing:.02em;
+  color:var(--fg);
+}
+.reel-box-txt .d{margin:0;color:rgba(245,245,245,.68);font-size:.92rem;max-width:46ch}
+.reel-box-cta{
+  justify-self:start;margin-top:5px;
+  background:var(--accent);color:#fff;
+  border-radius:999px;
+  min-height:46px;display:inline-flex;align-items:center;padding:0 26px;
+  font-size:.82rem;font-weight:600;letter-spacing:.04em;
+}
+.reel-box-zu{
+  position:absolute;top:18px;right:20px;
+  width:44px;height:44px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.16);
+  background:none;color:var(--fg);
+  display:grid;place-items:center;cursor:pointer;
+  transition:background .2s var(--ease),border-color .2s var(--ease);
+}
+.reel-box-zu:hover{background:var(--accent);border-color:var(--accent)}
+
+@media(max-width:768px){
+  /* Die Schiene laeuft bis an den Bildschirmrand und darueber hinaus --
+     so ist sofort zu sehen, dass rechts noch etwas kommt. */
+  .reel-rail{margin-right:-20px;padding-right:20px}
+  .reel-rail-fade.r{display:none}
+  .reel-rail > *{flex:0 0 150px}
+  .reel-raster{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+  .reel-meta{padding:10px 11px}
+  .reel-meta b{font-size:.78rem}
+  .reel-box{padding:16px}
+  .reel-box-inner{flex-direction:column;gap:18px}
+  .reel-box-media{width:min(214px,54vw)}
+  .reel-box-txt{text-align:center;justify-items:center}
+  .reel-box-txt .d{font-size:.86rem}
+  .reel-box-cta{justify-self:center}
+}

@@ -53,7 +53,7 @@ WURZEL = Path(__file__).resolve().parent.parent
 BEKANNT_DATEI = Path(__file__).resolve().parent / "bekannt.txt"
 
 #: Die Seiten, die tatsaechlich ausgeliefert werden.
-SEITEN = ["index.html", "booking.html", "admin.html", "profile.html", "auth.html"]
+SEITEN = ["index.html", "work.html", "booking.html", "admin.html", "profile.html", "auth.html"]
 
 #: Muster, die niemals in einer Frontend-Datei stehen duerfen.
 GEHEIM = [
