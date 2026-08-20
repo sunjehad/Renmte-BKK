@@ -11,8 +11,14 @@
    alles mit. Sie liegen im oeffentlichen Supabase-Bucket "work" desselben
    Projekts, das die Buchungen haelt.
 
-   Zum oertlichen Pruefen steht MEDIA auf 'images/work/'; dieser Ordner ist
-   in .gitignore und existiert nur auf dem Entwicklungsrechner.
+   Erzeugt werden die Dateien mit tools/reels-web-fassung.py (nach
+   images/work/, in .gitignore), hochgeladen mit tools/reels-hochladen.sh.
+
+   ⚠ Der Bucket liefert `cache-control: no-cache`. Der CLI 2.108 nimmt den
+   Schalter --cache-control entgegen, setzt ihn aber nicht -- geprueft am
+   20.08. mit "max-age=604800" und "604800". Folge: wiederkehrende Besucher
+   laden erneut. Bei 5 GB Freikontingent im Monat unkritisch, aber es steht
+   hier, damit es niemand zweimal untersucht.
 
    ── Zwei Eintraege mit Vorbehalt ────────────────────────────────────────
    `alt08` traegt Preise im Bild ("LAUNCH OFFER 50% OFF · FROM B1,500 PER
@@ -22,9 +28,9 @@
    Beide Vorbehalte stehen auch an der jeweiligen Zeile.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* Umstellen auf Supabase, sobald der Bucket steht:
-   'https://nghsyxwhczvwaorssgoh.supabase.co/storage/v1/object/public/work/' */
-window.MEDIA = 'images/work/';
+/* Oeffentlicher Supabase-Bucket "work", angelegt am 20.08.2026.
+   Zum oertlichen Pruefen ohne Netz: auf 'images/work/' zurueckstellen. */
+window.MEDIA = 'https://nghsyxwhczvwaorssgoh.supabase.co/storage/v1/object/public/work/';
 
 /* Andys Auswahl vom 20.08.2026, getroffen ueber alle 63 fertigen Clips.
    Die Herkunft jeder Datei steht in tools/reels-auswahl.json -- diese Liste
@@ -190,8 +196,12 @@ window.BAENDER = [
     var k = bauen();
     vorher = document.activeElement;
     k.querySelector('.reel-box-media').innerHTML =
+      /* muted, sonst blockiert der Browser das Autoplay und der Kasten zeigt
+         ein Standbild mit Play-Knopf. Die Reels sind ohnehin so gebaut, dass
+         sie stumm funktionieren -- der Ton ist ein Bett, kein Traeger.
+         Ueber die Bedienleiste laesst er sich einschalten. */
       '<video src="' + window.MEDIA + r.id + '.mp4" poster="' + window.MEDIA + r.id + '.jpg"'
-      + ' autoplay loop playsinline controls></video>';
+      + ' autoplay muted loop playsinline controls></video>';
     k.querySelector('.k').textContent  = r.lab;
     k.querySelector('h3').textContent  = r.t;
     k.querySelector('.d').textContent  = r.d;

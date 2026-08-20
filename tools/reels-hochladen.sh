@@ -7,13 +7,14 @@
 #   Der CLI kann keine Buckets anlegen (Stand 2.108.0, nur ls/cp/mv/rm).
 #
 # Die Dateien entstehen aus dem Dropbox-Material mit
-# tools/reels-web-fassung.sh und liegen unter images/work/ (gitignore).
+# tools/reels-web-fassung.py und liegen unter images/work/ (gitignore).
 #
 # Aufruf:  ./tools/reels-hochladen.sh
 #
 # Angelegt 2026-08-20 mit der Arbeitsproben-Galerie.
 # ══════════════════════════════════════════════════════════════════════════
-set -euo pipefail
+set -uo pipefail
+fehler=0
 cd "$(dirname "$0")/.."
 
 QUELLE="images/work"
@@ -25,20 +26,50 @@ if [ ! -d "$QUELLE" ]; then
 fi
 
 ANZ=$(find "$QUELLE" -type f \( -name '*.mp4' -o -name '*.jpg' \) | wc -l | tr -d ' ')
-echo "Lade $ANZ Dateien nach ss:///$BUCKET/ ..."
+echo "Lade $ANZ Dateien in die Wurzel von ss:///$BUCKET ..."
+echo
 
+# Datei fuer Datei statt "cp -r": Der rekursive Aufruf legt den ORDNER im
+# Bucket an, nicht seinen Inhalt -- die Dateien landen dann unter
+# work/work/n02.jpg statt work/n02.jpg. Am 20.08. genau so passiert.
+#
 # Eine Woche Zwischenspeicher: Die Reels aendern sich nicht. Das spart
 # Uebertragungsvolumen -- der kostenlose Tarif gibt 5 GB im Monat her.
 # Wird ein Reel ersetzt, muss es einen neuen Dateinamen bekommen, sonst
 # sehen wiederkehrende Besucher bis zu sieben Tage lang das alte.
-supabase storage cp -r "$QUELLE" "ss:///$BUCKET" \
-  --linked --experimental \
-  --jobs 4 \
-  --cache-control "max-age=604800"
+for datei in "$QUELLE"/*.mp4 "$QUELLE"/*.jpg; do
+  [ -e "$datei" ] || continue
+  name=$(basename "$datei")
+  printf '  %-14s' "$name"
+  if supabase storage cp "$datei" "ss:///$BUCKET/$name" \
+       --linked --experimental --cache-control "max-age=604800" >/dev/null 2>&1
+  then echo "ok"
+  else echo "FEHLER"; fehler=1
+  fi
+done
+
+BASIS="https://nghsyxwhczvwaorssgoh.supabase.co/storage/v1/object/public/$BUCKET"
 
 echo
-echo "Fertig. Gegenprobe -- diese Adresse muss ein Bild liefern:"
-echo "  https://nghsyxwhczvwaorssgoh.supabase.co/storage/v1/object/public/$BUCKET/b11.jpg"
-echo
-echo "Danach in work-media.js MEDIA umstellen auf:"
-echo "  'https://nghsyxwhczvwaorssgoh.supabase.co/storage/v1/object/public/$BUCKET/'"
+echo "Gegenprobe -- jede Datei aus der Auswahl oeffentlich abrufbar?"
+schlecht=0
+while IFS= read -r kennung; do
+  for endung in mp4 jpg; do
+    code=$(curl -s -o /dev/null -w '%{http_code}' "$BASIS/$kennung.$endung")
+    [ "$code" = "200" ] || { echo "  FEHLT: $kennung.$endung ($code)"; schlecht=$((schlecht+1)); }
+  done
+done < <(python3 -c "
+import json
+for r in json.load(open('tools/reels-auswahl.json'))['reels']: print(r['id'])
+")
+
+if [ "$schlecht" = "0" ] && [ "$fehler" = "0" ]; then
+  echo "  alle abrufbar."
+  echo
+  echo "MEDIA in work-media.js muss stehen auf:"
+  echo "  '$BASIS/'"
+else
+  echo
+  echo "NICHT vollstaendig -- $schlecht Datei(en) fehlen. MEDIA nicht umstellen."
+  exit 1
+fi
