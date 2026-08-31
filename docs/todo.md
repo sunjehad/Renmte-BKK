@@ -332,11 +332,17 @@ Normalpreise sind Anker fürs Marketing, kein Ziel.
 **Betroffen sind drei Aktionen:**
 | Aktion | steht auf |
 |---|---|
-| Studio | ฿200/Std. „promo until 31 Aug" |
+| Studio | ฿200/Std. „promo until 30 Sep" |
 | We Cut Your Podcast | 50 % — erste Stunde ฿1.500/฿2.000/฿3.000 |
 | Record Your Podcast | jede weitere Stunde zum halben Satz |
 
-**Wichtig: nichts davon schaltet von selbst um.** Am 1. September stehen
+**Frist verlängert (30.08.2026):** Andy hat die Aktion vom 31.08. auf den
+**30.09.2026** gezogen. Die Datumsangaben in `index.html` und `booking.html`
+sind an diesem Tag in allen fünf Sprachen nachgezogen (24 + 4 Stellen);
+`supabase/functions/_shared/preise.ts` brauchte nichts, weil dort kein Datum
+steht, sondern nur die Sätze.
+
+**Wichtig: nichts davon schaltet von selbst um.** Am 1. Oktober stehen
 dieselben Preise da, nur mit abgelaufenem Datum daneben. Eine Automatik, die
 den Preis unbeaufsichtigt verdoppelt, wäre gefährlicher als ein veraltetes
 Datum — deshalb bewusst nicht gebaut.
@@ -348,7 +354,7 @@ Anhebung festmachen will. Ende August dort nachsehen.
 **Wenn es soweit ist, an drei Stellen ändern** (`docs/decisions.md`, T-8):
 `index.html`, `booking.html` und `supabase/functions/_shared/preise.ts` —
 danach **beides** ausspielen, Push und `supabase functions deploy`. Die
-durchgestrichenen Preise und alle „until 31 Aug"-Hinweise fallen dann weg,
+durchgestrichenen Preise und alle „until 30 Sep"-Hinweise fallen dann weg,
 in **allen fünf Sprachen**.
 
 ⚠️ **Mit dem Preiswechsel muss auch ein Reel von der Website.** `alt08`
