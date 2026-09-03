@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root{
   --bg:#070709;--bg2:#0f0f12;--bg3:#17171c;
@@ -660,7 +661,37 @@ tr.neu td:first-child::before{content:'NEU';position:absolute;left:2px;top:50%;t
     </div>
     <div class="modal-body">
       <input type="hidden" id="cancel-id">
-      <p style="font-size:14px;color:var(--muted);margin-bottom:20px">Are you sure you want to cancel this booking? The status will be set to cancelled.</p>
+      <input type="hidden" id="cancel-modus" value="cancel">
+      <p id="cancel-frage" style="font-size:14px;color:var(--muted);margin-bottom:20px">Are you sure you want to cancel this booking? The status will be set to cancelled.</p>
+
+      <div class="form-group">
+        <label>Reason (goes into the email)</label>
+        <select id="cancel-grund" onchange="grundGewaehlt()">
+          <option value="Unfortunately we have to cancel this booking due to unforeseen circumstances.">Unforeseen circumstances</option>
+          <option value="We are moving to a new location and the studio is not available on your date.">Moving to a new location</option>
+          <option value="A technical problem in the studio means we cannot host your session.">Technical problem in the studio</option>
+          <option value="Unfortunately this time slot was double-booked.">Double booking</option>
+          <option value="__frei__">Write my own…</option>
+        </select>
+        <textarea id="cancel-grund-frei" rows="3" placeholder="Your own wording — this goes into the email as-is."
+                  style="display:none;margin-top:8px"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Refund</label>
+        <select id="cancel-geld">
+          <option value="frage">Ask the customer: refund or credit</option>
+          <option value="refund">Tell them we refund in full</option>
+          <option value="nichts">Say nothing about the money</option>
+        </select>
+      </div>
+
+      <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:13px;color:var(--muted);margin-bottom:18px">
+        <input type="checkbox" id="cancel-mail" checked style="width:auto;margin:0">
+        Email the customer
+      </label>
+      <div id="cancel-mail-status" style="font-size:12px;color:var(--muted);margin-bottom:16px"></div>
+
       <div style="display:flex;gap:10px">
         <button class="btn-red" onclick="doCancel()">Yes, Cancel Booking</button>
         <button class="btn-ghost" onclick="closeModal('cancel-modal')">Keep Booking</button>
@@ -670,6 +701,33 @@ tr.neu td:first-child::before{content:'NEU';position:absolute;left:2px;top:50%;t
 </div>
 
 <script>
+// ═══════════════════════════════════════════════
+// STORNO-MAIL (EmailJS)
+//
+// Dieselbe Strasse wie die Bestaetigungsmail in booking.html: dasselbe
+// EmailJS-Konto, derselbe Dienst, derselbe Absender. Nur die Vorlage ist
+// eine andere -- und die liegt, wie alle anderen, im EmailJS-Konto und
+// **nicht** hier im Code.
+//
+// Solange unten der Platzhalter steht, verschickt das Panel nichts: es sagt
+// im Storno-Fenster, dass die Vorlage fehlt, und storniert trotzdem. Lieber
+// keine Mail als eine ins Leere -- derselbe Grundsatz wie beim Dropbox-Link
+// in booking.html.
+//
+// Die Vorlage muss diese Parameter ausgeben:
+//   booking_ref, customer_name, customer_email, service,
+//   booking_date, start_time, storno_grund, geld_text, betrag
+// ═══════════════════════════════════════════════
+const EMAILJS_PUBLIC_KEY      = 'n-YxOGgL8mPVUaoBP';
+const EMAILJS_SERVICE_ID      = 'service_jwnx06q';
+const EMAILJS_CANCEL_TEMPLATE = 'PLATZHALTER_STORNO_VORLAGE_BITTE_EINTRAGEN';
+const EMAILJS_ADMIN_TEMPLATE  = 'template_thqicqi';
+
+const STORNO_VORLAGE_GESETZT =
+  /^template_/.test(EMAILJS_CANCEL_TEMPLATE);
+
+if (window.emailjs) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
 const { createClient } = supabase;
 const sb = createClient(
   'https://nghsyxwhczvwaorssgoh.supabase.co',
@@ -1032,11 +1090,10 @@ async function markPaid(id) {
   await sb.from('bookings').update({ booking_status: 'paid', payment_status: 'paid', status: 'confirmed', paid_at: new Date().toISOString() }).eq('id', id);
   loadAllBookings();
 }
-async function refundBooking(id) {
-  if (!confirm('Mark this booking as refunded? This does not call Stripe automatically.')) return;
-  await sb.from('bookings').update({ booking_status: 'refunded', payment_status: 'refunded', status: 'cancelled', refunded_at: new Date().toISOString() }).eq('id', id);
-  loadAllBookings();
-}
+// Der Refund-Knopf setzt weiterhin nur den Status -- Stripe wird nicht
+// angerufen. Neu ist, dass er durch dasselbe Fenster geht wie Cancel und
+// den Kunden benachrichtigen kann.
+function refundBooking(id) { openCancel(id, 'refund'); }
 async function releaseBooking(id) {
   if (!confirm('Release this pending reservation? The time slot will become available again.')) return;
   await sb.from('bookings').update({ booking_status: 'cancelled', payment_status: 'cancelled', status: 'cancelled' }).eq('id', id);
@@ -1109,10 +1166,109 @@ async function saveNote() {
 }
 
 // ── CANCEL MODAL ──
-function openCancel(id) { document.getElementById('cancel-id').value = id; openModal('cancel-modal'); }
+function openCancel(id, modus) {
+  document.getElementById('cancel-id').value    = id;
+  document.getElementById('cancel-modus').value = modus || 'cancel';
+
+  const refund = (modus === 'refund');
+  document.querySelector('#cancel-modal .modal-title').textContent =
+    refund ? 'REFUND BOOKING' : 'CANCEL BOOKING';
+  document.getElementById('cancel-frage').textContent = refund
+    ? 'Mark this booking as refunded? This does not call Stripe automatically — you still have to send the money yourself.'
+    : 'Are you sure you want to cancel this booking? The status will be set to cancelled.';
+  document.getElementById('cancel-geld').value = refund ? 'refund' : 'frage';
+
+  const hinweis = document.getElementById('cancel-mail-status');
+  const schalter = document.getElementById('cancel-mail');
+  if (STORNO_VORLAGE_GESETZT) {
+    hinweis.textContent = '';
+    schalter.disabled = false;
+    schalter.checked  = true;
+  } else {
+    // Kein stiller Fehlschlag: der Grund steht im Fenster, nicht in der Konsole.
+    hinweis.textContent = '⚠ No cancellation template set up in EmailJS yet — '
+                        + 'the booking will be cancelled, but no email goes out.';
+    schalter.checked  = false;
+    schalter.disabled = true;
+  }
+  openModal('cancel-modal');
+}
+
+function grundGewaehlt() {
+  const frei = document.getElementById('cancel-grund').value === '__frei__';
+  document.getElementById('cancel-grund-frei').style.display = frei ? 'block' : 'none';
+}
+
+const GELD_TEXTE = {
+  frage: 'About your payment — just tell me which you would prefer: a full refund, '
+       + 'or we keep it as credit for a later session. Either is completely fine.',
+  refund: 'Your payment will be refunded in full. Please allow a few days for it to arrive.',
+  nichts: ''
+};
+
+async function sendeStornoMail(b) {
+  if (!STORNO_VORLAGE_GESETZT) return { ok: false, grund: 'Vorlage fehlt' };
+
+  const gewaehlt = document.getElementById('cancel-grund').value;
+  const grund = gewaehlt === '__frei__'
+    ? document.getElementById('cancel-grund-frei').value.trim()
+    : gewaehlt;
+
+  // Lesbar, nicht roh: in der Mail steht "Studio Rental" und "4 Sep 2026",
+  // nicht "studio_rental" und "2026-09-04". SVC_NAMES ist dieselbe Liste,
+  // aus der auch die Tabelle ihre Bezeichnungen nimmt.
+  const datum = b.booking_date || b.equipment_start_date || '';
+  const params = {
+    booking_ref:    b.booking_ref || '',
+    customer_name:  b.customer_name || '',
+    customer_email: b.customer_email || '',
+    service:        SVC_NAMES[b.service_type] || b.service_type || '',
+    booking_date:   datum
+      ? new Date(datum + 'T12:00').toLocaleDateString('en-GB',
+          { day:'numeric', month:'short', year:'numeric' })
+      : '',
+    start_time:     b.start_time || '',
+    storno_grund:   grund,
+    geld_text:      GELD_TEXTE[document.getElementById('cancel-geld').value] || '',
+    betrag:         b.total_amount != null ? ('THB ' + b.total_amount) : ''
+  };
+
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CANCEL_TEMPLATE, params);
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_ADMIN_TEMPLATE,  params);
+    return { ok: true };
+  } catch (err) {
+    console.error('EmailJS error:', err);
+    return { ok: false, grund: (err && err.text) || String(err) };
+  }
+}
+
 async function doCancel() {
-  const { error } = await sb.from('bookings').update({ status: 'cancelled' }).eq('id', document.getElementById('cancel-id').value);
-  if (!error) { closeModal('cancel-modal'); loadAllBookings(); }
+  const id     = document.getElementById('cancel-id').value;
+  const refund = document.getElementById('cancel-modus').value === 'refund';
+  const b      = allBookings.find(x => x.id === id);
+
+  const felder = refund
+    ? { booking_status: 'refunded', payment_status: 'refunded', status: 'cancelled',
+        refunded_at: new Date().toISOString() }
+    : { status: 'cancelled' };
+
+  const { error } = await sb.from('bookings').update(felder).eq('id', id);
+  if (error) { alert('Could not cancel: ' + error.message); return; }
+
+  // Erst stornieren, dann schreiben. Scheitert die Mail, ist die Buchung
+  // trotzdem storniert -- und das Panel sagt es, statt es zu verschlucken.
+  let mail = null;
+  if (b && document.getElementById('cancel-mail').checked) {
+    mail = await sendeStornoMail(b);
+  }
+
+  closeModal('cancel-modal');
+  loadAllBookings();
+  if (mail && !mail.ok) {
+    alert('Booking cancelled, but the email did NOT go out: ' + mail.grund
+        + '\nPlease write to ' + (b.customer_email || 'the customer') + ' yourself.');
+  }
 }
 
 // ── MODALS ──
