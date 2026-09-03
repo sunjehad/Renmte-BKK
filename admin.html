@@ -1220,8 +1220,11 @@ async function sendeStornoMail(b) {
   const datum = b.booking_date || b.equipment_start_date || '';
   const params = {
     booking_ref:    b.booking_ref || '',
-    customer_name:  b.customer_name || '',
-    customer_email: b.customer_email || '',
+    // Die Spalten heissen guest_*, nicht customer_* -- die Parameternamen der
+    // Vorlage bleiben davon unberuehrt. loadAllBookings() fuellt beide Felder
+    // fuer angemeldete Kunden aus dem Profil nach (siehe oben).
+    customer_name:  b.guest_name || '',
+    customer_email: b.guest_email || '',
     service:        SVC_NAMES[b.service_type] || b.service_type || '',
     booking_date:   datum
       ? new Date(datum + 'T12:00').toLocaleDateString('en-GB',
@@ -1230,7 +1233,7 @@ async function sendeStornoMail(b) {
     start_time:     b.start_time || '',
     storno_grund:   grund,
     geld_text:      GELD_TEXTE[document.getElementById('cancel-geld').value] || '',
-    betrag:         b.total_amount != null ? ('THB ' + b.total_amount) : ''
+    betrag:         b.total_price ? ('THB ' + b.total_price.toLocaleString()) : ''
   };
 
   try {
