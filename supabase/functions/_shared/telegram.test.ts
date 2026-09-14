@@ -79,7 +79,10 @@ test('Podcast-Aufnahme: Anzahlung und Rest getrennt', () => {
 test('Equipment bar: Zeitraum, Geraete, Kaution, kein "paid"', () => {
   const t = nachricht(geraet);
   assert.match(t, /NOT PAID YET — ฿2,400 cash at pick-up/);
-  assert.match(t, /Pick-up Mon 21\.09\.2026/);
+  assert.match(t, /Pick-up Mon 21\.09\.2026$/m);
+  assert.match(t, /no pick-up time given/);
+  assert.match(nachricht({ ...geraet, start_time: '14:00' }), /Pick-up Mon 21\.09\.2026, 14:00/);
+  assert.doesNotMatch(nachricht({ ...geraet, start_time: '14:00' }), /no pick-up time/);
   assert.match(t, /Return Thu 24\.09\.2026 \(3 days\)/);
   assert.match(nachricht({ ...geraet, equipment_end_date: '2026-09-21', rental_days: 1 }), /Return same day \(1 day\)/);
   assert.match(t, /DJI Neo — 2 days × ฿700 \+ 1 extra day × ฿500 = ฿1,900/);

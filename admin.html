@@ -1005,7 +1005,9 @@ function renderStats() {
 // ── TODAY ──
 function renderTodayList() {
   const today = new Date().toISOString().split('T')[0];
-  const items = allBookings.filter(b => b.booking_date === today && b.status !== 'cancelled')
+  // Equipment zaehlt am Abholtag mit; seit 2026-09-14 traegt es in
+  // start_time die Abholzeit.
+  const items = allBookings.filter(b => (b.booking_date === today || b.equipment_start_date === today) && b.status !== 'cancelled')
     .sort((a,b) => (a.start_time||'').localeCompare(b.start_time||''));
   const list = document.getElementById('today-list');
   if (!items.length) {
@@ -1017,7 +1019,7 @@ function renderTodayList() {
       <div class="today-time">${b.start_time||'—'}</div>
       <div class="today-info">
         <div class="today-name">${b.guest_name||'—'}</div>
-        <div class="today-svc">${SVC_NAMES[b.service_type]||b.service_type}${b.duration_hours?' · '+b.duration_hours+'h':''} · ${b.guest_phone||''}</div>
+        <div class="today-svc">${SVC_NAMES[b.service_type]||b.service_type}${b.service_type==='equipment'?' · pick-up':''}${b.duration_hours?' · '+b.duration_hours+'h':''} · ${b.guest_phone||''}</div>
       </div>
       <span class="badge badge-${b.status||'confirmed'}">${b.status||'confirmed'}</span>
     </div>`).join('');

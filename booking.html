@@ -770,6 +770,14 @@ input[type=date]{color-scheme:dark}
         </div>
       </div>
 
+      <!-- Abholzeit: bis 2026-09-14 fragte das Formular nur Tage ab, und wer
+           fuer heute buchte, kam irgendwann - oder man musste nachfragen. -->
+      <div id="equip-pickup-section" style="display:none;margin-top:20px">
+        <label>Pick-up Time</label>
+        <div class="time-grid" id="equip-pickup-times" style="margin-top:10px"></div>
+        <div id="equip-pickup-none" style="display:none;font-size:13px;color:var(--red);margin-top:8px">No pick-up times left today — please choose a later start date.</div>
+      </div>
+
       <!-- Deposit notice -->
       <div style="background:rgba(230,57,70,.07);border:1px solid rgba(230,57,70,.3);border-radius:10px;padding:16px 18px;margin-top:20px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
@@ -1185,6 +1193,7 @@ let state = {
   duration: null,
   equipStart: null,
   equipEnd: null,
+  equipPickupTime: null,
   equipItems: [],
   participants: 2,
   cameraCount: 1,
@@ -1358,6 +1367,7 @@ function selectService(type, el) {
     state.equipItems = [];
     state.equipStart = null;
     state.equipEnd = null;
+    state.equipPickupTime = null;
     state.reelCount = null;
     state.reelAddonCount = 0;
     state.reelAddonPrice = 0;
@@ -2052,6 +2062,8 @@ function selectEquipDate(dateStr, el) {
     // Start fresh — pick start date
     state.equipStart = dateStr;
     state.equipEnd   = null;
+    state.equipPickupTime = null;
+    document.getElementById('equip-pickup-section').style.display = 'none';
     equipCal.pickingEnd = true;
     document.getElementById('equip-hint-text').textContent = 'Now click your return date';
     document.getElementById('equip-price-strip').style.display = 'none';
@@ -2067,8 +2079,45 @@ function selectEquipDate(dateStr, el) {
     document.getElementById('equip-hint-text').textContent =
       `${state.equipStart}  →  ${state.equipEnd} (click to change)`;
     calcEquipPrice();
+    renderEquipPickupTimes();
   }
   renderEquipCalendar();
+}
+
+// Abholzeit zu Oeffnungszeiten wie beim Studio (ALL_TIMES). Faellt der
+// Abholtag auf heute, sind vergangene und die laufende Stunde gesperrt.
+// Die Zeit landet in `start_time` - dieselbe Spalte, die bei Studio und
+// Podcast die Startzeit traegt; Equipment hatte dort bisher nichts.
+function renderEquipPickupTimes() {
+  const section = document.getElementById('equip-pickup-section');
+  const grid = document.getElementById('equip-pickup-times');
+  const keine = document.getElementById('equip-pickup-none');
+  section.style.display = '';
+  grid.innerHTML = '';
+  state.equipPickupTime = null;
+
+  const jetzt = new Date();
+  const heute = jetzt.getFullYear() + '-' + String(jetzt.getMonth() + 1).padStart(2, '0')
+    + '-' + String(jetzt.getDate()).padStart(2, '0');
+  let frei = 0;
+  ALL_TIMES.forEach(t => {
+    const slot = document.createElement('div');
+    slot.className = 'time-slot';
+    slot.textContent = t;
+    if (state.equipStart === heute && parseInt(t) <= jetzt.getHours()) {
+      slot.classList.add('booked');
+      slot.title = 'Already passed';
+    } else {
+      frei++;
+      slot.addEventListener('click', () => {
+        grid.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+        slot.classList.add('selected');
+        state.equipPickupTime = t;
+      });
+    }
+    grid.appendChild(slot);
+  });
+  keine.style.display = frei ? 'none' : '';
 }
 
 function toggleEquip(id, el) {
@@ -2150,6 +2199,7 @@ function validateStep2() {
     if (state.equipItems.length === 0) return alert('Please select at least one piece of equipment.');
     if (!state.equipStart) return alert('Please select a pick-up date.');
     if (!state.equipEnd)   return alert('Please select a return date.');
+    if (!state.equipPickupTime) return alert('Please select a pick-up time.');
     if (!document.getElementById('equip-terms').checked) return alert('Please accept the rental terms to continue.');
   }
   goStep(3);
@@ -2319,7 +2369,7 @@ function buildReview() {
     detailRows = `
       <div class="review-row"><span class="review-label">Service</span><span class="review-value">Equipment Rental</span></div>
       <div class="review-row"><span class="review-label">Equipment</span><span class="review-value">${state.equipItems.map(i => equipNames[i]).join(', ')}</span></div>
-      <div class="review-row"><span class="review-label">Pick-up</span><span class="review-value">${formatDate(state.equipStart)}</span></div>
+      <div class="review-row"><span class="review-label">Pick-up</span><span class="review-value">${formatDate(state.equipStart)}, ${state.equipPickupTime}</span></div>
       <div class="review-row"><span class="review-label">Return</span><span class="review-value">${formatDate(state.equipEnd)}</span></div>
       <div class="review-row"><span class="review-label">Rental Days</span><span class="review-value">${days} day${days > 1 ? 's' : ''}</span></div>
       <div class="review-total"><span class="label">Total${days >= EQUIP_EXTRA_DAY_FROM ? ' (extra days discounted)' : ''}</span><span class="amount">฿${state.totalPrice.toLocaleString()}</span></div>`;
@@ -2368,7 +2418,7 @@ function bookingPayload() {
     service_subtype:      state.service === 'drone' ? state.dronePackage : state.subtype,
     // Eine Anfrage hat noch kein Datum -- der Termin wird abgestimmt.
     booking_date:         (state.service === 'equipment' || istAnfrageDienst()) ? null : state.date,
-    start_time:           state.startTime,
+    start_time:           state.service === 'equipment' ? state.equipPickupTime : state.startTime,
     end_time:             state.endTime,
     duration_hours:       state.duration,
     equipment_start_date: state.equipStart || null,
@@ -2597,7 +2647,7 @@ function syntheticBookingFromState() {
     guest_phone: state.phone,
     service_type: state.service,
     booking_date: state.service !== 'equipment' ? state.date : null,
-    start_time: state.startTime,
+    start_time: state.service === 'equipment' ? state.equipPickupTime : state.startTime,
     end_time: state.endTime,
     duration_hours: state.duration,
     equipment_start_date: state.equipStart || null,
@@ -2776,7 +2826,8 @@ async function finalizeBooking(payload, existingBooking, skipEmail) {
     confRows += `<div class="review-row"><span class="review-label">Date</span><span class="review-value">${formatDate(state.date)}</span></div>`;
     confRows += `<div class="review-row"><span class="review-label">Time</span><span class="review-value">${state.startTime}${state.endTime ? ' – ' + state.endTime : ''}</span></div>`;
   } else {
-    confRows += `<div class="review-row"><span class="review-label">Dates</span><span class="review-value">${formatDate(state.equipStart)} – ${formatDate(state.equipEnd)}</span></div>`;
+    confRows += `<div class="review-row"><span class="review-label">Pick-up</span><span class="review-value">${formatDate(state.equipStart)}, ${state.equipPickupTime}</span></div>`;
+    confRows += `<div class="review-row"><span class="review-label">Return</span><span class="review-value">${formatDate(state.equipEnd)}</span></div>`;
     confRows += `<div class="review-row"><span class="review-label">Gear</span><span class="review-value">${state.equipItems.map(i => equipNames[i]).join(', ')}</span></div>`;
   }
   if (state.totalPrice) {
@@ -2871,7 +2922,7 @@ function buildCalendarLinks(booking) {
 
   let dtStart, dtEnd;
   if (booking.service_type === 'equipment') {
-    dtStart = (booking.equipment_start_date || '').replace(/-/g,'') + 'T090000';
+    dtStart = (booking.equipment_start_date || '').replace(/-/g,'') + 'T' + (booking.start_time ? booking.start_time.slice(0,5).replace(':','') + '00' : '090000');
     dtEnd   = (booking.equipment_end_date   || '').replace(/-/g,'') + 'T180000';
   } else {
     const d  = (booking.booking_date || '').replace(/-/g,'');
@@ -2970,7 +3021,8 @@ async function sendEmails(booking) {
   if (booking.service_type === 'equipment') {
     const s = (booking.equipment_start_date || '').replace(/-/g,'');
     const e = (booking.equipment_end_date   || '').replace(/-/g,'');
-    gcalDates = `${s}T090000/${e}T180000`;
+    const sh = booking.start_time ? booking.start_time.slice(0,5).replace(':','') + '00' : '090000';
+    gcalDates = `${s}T${sh}/${e}T180000`;
   } else {
     const d  = (booking.booking_date || '').replace(/-/g,'');
     const sh = booking.start_time ? booking.start_time.replace(':','') + '00' : '090000';
