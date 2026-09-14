@@ -89,8 +89,13 @@ export function nachricht(b: any): string {
     const dauer = b.duration_hours ? ` (${b.duration_hours} h)` : '';
     z.push(`📅 ${datum(b.booking_date)}${zeit ? ', ' + zeit : ''}${dauer}`);
   } else if (b.equipment_start_date) {
+    // Das Formular fragt Abhol- und Rueckgabetag ab, **keine Uhrzeit**; die
+    // Tage zaehlen beide mit. Gleicher Tag heisst: heute holen, heute zurueck.
     const tage = b.rental_days ? ` (${b.rental_days} day${b.rental_days == 1 ? '' : 's'})` : '';
-    z.push(`📅 ${datum(b.equipment_start_date)} – ${datum(b.equipment_end_date)}${tage}`);
+    const gleich = b.equipment_start_date === b.equipment_end_date;
+    z.push(`📅 Pick-up ${datum(b.equipment_start_date)}`);
+    z.push(`↩️ Return ${gleich ? 'same day' : datum(b.equipment_end_date)}${tage}`);
+    z.push('🕐 no pick-up time in the form — ask the customer');
   } else {
     z.push('📅 no date');
   }
