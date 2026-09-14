@@ -45,6 +45,13 @@ test('Anfrage: eigener Kopf, kein Bezahlt-Status', () => {
   assert.doesNotMatch(t, /PAID/);
 });
 
+test('Echte Buchung 14.09.: Pocket 3, ein Tag, Preis stimmt', () => {
+  const t = nachricht({ ...geraet, booking_status: 'paid', equipment_start_date: '2026-09-14',
+    equipment_end_date: '2026-09-14', rental_days: 1, equipment_items: ['pocket3'], total_price: 500 });
+  assert.match(t, /DJI Pocket 3 — 1 day × ฿500 = ฿500/);
+  assert.doesNotMatch(t, /⚠️/);
+});
+
 const leer = { booking_ref: 'RM-X', booking_status: 'paid', service_type: 'reel' };
 
 if (process.env.VORSCHAU) {
@@ -75,7 +82,9 @@ test('Equipment bar: Zeitraum, Geraete, Kaution, kein "paid"', () => {
   assert.match(t, /Pick-up Mon 21\.09\.2026/);
   assert.match(t, /Return Thu 24\.09\.2026 \(3 days\)/);
   assert.match(nachricht({ ...geraet, equipment_end_date: '2026-09-21', rental_days: 1 }), /Return same day \(1 day\)/);
-  assert.match(t, /DJI Neo, DJI Pocket 3/);
+  assert.match(t, /DJI Neo — 2 days × ฿700 \+ 1 extra day × ฿500 = ฿1,900/);
+  assert.match(t, /DJI Pocket 3 — 2 days × ฿500 \+ 1 extra day × ฿300 = ฿1,300/);
+  assert.match(t, /price list gives ฿3,200, booking says ฿2,400/); // Beispielpreis im Test passt absichtlich nicht
   assert.match(t, /refundable deposit/);
   assert.doesNotMatch(t, /✉️/); // keine leere Mailzeile
 });

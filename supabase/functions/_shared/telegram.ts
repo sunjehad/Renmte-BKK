@@ -2,6 +2,8 @@
 // Aufrufer: notify-booking-webhook. Getestet in telegram.test.ts.
 // Eingabe ist die ganze `bookings`-Zeile, wie der Trigger sie schickt.
 
+import { GERAETE_TAGESSATZ, GERAETE_ZUSATZTAG, GERAETE_ZUSATZTAG_AB } from './preise.ts';
+
 const svcLabel: Record<string, string> = {
   studio_rental: 'Photo Studio Rental',
   podcast: 'We Cut Your Podcast',
@@ -66,6 +68,40 @@ function paket(b: any): string {
   return s.replace(/_/g, ' ');
 }
 
+// Je Geraet eine Zeile mit Tagessatz und Summe, gerechnet aus `preise.ts` -
+// derselben Quelle, die den Betrag vor der Zahlung prueft. Die ersten beiden
+// Tage kosten den vollen Satz, jeder weitere den Zusatzsatz.
+// Weicht die Summe vom gespeicherten `total_price` ab, steht das dabei statt
+// still eine zweite Wahrheit zu zeigen.
+function geraetezeilen(geraete: string[], tage: number, gebucht: number): string[] {
+  if (!geraete.length) return [];
+  if (!tage) return [`🎥 ${geraete.map((g) => equipNames[g] || g).join(', ')}`];
+  const voll = Math.min(tage, GERAETE_ZUSATZTAG_AB - 1);
+  const zusatz = tage - voll;
+  const zeilen: string[] = [];
+  let summe = 0;
+  for (const g of geraete) {
+    const name = equipNames[g] || g;
+    const satz = GERAETE_TAGESSATZ[g], extra = GERAETE_ZUSATZTAG[g];
+    if (satz === undefined || extra === undefined) {
+      zeilen.push(`🎥 ${name} — no price on file`);
+      summe = NaN;
+      continue;
+    }
+    const betrag = satz * voll + extra * zusatz;
+    summe += betrag;
+    const tg = (n: number) => `${n} day${n === 1 ? '' : 's'}`;
+    const rechnung = zusatz > 0
+      ? `${tg(voll)} × ${baht(satz)} + ${zusatz} extra day${zusatz === 1 ? '' : 's'} × ${baht(extra)}`
+      : `${tg(voll)} × ${baht(satz)}`;
+    zeilen.push(`🎥 ${name} — ${rechnung} = ${baht(betrag)}`);
+  }
+  if (gebucht && Number.isFinite(summe) && summe !== gebucht) {
+    zeilen.push(`⚠️ price list gives ${baht(summe)}, booking says ${baht(gebucht)}`);
+  }
+  return zeilen;
+}
+
 // deno-lint-ignore no-explicit-any
 export function nachricht(b: any): string {
   const z: string[] = [];
@@ -76,10 +112,8 @@ export function nachricht(b: any): string {
   // WAS
   const detail = paket(b);
   z.push(`📋 ${svcLabel[b.service_type] || b.service_type}${detail ? ' — ' + detail : ''}`);
-  const geraete = Array.isArray(b.equipment_items) ? b.equipment_items : [];
-  if (geraete.length) {
-    z.push(`🎥 ${geraete.map((g: string) => equipNames[g] || g).join(', ')}`);
-  }
+  const geraete: string[] = Array.isArray(b.equipment_items) ? b.equipment_items : [];
+  z.push(...geraetezeilen(geraete, Number(b.rental_days) || 0, Number(b.total_price) || 0));
   if (b.participant_count) z.push(`👥 ${b.participant_count} people`);
 
   // WANN — von bis
