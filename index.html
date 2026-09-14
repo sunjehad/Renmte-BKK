@@ -93,11 +93,13 @@ section{padding:100px 40px}
 
 /* ── SERVICES ── */
 #services{background:var(--bg)}
-.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
-/* Vier Karten in drei Spalten lassen die vierte allein links stehen.
-   Mittig gesetzt wirkt sie gewollt statt vergessen. Gilt nur ab der
-   dreispaltigen Breite -- darunter ist das Raster einspaltig. */
-.services-grid > .service-card:nth-child(4){grid-column:2}
+.services-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+/* Fuenf Karten, drei je Zeile: sechs Halbspalten, jede Karte nimmt zwei.
+   Die zweite Zeile (Karte 4 und 5) beginnt bei Halbspalte 2 und sitzt damit
+   mittig statt links. Gilt nur ab der dreispaltigen Breite -- darunter ist
+   das Raster einspaltig. */
+.services-grid > .service-card{grid-column:span 2}
+.services-grid > .service-card:nth-child(4){grid-column:2 / span 2}
 .service-card{background:var(--bg-card);padding:48px 36px;position:relative;overflow:hidden;transition:background .3s var(--ease);cursor:pointer}
 .service-card:hover{background:var(--bg-elevated)}
 .service-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease)}
@@ -264,6 +266,7 @@ footer{background:var(--bg-card);border-top:1px solid var(--border);padding:48px
 /* ── RESPONSIVE ── */
 @media(max-width:1024px){
   .services-grid{grid-template-columns:1fr}
+  .services-grid > .service-card,
   .services-grid > .service-card:nth-child(4){grid-column:auto}
   .pricing-grid{grid-template-columns:1fr}
   .proof-grid{grid-template-columns:1fr}
@@ -683,6 +686,30 @@ section[id]{scroll-margin-top:84px}
       </div>
       <a href="booking.html?service=drone" class="service-cta">
         <span data-i18n="s4_cta">Get a Quote</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
+    <!-- SERVICE 5: On-location filming (auf Anfrage, seit 2026-09-14).
+         Kein Preis und kein Buchungsweg: die Anfrage laeuft ueber
+         Instagram-DM wie der Kontakt-Link, booking.html bleibt unberuehrt. -->
+    <div class="service-card reveal reveal-delay-1">
+      <div class="service-num">05</div>
+      <div class="service-images single">
+        <img src="images/dji-pocket3.png" alt="DJI Osmo Pocket 3 used by the RentMe crew for on-location filming">
+      </div>
+      <div class="service-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      </div>
+      <div class="service-for" data-i18n="s5_for">For artists, vloggers, brands & event organisers</div>
+      <h3 class="service-title" data-i18n="s5_title">ON-LOCATION FILMING</h3>
+      <p class="service-desc" data-i18n="s5_desc">We bring the crew and the cameras to you — a music video, a vlog, an event or a brand shoot, on the ground and from the air. Add editing and you get a finished film: cut, colour graded, with music and titles. Tell us what you're planning and we'll put together a quote.</p>
+      <div class="service-benefit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span data-i18n="s5_benefit">Your shoot, our crew — wherever it happens.</span>
+      </div>
+      <a href="https://www.instagram.com/bangkok_rentme" target="_blank" rel="noopener" class="service-cta">
+        <span data-i18n="s5_cta">Price on request</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
@@ -1360,6 +1387,9 @@ const translations = {
     s4_for:"For property agents, venues, event organisers & brands", s4_title:"AERIAL / DRONE FILMING",
     s4_desc:"You don't fly — we do. We come to your building, venue or event, film it from the air, and hand you the footage. Add editing and you get a finished film instead: cut, colour graded, with music and titles. We check the airspace rules for your location before we quote, so you don't have to.",
     s4_benefit:"A finished aerial film of your property — you just pick the day.", s4_cta:"Get a Quote",
+    s5_for:"For artists, vloggers, brands & event organisers", s5_title:"ON-LOCATION FILMING",
+    s5_desc:"We bring the crew and the cameras to you — a music video, a vlog, an event or a brand shoot, on the ground and from the air. Add editing and you get a finished film: cut, colour graded, with music and titles. Tell us what you're planning and we'll put together a quote.",
+    s5_benefit:"Your shoot, our crew — wherever it happens.", s5_cta:"Price on request",
     r1_text:'"The podcast studio is insane for the price. The ON AIR setup, the lighting, the mics — everything was ready when I arrived. Recorded two episodes in one session."',
     r1_role:"Podcast Host, Bangkok",
     r2_text:'"Rented the DJI for a real estate shoot in Pattaya. Everything was charged, calibrated, and came with a quick tutorial. Saved me thousands vs. buying. Will definitely rent again."',
@@ -1470,6 +1500,9 @@ const translations = {
     s4_for:"Pour agents immobiliers, lieux, organisateurs d'événements & marques", s4_title:"TOURNAGE AÉRIEN / DRONE",
     s4_desc:"Vous ne pilotez pas — c'est nous. Nous venons sur votre bâtiment, votre lieu ou votre événement, filmons depuis les airs et vous remettons les images. Ajoutez le montage et vous obtenez un film fini : monté, étalonné, avec musique et titres. Nous vérifions les règles de l'espace aérien pour votre site avant de vous faire une offre.",
     s4_benefit:"Un film aérien fini de votre bien — vous choisissez seulement le jour.", s4_cta:"Demander un devis",
+    s5_for:"Pour artistes, vloggeurs, marques & organisateurs d'événements", s5_title:"TOURNAGE SUR PLACE",
+    s5_desc:"Nous venons avec l'équipe et les caméras — clip musical, vlog, événement ou tournage de marque, au sol et depuis les airs. Ajoutez le montage et vous obtenez un film fini : monté, étalonné, avec musique et titres. Dites-nous ce que vous préparez et nous vous ferons une offre.",
+    s5_benefit:"Votre tournage, notre équipe — où que ce soit.", s5_cta:"Prix sur demande",
     r1_text:'"Le studio podcast est incroyable pour le prix. Le setup ON AIR, l\'éclairage, les micros — tout était prêt à mon arrivée. Deux épisodes enregistrés en une seule session."', r1_role:"Podcasteur, Bangkok",
     r2_text:'"Loué le DJI pour un shooting immobilier à Pattaya. Tout était chargé, calibré, avec un tutoriel rapide. Économisé des milliers vs l\'achat. Je re-louerai."', r2_role:"Photographe immobilier",
     r3_text:'"Première fois dans un studio pro et ils ont tout rendu si simple. Plusieurs couleurs de fond, bons éclairages, timing flexible. Mes photos de marque ressemblent enfin à de vraies photos de marque."', r3_role:"Fondatrice de marque mode",
@@ -1576,6 +1609,9 @@ const translations = {
     s4_for:"Für Makler, Locations, Eventveranstalter & Marken", s4_title:"LUFTAUFNAHMEN / DROHNENFLUG",
     s4_desc:"Sie fliegen nicht — wir. Wir kommen zu Ihrem Gebäude, Ihrer Location oder Ihrem Event, filmen aus der Luft und übergeben Ihnen das Material. Mit Schnitt wird daraus ein fertiger Film: geschnitten, farbkorrigiert, mit Musik und Titeln. Die Luftraumregeln für Ihren Standort prüfen wir vor dem Angebot.",
     s4_benefit:"Ein fertiger Luftfilm Ihrer Immobilie — Sie wählen nur den Tag.", s4_cta:"Angebot anfordern",
+    s5_for:"Für Künstler, Vlogger, Marken & Eventveranstalter", s5_title:"DREH VOR ORT",
+    s5_desc:"Wir kommen mit Crew und Kameras zu Ihnen — Musikvideo, Vlog, Event oder Markendreh, am Boden und aus der Luft. Mit Schnitt wird daraus ein fertiger Film: geschnitten, farbkorrigiert, mit Musik und Titeln. Erzählen Sie uns, was Sie planen, und wir erstellen ein Angebot.",
+    s5_benefit:"Ihr Dreh, unsere Crew — wo auch immer.", s5_cta:"Preis auf Anfrage",
     r1_text:'"Das Podcast-Studio ist unglaublich für den Preis. Das ON AIR-Setup, das Licht, die Mikros — alles war bereit als ich ankam. Zwei Folgen in einer Session aufgenommen."', r1_role:"Podcast-Host, Bangkok",
     r2_text:'"Die DJI für ein Immobilien-Shooting in Pattaya gemietet. Alles war geladen, kalibriert und mit Kurzanleitung. Tausende gespart vs. Kauf. Komme definitiv wieder."', r2_role:"Immobilienfotograf",
     r3_text:'"Erstes Mal in einem Profi-Studio und sie haben alles so einfach gemacht. Mehrere Hintergrundfarben, tolle Lichter, flexible Zeiten. Meine Markenfotos sehen endlich wie echte Markenfotos aus."', r3_role:"Mode-Marken-Gründerin",
@@ -1682,6 +1718,9 @@ const translations = {
     s4_for:"Для риелторов, площадок, организаторов мероприятий и брендов", s4_title:"АЭРОСЪЁМКА С ДРОНА",
     s4_desc:"Летаете не вы — летаем мы. Мы приезжаем к вашему зданию, площадке или мероприятию, снимаем с воздуха и передаём вам материал. Добавьте монтаж — и получите готовый фильм: смонтированный, с цветокоррекцией, музыкой и титрами. Правила воздушного пространства для вашего объекта мы проверяем до расчёта.",
     s4_benefit:"Готовый аэрофильм вашего объекта — вы выбираете только день.", s4_cta:"Запросить расчёт",
+    s5_for:"Для артистов, блогеров, брендов и организаторов мероприятий", s5_title:"СЪЁМКА НА ВЫЕЗДЕ",
+    s5_desc:"Мы приезжаем к вам с командой и камерами — клип, влог, мероприятие или съёмка для бренда, на земле и с воздуха. Добавьте монтаж — и получите готовый фильм: смонтированный, с цветокоррекцией, музыкой и титрами. Расскажите, что вы планируете, и мы подготовим расчёт.",
+    s5_benefit:"Ваша съёмка, наша команда — где угодно.", s5_cta:"Цена по запросу",
     r1_text:'"Подкаст-студия невероятная за такую цену. Сетап ON AIR, свет, микрофоны — всё было готово, когда я пришёл. Записал два эпизода за одну сессию."', r1_role:"Подкастер, Бангкок",
     r2_text:'"Арендовал DJI для съёмки недвижимости в Паттайе. Всё заряжено, откалибровано, с кратким инструктажем. Сэкономил тысячи по сравнению с покупкой."', r2_role:"Фотограф недвижимости",
     r3_text:'"Первый раз в профессиональной студии и они сделали всё таким простым. Несколько цветов фонов, хороший свет, гибкое время. Мои фото бренда наконец выглядят как настоящие."', r3_role:"Основательница модного бренда",
@@ -1788,6 +1827,9 @@ const translations = {
     s4_for:"สำหรับนายหน้าอสังหาฯ สถานที่จัดงาน ผู้จัดอีเวนต์ และแบรนด์", s4_title:"ถ่ายทำทางอากาศ / โดรน",
     s4_desc:"คุณไม่ต้องบินเอง — เราบินให้ เราไปที่อาคาร สถานที่ หรืออีเวนต์ของคุณ ถ่ายจากมุมสูง แล้วส่งไฟล์ให้คุณ เพิ่มบริการตัดต่อ คุณจะได้หนังที่เสร็จสมบูรณ์ ทั้งตัดต่อ ปรับสี ใส่เพลงและตัวอักษร เราตรวจสอบกฎการบินของพื้นที่ให้ก่อนเสนอราคา",
     s4_benefit:"หนังทางอากาศที่เสร็จสมบูรณ์ของอสังหาฯ คุณ — คุณแค่เลือกวัน", s4_cta:"ขอใบเสนอราคา",
+    s5_for:"สำหรับศิลปิน วล็อกเกอร์ แบรนด์ และผู้จัดอีเวนต์", s5_title:"ถ่ายทำนอกสถานที่",
+    s5_desc:"เราพาทีมงานและกล้องไปหาคุณ — มิวสิกวิดีโอ วล็อก อีเวนต์ หรืองานถ่ายของแบรนด์ ทั้งภาคพื้นดินและมุมสูง เพิ่มบริการตัดต่อ คุณจะได้หนังที่เสร็จสมบูรณ์ ทั้งตัดต่อ ปรับสี ใส่เพลงและตัวอักษร บอกเราว่าคุณวางแผนอะไรไว้ แล้วเราจะเสนอราคาให้",
+    s5_benefit:"งานถ่ายของคุณ ทีมงานของเรา — ที่ไหนก็ได้", s5_cta:"ราคาตามตกลง",
     r1_text:'"สตูดิโอพอดแคสต์น่าทึ่งมากสำหรับราคานี้ เซตอัป ON AIR แสง ไมค์ — ทุกอย่างพร้อมตอนฉันมาถึง บันทึกได้ 2 ตอนในเซสชันเดียว"', r1_role:"พอดแคสเตอร์ กรุงเทพฯ",
     r2_text:'"เช่า DJI สำหรับถ่ายอสังหาฯ ที่พัทยา ทุกอย่างชาร์จแล้ว ปรับเทียบแล้ว มีคู่มือสั้นๆ ประหยัดเงินได้มากเมื่อเทียบกับการซื้อ จะมาเช่าอีกแน่นอน"', r2_role:"ช่างภาพอสังหาฯ",
     r3_text:'"ครั้งแรกที่ใช้สตูดิโอมืออาชีพและพวกเขาทำให้มันง่ายมาก ฉากหลังหลายสี ไฟดี เวลาที่ยืดหยุ่น รูปภาพแบรนด์ดูเป็นมืออาชีพแล้วในที่สุด"', r3_role:"ผู้ก่อตั้งแบรนด์แฟชั่น",
