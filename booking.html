@@ -2866,7 +2866,7 @@ function buildCalendarLinks(booking) {
 
   const name    = booking.guest_name || `${state.firstName} ${state.lastName}`;
   const title   = encodeURIComponent(`${svcLabel[booking.service_type] || booking.service_type} (${name})`);
-  const loc     = encodeURIComponent('51 Kamphaeng Phet 7 Rd, Makkasan, Bangkok 10400');
+  const loc     = encodeURIComponent('600/9 B Square Rama 9 – Mengjai, Wang Thonglang, Bangkok 10310');
   const details = encodeURIComponent(`Ref: ${booking.booking_ref}\nPhone: ${booking.guest_phone || state.phone}\nEmail: ${booking.guest_email || state.email}`);
 
   let dtStart, dtEnd;
@@ -2909,7 +2909,7 @@ function generateICS(booking, dtStart, dtEnd, summary) {
       'DTSTART:' + dtStart,
       'DTEND:' + dtEnd,
       'DESCRIPTION:' + desc,
-      'LOCATION:51 Kamphaeng Phet 7 Rd\\, Makkasan\\, Bangkok 10400',
+      'LOCATION:600/9 B Square Rama 9 – Mengjai\\, Wang Thonglang\\, Bangkok 10310',
       'BEGIN:VALARM',
       'TRIGGER:-PT24H',
       'ACTION:DISPLAY',
@@ -2965,7 +2965,7 @@ async function sendEmails(booking) {
   // Build Google Calendar link for admin
   const gcalTitle   = encodeURIComponent(`${svcLabel[booking.service_type] || booking.service_type} – ${customerName}`);
   const gcalDetails = encodeURIComponent(`Ref: ${booking.booking_ref}\nPhone: ${customerPhone}\nEmail: ${customerEmail}`);
-  const gcalLoc     = encodeURIComponent('51 Kamphaeng Phet 7 Rd, Makkasan, Bangkok 10400');
+  const gcalLoc     = encodeURIComponent('600/9 B Square Rama 9 – Mengjai, Wang Thonglang, Bangkok 10310');
   let gcalDates;
   if (booking.service_type === 'equipment') {
     const s = (booking.equipment_start_date || '').replace(/-/g,'');
@@ -3011,10 +3011,10 @@ async function sendEmails(booking) {
     ort_titel:      ohneTermin ? 'HOW IT WORKS' : 'LOCATION',
     ort_zeile1:     ohneTermin
                       ? 'No studio visit needed — everything runs through Dropbox.'
-                      : '51 Kamphaeng Phet 7 Rd, Makkasan, Ratchathewi, Bangkok 10400',
+                      : '600/9 B Square Rama 9 – Mengjai, Wang Thonglang, Bangkok 10310',
     ort_zeile2:     ohneTermin
                       ? 'Send your footage, we send the finished cut back.'
-                      : '5 min from Asoke BTS · Phetchaburi MRT',
+                      : 'Taxi or Grab recommended — nearest MRT about 2–3 km',
     source:         booking.source || 'website',
     gcal_link:      ohneTermin ? '' : gcalLink
   };

@@ -1,7 +1,7 @@
 # RentMe Bangkok — Buchungs-Website
 
 Website und Buchungsstrecke für **Rent Me Bangkok** — Fotostudio,
-Podcast-Produktion und DJI-Verleih im Bereich Asoke/Makkasan.
+Podcast-Produktion und DJI-Verleih in Rama 9 (B Square Rama 9 – Mengjai, Wang Thonglang); bis September 2026 in Makkasan.
 
 **Vier Dienste:** Fotostudio, Podcast-Setup, DJI-Geräteausleihe und
 Drohnenflug. Die ersten drei werden gebucht und bezahlt; der Drohnenflug ist

@@ -94,7 +94,7 @@ If there is anything I can do, just reply to this email.
 Sorry again, and thank you for your understanding.
 
 RentMe Bangkok
-51 Kamphaeng Phet 7 Rd, Makkasan, Ratchathewi, Bangkok 10400
+600/9 B Square Rama 9 – Mengjai, Wang Thonglang, Bangkok 10310
 ```
 
 ## Die Kopie an uns

@@ -44,9 +44,7 @@ window.MEDIA = 'https://nghsyxwhczvwaorssgoh.supabase.co/storage/v1/object/publi
           Sechs Stueck, je ein Dienst. Kundenmaterial bleibt dort draussen,
           solange Jays Freigabe fehlt.                                       */
 window.REELS = [
-  {id:'n02', kind:'info', lab:'Where we are',
-   t:'Makkasan.',
-   d:'Makkasan Station area — minutes from Asoke BTS and Phetchaburi MRT.'},
+  /* n02 "Makkasan." am 2026-09-14 entfernt: alte Adresse steht im Bild (Umzug nach Rama 9). */
   {id:'n07', kind:'info', lab:'First time?',
    t:'“I’ve never recorded a podcast.”',
    d:'Neither had most of the people who sat here first. You just talk, we handle the rest.'},
@@ -104,7 +102,7 @@ window.REELS = [
    Kacheln erscheint gar nicht erst. */
 window.BAENDER = [
   {k:'studio', h:'The Podcast Studio',
-   p:'One to three cameras, lighting set, sound at broadcast level — filmed in our own room in Makkasan.'},
+   p:'One to three cameras, lighting set, sound at broadcast level — filmed in our own studio in Bangkok.'},
   {k:'schnitt', h:'Edit & Delivery',
    p:'What happens after the shoot: colour, sound, titles, and both formats from the same session.'},
   {k:'foto', h:'Photo & Campaign',

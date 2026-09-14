@@ -1,5 +1,5 @@
 {
- "_": "Andys Auswahl vom 2026-08-20, getroffen im Auswahl-Artefakt ueber alle 63 fertigen Clips. Diese Datei ist die Quelle: tools/reels-web-fassung.py erzeugt daraus images/work/, work-media.js listet dieselben ids.",
+ "_": "Andys Auswahl vom 2026-08-20, getroffen im Auswahl-Artefakt ueber alle 63 fertigen Clips. Diese Datei ist die Quelle: tools/reels-web-fassung.py erzeugt daraus images/work/, work-media.js listet dieselben ids. 2026-09-14: n02 (\"Makkasan.\", alte Adresse im Bild) nach dem Umzug entfernt.",
  "_warnungen": {
   "preis": "Traegt Preise im Bild mit Verfallsdatum 31. August (docs/todo.md T-13).",
   "kunde": "Kundenmaterial — nur mit ausdruecklicher Freigabe des Kunden."
@@ -8,7 +8,7 @@
   {
    "k": "studio",
    "h": "The Podcast Studio",
-   "p": "One to three cameras, lighting set, sound at broadcast level — filmed in our own room in Makkasan."
+   "p": "One to three cameras, lighting set, sound at broadcast level — filmed in our own studio in Bangkok."
   },
   {
    "k": "schnitt",
@@ -47,15 +47,6 @@
   }
  ],
  "reels": [
-  {
-   "id": "n02",
-   "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-inhalt-2026-08-09/rentme-n02.mp4",
-   "gruppe": "info",
-   "hook": "Makkasan.",
-   "notiz": "09.08. · Inhalts-Staffel",
-   "preis": false,
-   "kunde": false
-  },
   {
    "id": "n07",
    "quelle": "~/Dropbox/Video aller Projekte/rentme/fertig/reels-inhalt-2026-08-09/rentme-n07.mp4",
