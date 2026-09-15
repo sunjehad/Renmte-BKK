@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equipment Rental Terms — Rent Me Bangkok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="vertrag.js"></script>
+<style>
+body{margin:0;background:#e9e9ee;font-family:Inter,Arial,sans-serif}
+.blatt{margin:24px auto 40px;max-width:800px;box-shadow:0 2px 20px rgba(0,0,0,.12)}
+@media (max-width:600px){.blatt{margin:0}}
+</style>
+</head>
+<body>
+<div class="blatt" id="blatt"></div>
+<script>
+// Die Bedingungen ohne Buchung -- verlinkt am Haken "agree to the rental
+// terms". Gleicher Text wie im Vertrag, aus derselben Quelle (vertrag.js).
+document.head.insertAdjacentHTML('beforeend', '<style>' + RentMeVertrag.CSS + '</style>');
+const F = RentMeVertrag.FIRMA;
+document.getElementById('blatt').innerHTML = `
+<article class="rv">
+  <header class="rv-kopf">
+    <div class="rv-logo">RENT<span>ME</span> BANGKOK</div>
+    <div class="rv-firma">${F.adresse}<br>${F.email} · Instagram ${F.instagram}</div>
+  </header>
+  <h1>Equipment Rental Terms</h1>
+  <div class="rv-meta">Version ${RentMeVertrag.VERSION} · These terms are part of the rental agreement you sign at pick-up.</div>
+  <h2>Terms and conditions</h2>
+  ${RentMeVertrag.bedingungenHtml(RentMeVertrag.VERSION, true)}
+</article>`;
+</script>
+</body>
+</html>

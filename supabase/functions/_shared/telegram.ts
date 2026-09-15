@@ -129,7 +129,9 @@ export function nachricht(b: any): string {
     const gleich = b.equipment_start_date === b.equipment_end_date;
     const abholung = uhr(b.start_time);
     z.push(`📅 Pick-up ${datum(b.equipment_start_date)}${abholung ? ', ' + abholung : ''}`);
-    z.push(`↩️ Return ${gleich ? 'same day' : datum(b.equipment_end_date)}${tage}`);
+    // Seit 15.09.2026 fragt das Formular auch die Rueckgabezeit ab (`end_time`).
+    const rueckgabe = uhr(b.end_time);
+    z.push(`↩️ Return ${gleich ? 'same day' : datum(b.equipment_end_date)}${rueckgabe ? ', by ' + rueckgabe : ''}${tage}`);
     // Buchungen vor dem 14.09.2026 haben keine Abholzeit.
     if (!abholung) z.push('🕐 no pick-up time given — ask the customer');
   } else {

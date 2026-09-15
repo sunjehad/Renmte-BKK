@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Rental Agreement — Rent Me Bangkok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="vertrag.js"></script>
+<style>
+body{margin:0;background:#e9e9ee;font-family:Inter,Arial,sans-serif}
+.leiste{position:sticky;top:0;background:#070709;color:#f5f5f5;padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;z-index:5}
+.leiste b{font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;letter-spacing:.05em;font-weight:400}
+.leiste b span{color:#e63946}
+.leiste button{background:#e63946;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer}
+.hinweis{max-width:800px;margin:16px auto 0;padding:0 16px;font-size:13px;color:#333}
+.blatt{margin:16px auto 40px;max-width:800px;box-shadow:0 2px 20px rgba(0,0,0,.12)}
+.fehler{max-width:560px;margin:60px auto;padding:24px;background:#fff;border-radius:12px;font-size:14px}
+@media print{body{background:#fff}.leiste,.hinweis{display:none}.blatt{box-shadow:none;margin:0}}
+</style>
+</head>
+<body>
+<div class="leiste">
+  <b>RENT<span>ME</span> · RENTAL AGREEMENT</b>
+  <button onclick="window.print()">Save as PDF / Print</button>
+</div>
+<div class="hinweis" id="hinweis"></div>
+<div class="blatt" id="blatt"></div>
+
+<script>
+// Drei Wege zum Vertrag:
+//   #d=<base64>   aus der Buchungsbestaetigung -- die Buchungsfelder stehen im
+//                 Fragment, das nie an einen Server geht. Ungezeichnet.
+//   ?id=<uuid>    aus dem Admin -- liest Buchung und Unterschrift mit der
+//                 Admin-Sitzung (RLS: nur Admins sehen rental_contracts).
+//   ?lokal=1      aus dem Admin, wenn das Speichern scheiterte (z. B. Tabelle
+//                 noch nicht angelegt) -- Daten aus sessionStorage, damit der
+//                 unterschriebene Vertrag trotzdem gedruckt werden kann.
+document.head.insertAdjacentHTML('beforeend', '<style>' + RentMeVertrag.CSS + '</style>');
+const blatt = document.getElementById('blatt');
+const hinweis = document.getElementById('hinweis');
+
+function zeige(b, v) {
+  blatt.innerHTML = RentMeVertrag.vertragHtml(b, v);
+  if (b.booking_ref) document.title = 'Rental Agreement ' + b.booking_ref + ' — Rent Me Bangkok';
+}
+function fehler(text) {
+  blatt.className = '';
+  blatt.innerHTML = '<div class="fehler">' + RentMeVertrag.esc(text) + '</div>';
+}
+
+(async function () {
+  const params = new URLSearchParams(location.search);
+  const frag = new URLSearchParams(location.hash.slice(1));
+
+  if (frag.get('d')) {
+    try {
+      const json = decodeURIComponent(escape(atob(frag.get('d').replace(/-/g, '+').replace(/_/g, '/'))));
+      zeige(JSON.parse(json), null);
+      hinweis.textContent = 'This is your rental agreement. Please bring your passport or Thai ID card — we sign it together at pick-up.';
+    } catch (e) {
+      fehler('This link is incomplete. Please use the button on your booking confirmation again.');
+    }
+    return;
+  }
+
+  if (params.get('lokal')) {
+    try {
+      const { b, v } = JSON.parse(sessionStorage.getItem('rentme_vertrag_lokal'));
+      zeige(b, v);
+      hinweis.textContent = '⚠ Not saved online — save this as PDF now.';
+    } catch (e) {
+      fehler('No local contract found in this browser tab.');
+    }
+    return;
+  }
+
+  const id = params.get('id');
+  if (!id) return fehler('No booking given.');
+  const sb = supabase.createClient(
+    'https://nghsyxwhczvwaorssgoh.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5naHN5eHdoY3p2d2FvcnNzZ29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNDA3NDIsImV4cCI6MjA5NzYxNjc0Mn0.3EV00ggHV5domLBbJpTrdIiWatOyhNpFVJo42FqppPk'
+  );
+  const { data: b, error } = await sb.from('bookings').select('*').eq('id', id).maybeSingle();
+  if (error || !b) return fehler('Booking not found. Log in to the admin page first.');
+  const { data: v, error: vErr } = await sb.from('rental_contracts').select('data').eq('booking_id', id).maybeSingle();
+  zeige(b, v ? v.data : null);
+  if (vErr) hinweis.textContent = 'Signed contracts cannot be loaded yet (database table missing) — showing the unsigned agreement.';
+})();
+</script>
+</body>
+</html>

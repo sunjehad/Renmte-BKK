@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="vertrag.js"></script>
 <style>
 :root{
   --bg:#070709;--bg2:#0f0f12;--bg3:#17171c;
@@ -182,6 +183,15 @@ tr.neu td:first-child::before{content:'NEU';position:absolute;left:2px;top:50%;t
 
 /* ── MSG ── */
 .msg{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px}
+/* Mietvertrag (seit 2026-09-15) */
+.action-btn.vertrag{border-color:rgba(245,158,11,.45);color:#fbbf24}
+.action-btn.vertrag.signiert{border-color:rgba(34,197,94,.45);color:#4ade80}
+.sign-pad{width:100%;height:150px;background:#fff;border-radius:8px;touch-action:none;display:block;cursor:crosshair}
+.sign-kopf{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sign-kopf button{font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:3px 8px}
+#contract-modal .form-group{min-width:0}
+#contract-modal input[type=file]{max-width:100%;font-size:12px}
+.foto-vorschau{max-width:100%;max-height:140px;border-radius:6px;margin-top:8px;display:none}
 .msg.error{background:rgba(230,57,70,.1);border:1px solid var(--border-red);color:#ff6b6b}
 .msg.success{background:rgba(37,99,235,.1);border:1px solid var(--border-blue);color:var(--blue-l)}
 
@@ -634,6 +644,64 @@ tr.neu td:first-child::before{content:'NEU';position:absolute;left:2px;top:50%;t
   </div>
 </div>
 
+<!-- ═══ CONTRACT MODAL (Mietvertrag bei der Abholung, seit 2026-09-15) ═══ -->
+<div class="modal-overlay" id="contract-modal">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <div class="modal-title">RENTAL AGREEMENT</div>
+      <div class="modal-close" onclick="closeModal('contract-modal')">×</div>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ct-id">
+      <div id="ct-summary" style="background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.25);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;line-height:1.7"></div>
+      <div class="msg" id="ct-msg" style="display:none"></div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>ID Document</label>
+          <select id="ct-id-art"><option>Passport</option><option>Thai ID card</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label>ID Number</label><input type="text" id="ct-id-nr" placeholder="as on the document"></div>
+      </div>
+      <div id="ct-serien"></div>
+      <div class="form-group"><label>Accessories / Condition</label><textarea id="ct-zustand" rows="2" placeholder="e.g. case, USB-C cable, 2 batteries — small scratch on lid"></textarea></div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Photo of ID</label>
+          <input type="file" id="ct-foto-ausweis" accept="image/*" capture="environment" onchange="vertragFoto(this,'ct-vorschau-ausweis')">
+          <img id="ct-vorschau-ausweis" class="foto-vorschau" alt="">
+        </div>
+        <div class="form-group">
+          <label>Photo of Renter</label>
+          <input type="file" id="ct-foto-kunde" accept="image/*" capture="user" onchange="vertragFoto(this,'ct-vorschau-kunde')">
+          <img id="ct-vorschau-kunde" class="foto-vorschau" alt="">
+        </div>
+      </div>
+
+      <label style="display:flex;gap:10px;align-items:center;font-size:13px;margin-bottom:16px;cursor:pointer">
+        <input type="checkbox" id="ct-kaution" style="width:16px;height:16px;accent-color:var(--blue)"> Deposit ฿1,000 received in cash
+      </label>
+
+      <div class="form-group">
+        <div class="sign-kopf"><label style="margin:0">Renter Signature</label><button type="button" onclick="padLeeren('ct-pad-kunde')">Clear</button></div>
+        <canvas class="sign-pad" id="ct-pad-kunde"></canvas>
+      </div>
+      <div class="form-group"><label>Staff Name</label><input type="text" id="ct-personal" placeholder="who hands over the equipment"></div>
+      <div class="form-group">
+        <div class="sign-kopf"><label style="margin:0">Staff Signature</label><button type="button" onclick="padLeeren('ct-pad-personal')">Clear</button></div>
+        <canvas class="sign-pad" id="ct-pad-personal"></canvas>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-primary" id="ct-save" onclick="vertragSpeichern()">Sign &amp; Save</button>
+        <a class="btn-ghost" id="ct-vorschau" href="#" target="_blank" rel="noopener" style="text-decoration:none">View agreement</a>
+        <button class="btn-ghost" onclick="closeModal('contract-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ NOTE MODAL ═══ -->
 <div class="modal-overlay" id="note-modal">
   <div class="modal">
@@ -866,6 +934,7 @@ async function loadAllBookings() {
   if (filterAktiv) filterBookings();
   else { filteredBookings = [...allBookings]; renderTable(); }
 
+  await ladeVertraege();
   renderStats();
   renderWatch();
   renderTodayList();
@@ -1007,8 +1076,12 @@ function renderTodayList() {
   const today = new Date().toISOString().split('T')[0];
   // Equipment zaehlt am Abholtag mit; seit 2026-09-14 traegt es in
   // start_time die Abholzeit.
-  const items = allBookings.filter(b => (b.booking_date === today || b.equipment_start_date === today) && b.status !== 'cancelled')
-    .sort((a,b) => (a.start_time||'').localeCompare(b.start_time||''));
+  // Seit 2026-09-15 auch Rueckgaben: am Rueckgabetag zaehlt die Rueckgabezeit
+  // (`end_time`), damit man sieht, wann Geraete zurueckkommen muessen.
+  const rueckgabeHeute = b => b.service_type === 'equipment' && b.equipment_end_date === today && b.equipment_start_date !== today;
+  const zeitVon = b => rueckgabeHeute(b) ? (b.end_time || '') : (b.start_time || '');
+  const items = allBookings.filter(b => (b.booking_date === today || b.equipment_start_date === today || rueckgabeHeute(b)) && b.status !== 'cancelled')
+    .sort((a,b) => zeitVon(a).localeCompare(zeitVon(b)));
   const list = document.getElementById('today-list');
   if (!items.length) {
     list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:24px;text-align:center">No bookings today.</div>';
@@ -1016,10 +1089,10 @@ function renderTodayList() {
   }
   list.innerHTML = items.map(b => `
     <div class="today-card">
-      <div class="today-time">${b.start_time||'—'}</div>
+      <div class="today-time">${zeitVon(b)||'—'}</div>
       <div class="today-info">
         <div class="today-name">${b.guest_name||'—'}</div>
-        <div class="today-svc">${SVC_NAMES[b.service_type]||b.service_type}${b.service_type==='equipment'?' · pick-up':''}${b.duration_hours?' · '+b.duration_hours+'h':''} · ${b.guest_phone||''}</div>
+        <div class="today-svc">${SVC_NAMES[b.service_type]||b.service_type}${b.service_type==='equipment'?(rueckgabeHeute(b)?' · return':' · pick-up'+(b.end_time?' (back '+(b.equipment_end_date===today?'':'on '+(b.equipment_end_date||'').slice(5)+' ')+'by '+b.end_time+')':'')+(vertraege.has(b.id)?' · ✓ contract':' · contract open')):''}${b.duration_hours?' · '+b.duration_hours+'h':''} · ${b.guest_phone||''}</div>
       </div>
       <span class="badge badge-${b.status||'confirmed'}">${b.status||'confirmed'}</span>
     </div>`).join('');
@@ -1061,6 +1134,7 @@ function renderTable() {
         ${bookingStatus === 'pending_payment' ? `<button class="action-btn cancel" onclick="releaseBooking('${b.id}')">Release</button>` : ''}
         ${status !== 'cancelled' ? `<button class="action-btn cancel" onclick="openCancel('${b.id}')">Cancel</button>` : ''}
         <button class="action-btn note"   onclick="openNote('${b.id}')">Note</button>
+        ${b.service_type === 'equipment' && status !== 'cancelled' ? `<button class="action-btn vertrag${vertraege.has(b.id) ? ' signiert' : ''}" onclick="openContract('${b.id}')">${vertraege.has(b.id) ? '✓ Contract' : '📄 Contract'}</button>` : ''}
       </div></td>
     </tr>`;
   }).join('');
@@ -1103,6 +1177,157 @@ async function releaseBooking(id) {
 }
 
 // ── EDIT MODAL ──
+// ── MIETVERTRAG ─────────────────────────────────────────────────────────
+//
+// Unterschrieben wird bei der Abholung, hier im Admin (Handy/Tablet). Die
+// Daten gehen in `rental_contracts` (rental-contract-migration.sql), der Text
+// kommt versioniert aus vertrag.js. **Die Tabelle kann fehlen**, solange die
+// Migration nicht ausgefuehrt ist -- dann wird der unterschriebene Vertrag
+// trotzdem angezeigt und kann als PDF gesichert werden, nur nicht online.
+let vertraege = new Set();
+let vertragsTabelleFehlt = false;
+const vertragFotos = {};
+
+async function ladeVertraege() {
+  const { data, error } = await sb.from('rental_contracts').select('booking_id');
+  vertragsTabelleFehlt = !!error;
+  vertraege = new Set((data || []).map(r => r.booking_id));
+}
+
+function padEinrichten(id) {
+  const c = document.getElementById(id);
+  const r = c.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr); ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111';
+  c.dataset.leer = '1';
+  if (c.dataset.bereit) return;
+  c.dataset.bereit = '1';
+  let zieht = false;
+  const pos = e => { const b = c.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  c.addEventListener('pointerdown', e => { zieht = true; c.setPointerCapture(e.pointerId); const [x, y] = pos(e); const k = c.getContext('2d'); k.beginPath(); k.moveTo(x, y); });
+  c.addEventListener('pointermove', e => { if (!zieht) return; const [x, y] = pos(e); const k = c.getContext('2d'); k.lineTo(x, y); k.stroke(); c.dataset.leer = '0'; });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => c.addEventListener(t, () => { zieht = false; }));
+}
+
+function padLeeren(id) {
+  const c = document.getElementById(id);
+  c.getContext('2d').clearRect(0, 0, c.width, c.height);
+  c.dataset.leer = '1';
+}
+
+// Fotos werden verkleinert (lange Kante 1000 px, JPEG) -- ein Handyfoto hat
+// sonst mehrere MB und gehoert so nicht in eine Datenbankzeile.
+function vertragFoto(input, vorschauId) {
+  const datei = input.files && input.files[0];
+  if (!datei) return;
+  const img = new Image();
+  img.onload = () => {
+    const f = Math.min(1, 1000 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * f); c.height = Math.round(img.height * f);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    vertragFotos[input.id] = c.toDataURL('image/jpeg', 0.72);
+    const v = document.getElementById(vorschauId);
+    v.src = vertragFotos[input.id]; v.style.display = 'block';
+    URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(datei);
+}
+
+function vertragMeldung(text, art) {
+  const m = document.getElementById('ct-msg');
+  m.innerHTML = text; m.className = 'msg ' + art; m.style.display = 'block';
+}
+
+function openContract(id) {
+  const b = allBookings.find(x => x.id === id);
+  if (!b) return;
+  document.getElementById('ct-id').value = id;
+  const geraete = RentMeVertrag.geraeteNamen(b.equipment_items);
+  document.getElementById('ct-summary').innerHTML =
+    '<div><strong>' + RentMeVertrag.esc(b.guest_name || '—') + '</strong> · ' + RentMeVertrag.esc(b.booking_ref || '') + '</div>'
+    + '<div>' + RentMeVertrag.esc(geraete.join(', ') || '—') + '</div>'
+    + '<div>Pick-up ' + (b.equipment_start_date || '—') + (b.start_time ? ' ' + b.start_time : '')
+    + ' → Return ' + (b.equipment_end_date || '—') + (b.end_time ? ' by ' + b.end_time : '') + '</div>';
+  document.getElementById('ct-serien').innerHTML = (b.equipment_items || []).map(i =>
+    '<div class="form-group"><label>Serial Number — ' + RentMeVertrag.esc(RentMeVertrag.GERAETE[i] || i) + '</label>'
+    + '<input type="text" data-geraet="' + RentMeVertrag.esc(i) + '" class="ct-serie" placeholder="on the device or box"></div>').join('');
+  ['ct-id-nr', 'ct-zustand', 'ct-personal'].forEach(f => { document.getElementById(f).value = ''; });
+  document.getElementById('ct-kaution').checked = false;
+  delete document.getElementById('ct-kaution').dataset.bestaetigt;
+  ['ct-foto-ausweis', 'ct-foto-kunde'].forEach(f => { document.getElementById(f).value = ''; delete vertragFotos[f]; });
+  ['ct-vorschau-ausweis', 'ct-vorschau-kunde'].forEach(f => { document.getElementById(f).style.display = 'none'; });
+  document.getElementById('ct-vorschau').href = 'rental-agreement.html?id=' + id;
+  document.getElementById('ct-msg').style.display = 'none';
+  document.getElementById('ct-save').disabled = false;
+  openModal('contract-modal');
+  // Erst nach dem Oeffnen messen -- im versteckten Modal ist die Breite 0.
+  // Direkt, nicht per requestAnimationFrame: der Aufruf erzwingt das Layout
+  // ohnehin, und ein verzoegertes Einrichten liess im Test leere Felder als
+  // "unterschrieben" durch.
+  padEinrichten('ct-pad-kunde'); padEinrichten('ct-pad-personal');
+  if (vertraege.has(id)) {
+    vertragMeldung('This booking already has a signed agreement. <a href="rental-agreement.html?id=' + id + '" target="_blank" style="color:inherit;text-decoration:underline">Open it</a> — saving again replaces it.', 'success');
+  } else if (vertragsTabelleFehlt) {
+    vertragMeldung('⚠ The contracts table is not set up yet (rental-contract-migration.sql). You can still sign — the agreement opens for saving as PDF, but it is not stored online.', 'error');
+  }
+}
+
+async function vertragSpeichern() {
+  const id = document.getElementById('ct-id').value;
+  const b = allBookings.find(x => x.id === id);
+  if (!b) return;
+  const padKunde = document.getElementById('ct-pad-kunde');
+  const padPersonal = document.getElementById('ct-pad-personal');
+  if (padKunde.dataset.leer !== '0') return vertragMeldung('The renter has not signed yet.', 'error');
+  if (!document.getElementById('ct-id-nr').value.trim() && !vertragFotos['ct-foto-ausweis'])
+    return vertragMeldung('Please enter the ID number or take a photo of the ID.', 'error');
+  if (!document.getElementById('ct-kaution').checked &&
+      !confirmOhneDialog('ct-kaution')) return;
+
+  const seriennummern = {};
+  document.querySelectorAll('.ct-serie').forEach(el => { if (el.value.trim()) seriennummern[el.dataset.geraet] = el.value.trim(); });
+  const v = {
+    version: RentMeVertrag.VERSION,
+    signed_at: new Date().toISOString(),
+    ausweis_art: document.getElementById('ct-id-art').value,
+    ausweis_nummer: document.getElementById('ct-id-nr').value.trim(),
+    seriennummern,
+    zustand: document.getElementById('ct-zustand').value.trim(),
+    kaution_erhalten: document.getElementById('ct-kaution').checked,
+    foto_ausweis: vertragFotos['ct-foto-ausweis'] || null,
+    foto_kunde: vertragFotos['ct-foto-kunde'] || null,
+    unterschrift_kunde: padKunde.toDataURL('image/png'),
+    unterschrift_personal: padPersonal.dataset.leer !== '0' ? null : padPersonal.toDataURL('image/png'),
+    personal_name: document.getElementById('ct-personal').value.trim(),
+  };
+  const btn = document.getElementById('ct-save');
+  btn.disabled = true;
+  const { error } = await sb.from('rental_contracts')
+    .upsert({ booking_id: id, version: v.version, signed_at: v.signed_at, data: v });
+  if (error) {
+    // Nicht verlieren, was gerade unterschrieben wurde.
+    sessionStorage.setItem('rentme_vertrag_lokal', JSON.stringify({ b, v }));
+    btn.disabled = false;
+    return vertragMeldung('⚠ Not saved online (' + RentMeVertrag.esc(error.message) + '). <a href="rental-agreement.html?lokal=1" target="_blank" style="color:inherit;text-decoration:underline">Open the signed agreement</a> and save it as PDF now.', 'error');
+  }
+  vertraege.add(id);
+  renderTable(); renderTodayList();
+  vertragMeldung('✓ Signed and saved. <a href="rental-agreement.html?id=' + id + '" target="_blank" style="color:inherit;text-decoration:underline">Open the agreement</a> to print or send it as PDF.', 'success');
+}
+
+// Kaution nicht angehakt: kein Browser-Dialog (blockiert die Seite), sondern
+// ein zweiter Klick auf "Sign & Save" bestaetigt bewusst.
+function confirmOhneDialog(feld) {
+  const el = document.getElementById(feld);
+  if (el.dataset.bestaetigt === '1') { delete el.dataset.bestaetigt; return true; }
+  el.dataset.bestaetigt = '1';
+  vertragMeldung('Deposit not ticked as received. Click “Sign &amp; Save” again to save without deposit.', 'error');
+  return false;
+}
+
 function openEdit(id) {
   const b = allBookings.find(x => x.id === id);
   if (!b) return;

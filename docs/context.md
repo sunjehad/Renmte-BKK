@@ -28,6 +28,21 @@ festgehaltene Entscheidung. Dieser Ordner `docs/` ist der erste Schritt dagegen.
 
 ## Was zuletzt geschah
 
+**2026-09-15** — Andys Auftrag: Abholung mit Uhrzeit und automatischer
+Mietvertrag („mach alles so wie du denkst“). **Lokal gebaut, nicht gepusht.**
+- **Rückgabezeit** im Equipment-Formular (Pflicht, am selben Tag nur nach der
+  Abholzeit), gespeichert in `end_time`; Übersicht, Bestätigung, Kalender.
+- **Mietvertrag:** Text versioniert in `vertrag.js` (Version 1, Werte als
+  Vorschlag, nicht juristisch geprüft). `rental-terms.html` (Bedingungen,
+  verlinkt am Haken), `rental-agreement.html` (Vertrag: ungezeichnet aus der
+  Bestätigung per `#d=`, gezeichnet per `?id=` für Admins).
+- **Admin:** Knopf „Contract“ bei Equipment — Ausweis, Seriennummern, Zustand,
+  Fotos, Kaution, Unterschrift Kunde/Personal → `rental_contracts`.
+  „Today“ zeigt auch Rückgaben.
+- **Offen, braucht Freigabe:** `rental-contract-migration.sql` ausführen (bis
+  dahin wird nur lokal als PDF gesichert), Push, Deploy von
+  `notify-booking-webhook` (Rückgabezeit im Telegram-Alarm).
+
 **2026-07-27** — Erste Bestandsaufnahme durch BrainMag, Fokusübernahme.
 Rein lesend erhoben, dann:
 
