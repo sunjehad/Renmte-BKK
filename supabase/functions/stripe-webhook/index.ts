@@ -45,7 +45,10 @@ Deno.serve(async (req) => {
           payment_method: 'cash', payment_status: 'pending',
           booking_status: 'cash_on_pickup', status: 'confirmed',
           paid_at: new Date().toISOString(), reservation_expires_at: null,
-        }).eq('id', bookingId).eq('booking_status', 'pending_payment');
+        }).eq('id', bookingId).eq('booking_status', 'pending_payment')
+          // Im Admin storniert, aber die Stripe-Seite war noch offen: nicht
+          // wieder bestaetigen ("Cancel" setzt nur status, nicht booking_status).
+          .neq('status', 'cancelled');
         await supabase.rpc('cancel_competing_pending_bookings', { p_booking_id: bookingId });
       }
     } else if (event.type === 'checkout.session.completed') {
