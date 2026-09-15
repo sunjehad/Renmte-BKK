@@ -1129,7 +1129,9 @@ async function noShowAbbuchen(id) {
   if (!knopf) return;
   if (knopf.dataset.sicher !== '1') {
     knopf.dataset.sicher = '1';
-    knopf.textContent = 'Click again to charge';
+    // Erinnerung vor dem Abbuchen: Absagen kommen auch per Mail, WhatsApp oder
+    // LINE -- der Gmail-Waechter meldet Mail-Absagen als "ABSAGE RMB-..." in Telegram.
+    knopf.textContent = 'No cancellation in Telegram/chat? Click again to charge';
     setTimeout(() => { if (knopf.isConnected && knopf.dataset.sicher === '1') { delete knopf.dataset.sicher; renderTable(); } }, 5000);
     return;
   }
