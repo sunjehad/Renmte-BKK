@@ -3,7 +3,7 @@
 Aktueller Stand. Bei jeder größeren Änderung nachziehen.
 Dauerhaftes Wissen steht in `CLAUDE.md`, Begründungen in `decisions.md`.
 
-**Stand: 2026-07-27**
+**Stand: 2026-09-15** (Abschnitt „Was zuletzt geschah“; ältere Abschnitte darunter sind historisch)
 
 ---
 
@@ -27,6 +27,43 @@ festgehaltene Entscheidung. Dieser Ordner `docs/` ist der erste Schritt dagegen.
 - Der Doku-Wächter des Gehirns läuft hier als `post-commit`-Hook.
 
 ## Was zuletzt geschah
+
+**2026-09-15, später** — Buchungsstrecke und Betrieb nach Andys Aufträgen.
+Alles live, soweit nicht anders vermerkt.
+- **Vertragspartner:** „Rent Me Bangkok, on behalf of Sky Universe Group
+  Co., Ltd.“ (Name wie im Stripe-Konto; einmal in `vertrag.js`
+  `FIRMA.vermieter`). Kein Personenname unter der Unterschrift, keine
+  Seriennummern mehr.
+- **Kontaktkanal:** Schritt 3 fragt WhatsApp oder LINE ab
+  (`contact_channel`/`contact_handle`, `contact-channel-migration.sql`).
+  Admin und Telegram zeigen einen Chat-Link. Bot: geplant, nicht gebaut.
+- **Zustimmung beim Buchen:** `terms_version` + `terms_accepted_at` (Zeit aus
+  der DB, `terms-acceptance-migration.sql`). `booking-terms.html` ersetzt die
+  toten Links im Confirm-Schritt; `privacy.html` (PDPA).
+- **No-Show-Sicherung bei Barzahlung** (Studio, Geräte): Online-Unterschrift
+  der Reservierungsbedingungen R1 (`reservation_agreements`, RPC
+  `sign_reservation`) + Karte per Stripe Checkout `mode: setup`
+  (`stripe-card-guarantee`). Webhook-Zweig `mode === 'setup'` bestätigt als
+  `cash_on_pickup`. `update_booking_payment` verweigert Bar ohne Karte. Admin
+  bucht bei No-Show 50 % ab (`stripe-noshow-charge`: Admin-JWT, Termin + 30
+  Min, einmalig, Betrag aus `preise.ts noShowGebuehr`).
+  `noshow-guarantee-migration.sql`. Live geprüft bis zur Stripe-Kartenseite
+  (RMB-DCCDC173, storniert); Kartenhinterlegung und Abbuchung selbst
+  **ungetestet**.
+- **Admin-Status:** Anzeige nach `anzeigeStatus()` — Stornierung gewinnt,
+  „cancelled · paid — refund?“ als eigener Zustand, No-Show eigen.
+- **Rückgabe im Admin** („↩ Return“ nach unterschriebenem Vertrag): Zeit,
+  Zustand, Kaution zurück/einbehalten, Zusatzbetrag; Verspätungsvorschlag
+  nach Vertrag. Tabelle `rental_returns` (`rental-return-migration.sql`,
+  **Andy muss ausführen**). Vertrag `?id=` zeigt die Rückgabe als Abschnitt 6.
+- **Erstattung einer No-Show-Gebühr** markiert die Buchung
+  (`payment_status: noshow_fee_refunded`, Webhook `charge.refunded`).
+- **Gmail-Wächter** (Claude-Routine): lief bis 15.09. nie (Schlüssel fehlte).
+  Neuer `TELEGRAM_NOTIZ_KEY`, meldet Absagen mit RMB-Nummer und Stripe-
+  Probleme. Telegram bleibt intern.
+- **Offen:** Drohnen-Registrierung (Andy), juristisches Gegenlesen + Thai-
+  Fassung, echter Kartentest inkl. No-Show-Abbuchung, Regel für späte
+  Absagen, Postfach info@rentme-bkk.com (MX fehlt).
 
 **2026-09-15** — Andys Auftrag: Abholung mit Uhrzeit und automatischer
 Mietvertrag („mach alles so wie du denkst“). **Seit 15.09. live** (Push

@@ -94,6 +94,13 @@ Deno.serve(async (req) => {
           booking_status: 'refunded', payment_status: 'refunded', status: 'cancelled',
           refunded_at: new Date().toISOString()
         }).eq('stripe_payment_intent', charge.payment_intent);
+        // No-Show-Gebuehr erstattet (seit 2026-09-15): die Abbuchung steht in
+        // noshow_payment_intent, nicht in stripe_payment_intent -- ohne diese
+        // Zeile merkte die Buchung die Erstattung nicht. booking_status bleibt
+        // no_show, nur der Zahlstatus zeigt die Erstattung.
+        await supabase.from('bookings').update({
+          payment_status: 'noshow_fee_refunded', refunded_at: new Date().toISOString()
+        }).eq('noshow_payment_intent', charge.payment_intent);
       }
     }
   } catch (err) {

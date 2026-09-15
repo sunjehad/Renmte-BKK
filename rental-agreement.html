@@ -97,6 +97,24 @@ function fehler(text) {
   }
   const { data: v, error: vErr } = await sb.from('rental_contracts').select('data').eq('booking_id', id).maybeSingle();
   zeige(b, v ? v.data : null);
+  // Rueckgabe (seit 2026-09-15) als Anhang unter dem Vertrag -- der Vertrag
+  // selbst bleibt unveraendert, die Rueckgabe ist ein eigener Datensatz.
+  const { data: r } = await sb.from('rental_returns').select('*').eq('booking_id', id).maybeSingle();
+  if (r) {
+    const e = RentMeVertrag.esc;
+    const baht = n => '฿' + Number(n || 0).toLocaleString('en-US');
+    const zustand = { ok: 'Complete and undamaged', schaden: 'Damaged', fehlt: 'Accessory missing' }[r.condition] || r.condition;
+    const art = blatt.querySelector('.rv');
+    if (art) art.insertAdjacentHTML('beforeend', `
+  <h2>6. Return</h2>
+  <table class="rv-tab">
+    <tr><th>Returned</th><td>${e(new Date(r.returned_at).toLocaleString('en-GB', { timeZone: 'Asia/Bangkok' }))}</td></tr>
+    <tr><th>Condition</th><td>${e(zustand)}</td></tr>
+    ${r.notes ? `<tr><th>Notes</th><td>${e(r.notes)}</td></tr>` : ''}
+    <tr><th>Deposit returned</th><td>${baht(r.deposit_returned)}${Number(r.deposit_kept) ? ' (kept ' + baht(r.deposit_kept) + ')' : ''}</td></tr>
+    ${Number(r.extra_charge) ? `<tr><th>Charged on top</th><td>${baht(r.extra_charge)}</td></tr>` : ''}
+  </table>`);
+  }
   if (vErr) hinweis.textContent = 'Signed contracts cannot be loaded yet (database table missing) — showing the unsigned agreement.';
 })();
 </script>

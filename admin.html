@@ -145,6 +145,9 @@ tr.neu td:first-child::before{content:'NEU';position:absolute;left:2px;top:50%;t
 .badge-pay-confirmed{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--green)}
 .badge-pay-refunded{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);color:#a855f7}
 .badge-pay-cancelled{background:rgba(230,57,70,.1);border:1px solid var(--border-red);color:var(--red)}
+.badge-pay-no_show{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.4);color:#f87171}
+.badge-pay-enquiry{background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.25);color:#93c5fd}
+.badge-pay-cancelled_paid{background:rgba(230,57,70,.15);border:1px solid var(--red);color:#fff}
 .badge-pay-failed{background:rgba(230,57,70,.1);border:1px solid var(--border-red);color:var(--red)}
 .badge-studio{background:rgba(230,57,70,.1);color:var(--red);border:1px solid var(--border-red)}
 .badge-podcast{background:rgba(37,99,235,.1);color:var(--blue-l);border:1px solid var(--border-blue)}
@@ -398,6 +401,9 @@ tr.neu td:first-child::before{content:'NEU';position:absolute;left:2px;top:50%;t
           <option value="refunded">Refunded</option>
           <option value="cancelled">Cancelled</option>
           <option value="failed">Failed</option>
+          <option value="cancelled_paid">Cancelled but paid</option>
+          <option value="no_show">No-show</option>
+          <option value="enquiry">Enquiry</option>
         </select>
         <select id="filter-payment-method" onchange="filterBookings()">
           <option value="">All Payment Methods</option>
@@ -703,6 +709,43 @@ tr.neu td:first-child::before{content:'NEU';position:absolute;left:2px;top:50%;t
   </div>
 </div>
 
+<!-- ═══ RETURN MODAL (Rueckgabe Geraete, seit 2026-09-15) ═══ -->
+<div class="modal-overlay" id="return-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title">EQUIPMENT RETURN</div>
+      <div class="modal-close" onclick="closeModal('return-modal')">×</div>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="rt-id">
+      <div id="rt-summary" class="sum-box" style="background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.25);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;line-height:1.7"></div>
+      <div class="msg" id="rt-msg" style="display:none"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Returned at</label><input type="datetime-local" id="rt-zeit" onchange="rueckgabeVorschlag()"></div>
+        <div class="form-group"><label>Late</label><div id="rt-spaet" style="padding:10px 0;font-size:13px"></div></div>
+      </div>
+      <div class="form-group">
+        <label>Condition</label>
+        <select id="rt-zustand">
+          <option value="ok">Complete and undamaged</option>
+          <option value="schaden">Damaged</option>
+          <option value="fehlt">Accessory missing</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="rt-notiz" rows="2" placeholder="e.g. scratch on lens cover, USB-C cable missing"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Deposit kept (฿)</label><input type="number" id="rt-einbehalten" min="0" max="1000" value="0" oninput="rueckgabeKaution()"></div>
+        <div class="form-group"><label>Deposit returned (฿)</label><div id="rt-zurueck" style="padding:10px 0;font-size:13px;font-weight:700"></div></div>
+      </div>
+      <div class="form-group"><label>Charged on top of deposit (฿)</label><input type="number" id="rt-extra" min="0" value="0"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-primary" id="rt-save" onclick="rueckgabeSpeichern()">Save Return</button>
+        <button class="btn-ghost" onclick="closeModal('return-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ NOTE MODAL ═══ -->
 <div class="modal-overlay" id="note-modal">
   <div class="modal">
@@ -936,6 +979,7 @@ async function loadAllBookings() {
   else { filteredBookings = [...allBookings]; renderTable(); }
 
   await ladeVertraege();
+  await ladeRueckgaben();
   renderStats();
   renderWatch();
   renderTodayList();
@@ -1096,6 +1140,28 @@ function kontaktLink(b) {
   return `<a class="kontakt-link" href="${url}" target="_blank" rel="noopener" title="${esc(h)}">💬 ${text} · ${esc(h)}</a>`;
 }
 
+// ── STATUS, WIE MAN IHN LESEN MUSS (seit 2026-09-15) ────────────────────
+// Die Tabelle zeigte booking_status. "Cancel" setzt aber nur status -- eine
+// stornierte bezahlte Buchung sah deshalb weiter wie PAID aus, eine stornierte
+// Barreservierung wie CASH ON PICKUP. Jetzt gewinnt die Stornierung, und
+// "storniert, aber bezahlt" ist ein eigener Zustand: da muss Geld zurueck.
+function anzeigeStatus(b) {
+  const bs = b.booking_status || 'confirmed';
+  if (b.noshow_charged_at || bs === 'no_show') {
+    return { key: 'no_show', text: b.payment_status === 'noshow_fee_refunded' ? 'no-show · fee refunded' : 'no-show · fee charged' };
+  }
+  if (bs === 'refunded') return { key: 'refunded', text: 'refunded' };
+  if (b.status === 'cancelled') {
+    if (bs === 'paid') return { key: 'cancelled_paid', text: 'cancelled · paid — refund?' };
+    return { key: 'cancelled', text: 'cancelled' };
+  }
+  return { key: bs, text: bs.replace(/_/g, ' ') };
+}
+function statusBadge(b) {
+  const s = anzeigeStatus(b);
+  return `<span class="badge badge-pay-${s.key}">${s.text}</span>`;
+}
+
 // ── NO-SHOW (seit 2026-09-15) ───────────────────────────────────────────
 // Barzahlung bei Studio/Geraeten laeuft mit hinterlegter Karte. Ist der
 // Termin plus 30 Minuten vorbei und der Kunde nicht da, bucht der Knopf 50 %
@@ -1214,7 +1280,7 @@ function renderTable() {
       <td><div>${date}</div><div class="table-meta">${time}</div></td>
       <td><div class="table-name">${b.guest_name||'—'}</div><div class="table-meta">${b.guest_email||''}</div><div class="table-meta">${b.guest_phone||''}</div>${kontaktLink(b)}${karteInfo(b)}</td>
       <td><span class="badge badge-${cls}">${SVC_NAMES[b.service_type]||b.service_type}</span></td>
-      <td><span class="badge badge-pay-${bookingStatus}">${bookingStatus.replace(/_/g,' ')}</span></td>
+      <td>${statusBadge(b)}</td>
       <td><span style="font-size:11px;color:var(--muted)">${paymentMethod}</span></td>
       <td><span style="font-size:12px;font-weight:600">${b.total_price ? '฿'+b.total_price.toLocaleString() : '—'}</span>${(() => { const bd = paymentBreakdown(b); return bd ? `<div class="table-meta" style="color:#fbbf24">paid ฿${bd.paid.toLocaleString()} · due ฿${bd.due.toLocaleString()}</div>` : ''; })()}</td>
       <td><span style="font-size:11px;color:var(--muted)">${b.source||'website'}</span></td>
@@ -1227,6 +1293,7 @@ function renderTable() {
         ${status !== 'cancelled' ? `<button class="action-btn cancel" onclick="openCancel('${b.id}')">Cancel</button>` : ''}
         <button class="action-btn note"   onclick="openNote('${b.id}')">Note</button>
         ${noShowKnopf(b)}
+        ${b.service_type === 'equipment' && status !== 'cancelled' && vertraege.has(b.id) ? `<button class="action-btn ${rueckgaben.has(b.id) ? 'vertrag signiert' : 'note'}" onclick="openReturn('${b.id}')">${rueckgaben.has(b.id) ? '✓ Returned' : '↩ Return'}</button>` : ''}
         ${b.service_type === 'equipment' && status !== 'cancelled' ? `<button class="action-btn vertrag${vertraege.has(b.id) ? ' signiert' : ''}" onclick="openContract('${b.id}')">${vertraege.has(b.id) ? '✓ Contract' : '📄 Contract'}</button>` : ''}
       </div></td>
     </tr>`;
@@ -1243,7 +1310,7 @@ function filterBookings() {
   filteredBookings = allBookings.filter(b => {
     const d = b.booking_date || b.equipment_start_date || '';
     if (svc  && b.service_type !== svc)   return false;
-    if (stat && (b.booking_status || 'confirmed') !== stat) return false;
+    if (stat && anzeigeStatus(b).key !== stat) return false;
     if (pm   && b.payment_method !== pm)   return false;
     if (from && d < from)                  return false;
     if (to   && d > to)                    return false;
@@ -1280,6 +1347,105 @@ async function releaseBooking(id) {
 let vertraege = new Set();
 let vertragsTabelleFehlt = false;
 const vertragFotos = {};
+
+// ── RUECKGABE (seit 2026-09-15) ─────────────────────────────────────────
+// Wann kam das Geraet zurueck, in welchem Zustand, was geschah mit der Kaution.
+// Die Verspaetung rechnet nach dem Mietvertrag (30 Min Kulanz, ฿100 je
+// angefangene Stunde, ab dem Folgetag voller Tagessatz) -- nur als Vorschlag,
+// den Betrag setzt der Mensch. Tabelle rental_returns (rental-return-migration.sql).
+const KAUTION_BAHT = 1000;
+const TAGESSATZ = { pocket3: 500, neo: 700, nano: 500 };  // preise.ts GERAETE_TAGESSATZ
+let rueckgaben = new Set();
+
+async function ladeRueckgaben() {
+  const { data } = await sb.from('rental_returns').select('booking_id');
+  rueckgaben = new Set((data || []).map(r => r.booking_id));
+}
+
+function rueckgabeSoll(b) {
+  if (!b.equipment_end_date) return null;
+  const zeit = String(b.end_time || '22:00').slice(0, 5);
+  return new Date(b.equipment_end_date + 'T' + zeit + ':00+07:00');
+}
+
+function bangkokLokal(d) {
+  const t = new Date(d.getTime() + 7 * 3600e3);
+  return t.toISOString().slice(0, 16);
+}
+
+function rueckgabeVorschlag() {
+  const b = allBookings.find(x => x.id === document.getElementById('rt-id').value);
+  const feld = document.getElementById('rt-spaet');
+  const wert = document.getElementById('rt-zeit').value;
+  const soll = b && rueckgabeSoll(b);
+  if (!b || !wert || !soll) { feld.textContent = '—'; return; }
+  const ist = new Date(wert + ':00+07:00');
+  const min = Math.round((ist - soll) / 60000);
+  if (min <= 30) { feld.innerHTML = '<span style="color:#4ade80">on time</span>'; return; }
+  const sollTag = b.equipment_end_date;
+  const istTag = bangkokLokal(ist).slice(0, 10);
+  let vorschlag;
+  if (istTag > sollTag) {
+    const tage = Math.round((new Date(istTag) - new Date(sollTag)) / 86400000);
+    const satz = (b.equipment_items || []).reduce((s, i) => s + (TAGESSATZ[i] || 0), 0);
+    vorschlag = tage * satz;
+    feld.innerHTML = `<span style="color:#f87171">${tage} day(s) late</span> · suggested ฿${vorschlag.toLocaleString()}`;
+  } else {
+    vorschlag = Math.ceil((min - 30) / 60) * 100;
+    feld.innerHTML = `<span style="color:#fbbf24">${min} min late</span> · suggested ฿${vorschlag.toLocaleString()}`;
+  }
+}
+
+function rueckgabeKaution() {
+  const kept = Math.max(0, Math.min(KAUTION_BAHT, parseInt(document.getElementById('rt-einbehalten').value) || 0));
+  document.getElementById('rt-zurueck').textContent = '฿' + (KAUTION_BAHT - kept).toLocaleString();
+}
+
+function openReturn(id) {
+  const b = allBookings.find(x => x.id === id);
+  if (!b) return;
+  document.getElementById('rt-id').value = id;
+  const soll = rueckgabeSoll(b);
+  document.getElementById('rt-summary').innerHTML = '<strong>' + RentMeVertrag.esc(b.guest_name || '—') + '</strong> · ' + RentMeVertrag.esc(b.booking_ref || '')
+    + '<br>' + RentMeVertrag.esc(RentMeVertrag.geraeteNamen(b.equipment_items).join(', '))
+    + '<br>Due back ' + (b.equipment_end_date || '—') + (b.end_time ? ' by ' + b.end_time : '');
+  document.getElementById('rt-zeit').value = bangkokLokal(new Date());
+  ['rt-notiz'].forEach(f => { document.getElementById(f).value = ''; });
+  document.getElementById('rt-zustand').value = 'ok';
+  document.getElementById('rt-einbehalten').value = 0;
+  document.getElementById('rt-extra').value = 0;
+  document.getElementById('rt-save').disabled = rueckgaben.has(id);
+  const msg = document.getElementById('rt-msg');
+  msg.style.display = rueckgaben.has(id) ? 'block' : 'none';
+  msg.className = 'msg success';
+  msg.innerHTML = rueckgaben.has(id) ? '✓ Return already recorded. <a href="rental-agreement.html?id=' + id + '" target="_blank" style="color:inherit;text-decoration:underline">Open agreement</a>' : '';
+  rueckgabeVorschlag(); rueckgabeKaution();
+  openModal('return-modal');
+}
+
+async function rueckgabeSpeichern() {
+  const id = document.getElementById('rt-id').value;
+  const zeit = document.getElementById('rt-zeit').value;
+  const msg = document.getElementById('rt-msg');
+  const zeige = (t, a) => { msg.innerHTML = t; msg.className = 'msg ' + a; msg.style.display = 'block'; };
+  if (!zeit) return zeige('Please enter the return time.', 'error');
+  const kept = Math.max(0, Math.min(KAUTION_BAHT, parseInt(document.getElementById('rt-einbehalten').value) || 0));
+  const extra = Math.max(0, parseInt(document.getElementById('rt-extra').value) || 0);
+  const zustand = document.getElementById('rt-zustand').value;
+  const notiz = document.getElementById('rt-notiz').value.trim();
+  if ((kept > 0 || extra > 0 || zustand !== 'ok') && !notiz) return zeige('Please add a note why deposit is kept or what is wrong.', 'error');
+  document.getElementById('rt-save').disabled = true;
+  const { error } = await sb.from('rental_returns').insert({
+    booking_id: id,
+    returned_at: new Date(zeit + ':00+07:00').toISOString(),
+    condition: zustand, notes: notiz,
+    deposit_kept: kept, deposit_returned: KAUTION_BAHT - kept, extra_charge: extra,
+  });
+  if (error) { document.getElementById('rt-save').disabled = false; return zeige('Not saved: ' + RentMeVertrag.esc(error.message), 'error'); }
+  rueckgaben.add(id);
+  renderTable();
+  zeige('✓ Return saved. <a href="rental-agreement.html?id=' + id + '" target="_blank" style="color:inherit;text-decoration:underline">Open agreement</a> — it now shows the return.', 'success');
+}
 
 async function ladeVertraege() {
   const { data, error } = await sb.from('rental_contracts').select('booking_id');
@@ -1452,6 +1618,23 @@ function openEdit(id) {
   document.getElementById('edit-features-body').innerHTML = rows.length ? rows.join('') : '<span style="color:var(--muted)">No details recorded</span>';
   document.getElementById('edit-msg').style.display = 'none';
   openModal('edit-modal');
+  zeigeReservierung(b);
+}
+
+// Unterschriebene Reservierungsbedingungen (Barzahlung mit Karte) nachladen.
+// Nur Admins duerfen reservation_agreements lesen.
+async function zeigeReservierung(b) {
+  if (!b.card_setup_session_id && !b.card_payment_method) return;
+  const { data } = await sb.from('reservation_agreements')
+    .select('version, signed_name, signature, signed_at').eq('booking_id', b.id).maybeSingle();
+  const body = document.getElementById('edit-features-body');
+  if (!body || document.getElementById('edit-id').value !== b.id) return;
+  const esc = RentMeVertrag.esc;
+  body.insertAdjacentHTML('beforeend', data
+    ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)"><strong>Reservation terms signed:</strong> ' + esc(data.signed_name)
+      + ' · version ' + esc(data.version) + ' · ' + new Date(data.signed_at).toLocaleString('en-GB', { timeZone: 'Asia/Bangkok' })
+      + '<div style="background:#fff;border-radius:6px;margin-top:6px;padding:4px;display:inline-block"><img src="' + esc(data.signature) + '" alt="Signature" style="max-height:70px;max-width:260px;display:block"></div></div>'
+    : '<div style="margin-top:10px;color:#fbbf24"><strong>Reservation terms:</strong> not signed</div>');
 }
 
 async function saveEdit() {
