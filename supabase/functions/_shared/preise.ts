@@ -182,6 +182,29 @@ export const MAX_MIETTAGE = 90;
 /** Obergrenze je Zahlung. Alles darueber ist ein Rechenfehler, kein Umsatz. */
 export const HOECHSTBETRAG = 200000;
 
+/**
+ * No-Show-Gebuehr bei Barzahlung mit hinterlegter Karte (seit 2026-09-15).
+ *
+ * Andy: Wer ohne Zahlung reserviert und nicht kommt, zahlt 50 % des
+ * Betrags. Grundlage ist IMMER der hier ermittelte Betrag (`ermittleBetrag`),
+ * nie `total_price` aus der Datenbank -- den setzt der Browser (R-010).
+ * Auf ganze Baht gerundet, weil Stripe THB in Satang nimmt und die
+ * Reservierungsbedingungen eine glatte Zahl nennen.
+ */
+export const NO_SHOW_ANTEIL = 0.5;
+
+export function noShowGebuehr(betrag: number): number {
+  return Math.round(betrag * NO_SHOW_ANTEIL);
+}
+
+/**
+ * Dienste, bei denen man bar reservieren kann und deshalb eine Karte als
+ * No-Show-Sicherheit hinterlegen muss: alle mit Termin. Cut Only und Reel
+ * haben keinen Termin -- ein No-Show ist dort nicht moeglich. Podcast-Setup
+ * verlangt ohnehin die Anzahlung online.
+ */
+export const DIENSTE_MIT_NO_SHOW_SICHERUNG = ["studio_rental", "equipment"];
+
 // ── Typen ─────────────────────────────────────────────────────────────────
 
 /** Die Felder des Buchungssatzes, die fuer den Preis zaehlen. */

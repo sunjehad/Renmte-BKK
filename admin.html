@@ -1096,6 +1096,71 @@ function kontaktLink(b) {
   return `<a class="kontakt-link" href="${url}" target="_blank" rel="noopener" title="${esc(h)}">💬 ${text} · ${esc(h)}</a>`;
 }
 
+// ── NO-SHOW (seit 2026-09-15) ───────────────────────────────────────────
+// Barzahlung bei Studio/Geraeten laeuft mit hinterlegter Karte. Ist der
+// Termin plus 30 Minuten vorbei und der Kunde nicht da, bucht der Knopf 50 %
+// ab. Den Betrag und alle Sperren rechnet stripe-noshow-charge serverseitig;
+// die Pruefung hier blendet den Knopf nur sinnvoll ein.
+const NO_SHOW_KULANZ_MIN = 30;
+
+function terminBeginn(b) {
+  const tag = b.service_type === 'equipment' ? b.equipment_start_date : b.booking_date;
+  const zeit = String(b.start_time || '').slice(0, 5);
+  if (!tag || !/^\d{2}:\d{2}$/.test(zeit)) return null;
+  return new Date(tag + 'T' + zeit + ':00+07:00');
+}
+
+function karteInfo(b) {
+  if (b.noshow_charged_at) return `<div class="table-meta" style="color:#f87171">No-show fee charged ฿${Number(b.noshow_fee_amount || 0).toLocaleString()}</div>`;
+  if (b.card_payment_method) return `<div class="table-meta" style="color:#4ade80">💳 card on file${b.noshow_fee_amount ? ' · no-show ฿' + Number(b.noshow_fee_amount).toLocaleString() : ''}</div>`;
+  return '';
+}
+
+function noShowKnopf(b) {
+  if (!b.card_payment_method || b.noshow_charged_at || b.booking_status !== 'cash_on_pickup' || b.status === 'cancelled') return '';
+  const beginn = terminBeginn(b);
+  if (!beginn || Date.now() < beginn.getTime() + NO_SHOW_KULANZ_MIN * 60000) return '';
+  return `<button class="action-btn cancel" id="noshow-${b.id}" onclick="noShowAbbuchen('${b.id}')">No-show: charge ฿${Number(b.noshow_fee_amount || 0).toLocaleString()}</button>`;
+}
+
+// Zweimal klicken statt confirm() -- ein Browserdialog blockiert die Seite.
+async function noShowAbbuchen(id) {
+  const knopf = document.getElementById('noshow-' + id);
+  if (!knopf) return;
+  if (knopf.dataset.sicher !== '1') {
+    knopf.dataset.sicher = '1';
+    knopf.textContent = 'Click again to charge';
+    setTimeout(() => { if (knopf.isConnected && knopf.dataset.sicher === '1') { delete knopf.dataset.sicher; renderTable(); } }, 5000);
+    return;
+  }
+  knopf.disabled = true;
+  knopf.textContent = 'Charging…';
+  const { data: sitzung } = await sb.auth.getSession();
+  const token = sitzung && sitzung.session ? sitzung.session.access_token : '';
+  let json = {};
+  try {
+    const res = await fetch('https://nghsyxwhczvwaorssgoh.supabase.co/functions/v1/stripe-noshow-charge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ bookingId: id })
+    });
+    json = await res.json();
+    if (!res.ok || json.error) throw new Error(json.error || 'Charge failed.');
+    knopf.textContent = '✓ Charged ฿' + Number(json.charged).toLocaleString();
+    setTimeout(loadAllBookings, 1500);
+  } catch (e) {
+    knopf.disabled = false;
+    delete knopf.dataset.sicher;
+    knopf.textContent = 'No-show: charge';
+    const zelle = knopf.closest('td');
+    if (zelle) {
+      const m = document.createElement('div');
+      m.className = 'table-meta'; m.style.color = '#f87171'; m.textContent = e.message;
+      zelle.appendChild(m);
+    }
+  }
+}
+
 function renderTodayList() {
   const today = new Date().toISOString().split('T')[0];
   // Equipment zaehlt am Abholtag mit; seit 2026-09-14 traegt es in
@@ -1145,7 +1210,7 @@ function renderTable() {
     return `<tr class="${neueIds.has(b.id) ? 'neu' : ''}">
       <td><div class="booking-ref-cell">${b.booking_ref||'—'}</div></td>
       <td><div>${date}</div><div class="table-meta">${time}</div></td>
-      <td><div class="table-name">${b.guest_name||'—'}</div><div class="table-meta">${b.guest_email||''}</div><div class="table-meta">${b.guest_phone||''}</div>${kontaktLink(b)}</td>
+      <td><div class="table-name">${b.guest_name||'—'}</div><div class="table-meta">${b.guest_email||''}</div><div class="table-meta">${b.guest_phone||''}</div>${kontaktLink(b)}${karteInfo(b)}</td>
       <td><span class="badge badge-${cls}">${SVC_NAMES[b.service_type]||b.service_type}</span></td>
       <td><span class="badge badge-pay-${bookingStatus}">${bookingStatus.replace(/_/g,' ')}</span></td>
       <td><span style="font-size:11px;color:var(--muted)">${paymentMethod}</span></td>
@@ -1159,6 +1224,7 @@ function renderTable() {
         ${bookingStatus === 'pending_payment' ? `<button class="action-btn cancel" onclick="releaseBooking('${b.id}')">Release</button>` : ''}
         ${status !== 'cancelled' ? `<button class="action-btn cancel" onclick="openCancel('${b.id}')">Cancel</button>` : ''}
         <button class="action-btn note"   onclick="openNote('${b.id}')">Note</button>
+        ${noShowKnopf(b)}
         ${b.service_type === 'equipment' && status !== 'cancelled' ? `<button class="action-btn vertrag${vertraege.has(b.id) ? ' signiert' : ''}" onclick="openContract('${b.id}')">${vertraege.has(b.id) ? '✓ Contract' : '📄 Contract'}</button>` : ''}
       </div></td>
     </tr>`;
@@ -1375,6 +1441,7 @@ function openEdit(id) {
   if (b.participant_count) rows.push('<div><strong>Participants:</strong> ' + b.participant_count + '</div>');
   if (b.equipment_items && b.equipment_items.length) rows.push('<div><strong>Equipment:</strong> ' + b.equipment_items.join(', ') + '</div>');
   if (b.notes) rows.push('<div><strong>Options / Notes:</strong> ' + b.notes + '</div>');
+  if (b.card_payment_method) rows.push('<div><strong>No-show guarantee:</strong> card on file' + (b.card_saved_at ? ' since ' + new Date(b.card_saved_at).toLocaleString('en-GB', { timeZone: 'Asia/Bangkok' }) : '') + (b.noshow_fee_amount ? ' · fee ฿' + Number(b.noshow_fee_amount).toLocaleString() : '') + (b.noshow_charged_at ? ' · <span style="color:#f87171">charged</span>' : '') + '</div>');
   if (b.contact_channel) rows.push('<div><strong>Contact via:</strong> ' + kontaktLink(b) + '</div>');
   if (b.terms_version) rows.push('<div><strong>Rental terms:</strong> version ' + b.terms_version + (b.terms_accepted_at ? ', accepted ' + new Date(b.terms_accepted_at).toLocaleString('en-GB', { timeZone: 'Asia/Bangkok' }) : '') + '</div>');
   if (b.total_price) rows.push('<div><strong>Total:</strong> ฿' + b.total_price.toLocaleString() + '</div>');

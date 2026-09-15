@@ -142,6 +142,10 @@ export function nachricht(b: any): string {
   const preis = Number(b.total_price) || 0;
   if (b.booking_status === 'cash_on_pickup') {
     z.push(`⏳ NOT PAID YET — ${preis ? baht(preis) + ' ' : ''}cash at pick-up`);
+    // No-Show-Sicherung (seit 15.09.2026): Karte hinterlegt, bei Nichterscheinen 50 %.
+    if (b.card_payment_method) {
+      z.push(`💳 card on file — no-show fee ${b.noshow_fee_amount ? baht(Number(b.noshow_fee_amount)) : '50%'}`);
+    }
   } else if (b.service_type === 'podcast_setup' && preis > PODCAST_AUFBAU) {
     z.push(`🟡 DEPOSIT PAID ${baht(PODCAST_AUFBAU)} — ${baht(preis - PODCAST_AUFBAU)} still open (at the studio)`);
   } else if (anfrage) {

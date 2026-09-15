@@ -28,7 +28,27 @@ Deno.serve(async (req) => {
     return new Response(`Webhook Error: ${err.message}`, { status: 400 });
   }
   try {
-    if (event.type === 'checkout.session.completed') {
+    if (event.type === 'checkout.session.completed' && event.data.object.mode === 'setup') {
+      // Karte als No-Show-Sicherheit hinterlegt (stripe-card-guarantee, seit
+      // 2026-09-15). Es ist NICHTS bezahlt: die Buchung wird Barzahlung bei
+      // Abholung, genau wie update_booking_payment('cash') es tut -- nur dass
+      // jetzt eine Karte dahinter steht. Ohne diesen Zweig wuerde der Zweig
+      // darunter die Buchung faelschlich als 'paid' markieren.
+      const session = event.data.object;
+      const bookingId = session.metadata?.booking_id;
+      if (bookingId && session.setup_intent) {
+        const setup = await stripe.setupIntents.retrieve(String(session.setup_intent));
+        await supabase.from('bookings').update({
+          card_payment_method: typeof setup.payment_method === 'string' ? setup.payment_method : setup.payment_method?.id,
+          card_saved_at: new Date().toISOString(),
+          stripe_customer_id: session.customer,
+          payment_method: 'cash', payment_status: 'pending',
+          booking_status: 'cash_on_pickup', status: 'confirmed',
+          paid_at: new Date().toISOString(), reservation_expires_at: null,
+        }).eq('id', bookingId).eq('booking_status', 'pending_payment');
+        await supabase.rpc('cancel_competing_pending_bookings', { p_booking_id: bookingId });
+      }
+    } else if (event.type === 'checkout.session.completed') {
       // Card payments via Stripe Checkout
       const session = event.data.object;
       const bookingId = session.metadata?.booking_id;

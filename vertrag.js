@@ -155,6 +155,30 @@
 
   const VERSION = '2';
 
+  // ── Reservierung ohne Zahlung (No-Show-Sicherung, seit 15.09.2026) ─────
+  // Andy: Wer bar reserviert und nicht kommt, zahlt 50 %. Der Kunde
+  // unterschreibt das online vor der Kartenhinterlegung. Eigene Versionen
+  // ("R1", ...), unabhaengig vom Mietvertrag. Den Betrag rechnet der Server
+  // (preise.ts noShowGebuehr); hier steht er nur zur Anzeige.
+  const RESERVIERUNG_VERSION = 'R1';
+  const NO_SHOW_KULANZ_MINUTEN = 30;
+  const RESERVIERUNG = {
+    'R1': function (gebuehr) {
+      const betrag = gebuehr ? baht(gebuehr) : '50% of the booking price';
+      return [
+        `You are reserving without paying now and will pay in cash when you arrive. To keep the slot for you, we hold your card on file with our payment provider Stripe. Nothing is charged now.`,
+        `If you do not show up, we charge a no-show fee of 50% of the booking price (${betrag}) to this card. You count as a no-show if you have not arrived ${NO_SHOW_KULANZ_MINUTEN} minutes after your booking time (for equipment: the pick-up time) and have not told us before.`,
+        `No fee applies if you arrive, or if you tell us before your booking time that you cannot come (email rentmebkk@gmail.com, Instagram @bangkok_rentme or your chosen WhatsApp/LINE chat).`,
+        `The reservation is made by Rent Me Bangkok on behalf of Sky Universe Co., Ltd. The full Booking Terms and, for equipment, the Rental Terms also apply.`,
+      ];
+    },
+  };
+
+  function reservierungHtml(version, gebuehr) {
+    const absaetze = (RESERVIERUNG[version] || RESERVIERUNG[RESERVIERUNG_VERSION])(gebuehr);
+    return absaetze.map(a => `<p>${esc(a)}</p>`).join('');
+  }
+
   function bedingungenHtml(version, hatDrohne) {
     const klauseln = (VERSIONEN[version] || VERSIONEN[VERSION])(hatDrohne);
     return '<ol class="rv-klauseln">' + klauseln.map(([titel, absaetze]) =>
@@ -292,6 +316,7 @@
 
   window.RentMeVertrag = {
     VERSION, FIRMA, GERAETE, KAUTION,
+    RESERVIERUNG_VERSION, reservierungHtml,
     vertragHtml, bedingungenHtml, geraeteNamen, CSS, esc,
   };
 })();

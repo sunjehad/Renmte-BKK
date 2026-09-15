@@ -35,10 +35,17 @@ body{margin:0;background:#e9e9ee;font-family:Inter,Arial,sans-serif}
   <ul>
     <li>A booking is confirmed as soon as it is completed on our website.</li>
     <li>Card and QR bookings are held for 30 minutes while you complete the payment. If the payment does not arrive in time, the slot is released again.</li>
-    <li>If you choose cash, you pay in person when you arrive. No-shows or unpaid bookings may affect future bookings.</li>
+    <li>If you choose cash, you pay in person when you arrive. For studio and equipment bookings, a card is kept on file as a no-show guarantee (see below).</li>
     <li>Podcast recordings: the one-time setup fee of ฿1,500 is paid online to confirm the date. It is part of your total, not a deposit; the rest is paid at the studio on the day.</li>
     <li>Enquiries (drone filming, full podcast service) are not bookings. Nothing is charged until you accept our quote.</li>
     <li>Equipment rental has its own <a href="rental-terms.html">Rental Terms</a>, including the deposit and the rental agreement signed at pick-up.</li>
+  </ul>
+
+  <h2 id="no-show">Cash reservations and no-show fee</h2>
+  <div id="rv-bedingungen"></div>
+  <ul>
+    <li>Applies to studio and equipment bookings paid in cash on arrival.</li>
+    <li>Card and QR payments are paid in advance; no separate no-show fee applies to them.</li>
   </ul>
 
   <h2 id="cancellation">Cancellation policy</h2>
@@ -56,6 +63,8 @@ body{margin:0;background:#e9e9ee;font-family:Inter,Arial,sans-serif}
 <script>
 document.head.insertAdjacentHTML('beforeend', '<style>' + RentMeVertrag.CSS + '</style>');
 const F = RentMeVertrag.FIRMA;
+// No-Show-Regel aus derselben Quelle, die der Kunde online unterschreibt.
+document.getElementById('rv-bedingungen').innerHTML = RentMeVertrag.reservierungHtml(RentMeVertrag.RESERVIERUNG_VERSION, null);
 document.getElementById('firma').innerHTML = RentMeVertrag.esc(F.adresse) + '<br>' + RentMeVertrag.esc(F.email) + ' · Instagram ' + RentMeVertrag.esc(F.instagram);
 </script>
 </body>

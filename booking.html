@@ -176,6 +176,12 @@ textarea{resize:vertical;min-height:80px}
 .review-total .amount{font-family:var(--font-head);font-size:2rem;color:var(--fg)}
 
 /* ── TERMS ── */
+.rv-box{background:var(--bg3);border:1px solid rgba(245,158,11,.4);border-radius:10px;padding:16px 18px}
+.rv-box-titel{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fbbf24;margin-bottom:8px}
+.rv-box-text p{font-size:13px;color:var(--fg-muted,#bbb);line-height:1.6;margin:0 0 8px}
+.rv-box-link{font-size:12px;color:var(--blue-l)}
+.rv-pad{width:100%;height:150px;background:#fff;border-radius:8px;touch-action:none;display:block;cursor:crosshair}
+.rv-clear{font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:3px 8px;background:none;cursor:pointer}
 .terms-check{display:flex;gap:12px;align-items:flex-start;padding:16px;background:var(--bg3);border-radius:8px;margin-bottom:24px;cursor:pointer}
 .terms-check input[type=checkbox]{width:18px;height:18px;margin-top:1px;accent-color:var(--blue);flex-shrink:0;cursor:pointer}
 .terms-text{font-size:12px;color:var(--muted);line-height:1.6}
@@ -1039,12 +1045,38 @@ input[type=date]{color-scheme:dark}
       <div class="pay-card" onclick="selectPayment('cash',this)">
         <div class="pay-icon">💵</div>
         <div class="pay-title">Cash on Pick-up</div>
-        <div class="pay-desc">Pay in person when you arrive. Booking is held immediately.</div>
+        <div class="pay-desc" id="cash-desc">Pay in person when you arrive. Booking is held immediately.</div>
       </div>
     </div>
 
     <div id="cash-commitment" style="display:none;margin-top:20px">
-      <div class="terms-check" style="margin-bottom:0">
+      <!-- Dienste mit Termin (Studio, Geraete) seit 2026-09-15: online
+           unterschreiben + Karte als No-Show-Sicherheit. Cut Only / Reel
+           behalten den alten Haken darunter. -->
+      <div id="cash-garantie" style="display:none">
+        <div class="rv-box">
+          <div class="rv-box-titel">Reservation terms — no-show fee</div>
+          <div id="rv-text" class="rv-box-text"></div>
+          <a href="booking-terms.html#no-show" target="_blank" rel="noopener" class="rv-box-link">Full Booking Terms</a>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+          <label for="rv-name">Full name *</label>
+          <input type="text" id="rv-name" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label style="margin:0">Signature *</label>
+            <button type="button" class="rv-clear" onclick="rvPadLeeren()">Clear</button>
+          </div>
+          <canvas id="rv-pad" class="rv-pad"></canvas>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px">Sign with your finger or mouse.</div>
+        </div>
+        <label class="terms-check" style="margin-bottom:0">
+          <input type="checkbox" id="rv-check">
+          <span class="terms-text">I have read and agree to the reservation terms above, including the no-show fee charged to my card.</span>
+        </label>
+      </div>
+      <div id="cash-alt" class="terms-check" style="margin-bottom:0">
         <input type="checkbox" id="cash-commit-check" onchange="document.getElementById('btn-pay').disabled=!this.checked">
         <div class="terms-text">
           I commit to paying <strong id="cash-amount-label" style="color:var(--fg)"></strong> in cash on arrival. I understand that no-shows or unpaid bookings may affect future bookings.
@@ -2616,6 +2648,12 @@ function setupStep5() {
     document.getElementById('deposit-remaining').textContent = '฿' + (state.totalPrice - PODCAST_AUFBAU).toLocaleString();
   }
 
+  // Barzahlung mit Karte als No-Show-Sicherheit (seit 2026-09-15).
+  const cashDesc = document.getElementById('cash-desc');
+  if (cashDesc) cashDesc.textContent = brauchtKartenSicherung()
+    ? 'Pay in person when you arrive. Your card is kept as a no-show guarantee — nothing is charged now.'
+    : 'Pay in person when you arrive. Booking is held immediately.';
+
   // Disable cash for podcast_setup — deposit must be paid online
   const cashCard = document.querySelector('.pay-card:nth-child(3)');
   if (cashCard) {
@@ -2623,6 +2661,36 @@ function setupStep5() {
     cashCard.style.pointerEvents = isSetup ? 'none' : '';
     cashCard.title = isSetup ? 'Cash not available — deposit required' : '';
   }
+}
+
+// ── No-Show-Sicherung bei Barzahlung (seit 2026-09-15) ─────────────────
+// Nur fuer Dienste mit Termin; muss zu preise.ts DIENSTE_MIT_NO_SHOW_SICHERUNG
+// passen. Die Gebuehr hier ist nur Anzeige -- abgebucht wird, was
+// stripe-noshow-charge serverseitig aus der Preisquelle rechnet.
+const DIENSTE_MIT_NO_SHOW_SICHERUNG = ['studio_rental', 'equipment'];
+function brauchtKartenSicherung() { return DIENSTE_MIT_NO_SHOW_SICHERUNG.includes(state.service); }
+
+function rvPadEinrichten() {
+  const c = document.getElementById('rv-pad');
+  const r = c.getBoundingClientRect();
+  if (!r.width) return;
+  const dpr = window.devicePixelRatio || 1;
+  c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr); ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111';
+  c.dataset.leer = '1';
+  if (c.dataset.bereit) return;
+  c.dataset.bereit = '1';
+  let zieht = false;
+  const pos = e => { const b = c.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  c.addEventListener('pointerdown', e => { zieht = true; c.setPointerCapture(e.pointerId); const [x, y] = pos(e); const k = c.getContext('2d'); k.beginPath(); k.moveTo(x, y); });
+  c.addEventListener('pointermove', e => { if (!zieht) return; const [x, y] = pos(e); const k = c.getContext('2d'); k.lineTo(x, y); k.stroke(); c.dataset.leer = '0'; });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => c.addEventListener(t, () => { zieht = false; }));
+}
+function rvPadLeeren() {
+  const c = document.getElementById('rv-pad');
+  c.getContext('2d').clearRect(0, 0, c.width, c.height);
+  c.dataset.leer = '1';
 }
 
 function selectPayment(method, el) {
@@ -2633,8 +2701,22 @@ function selectPayment(method, el) {
   const btn = document.getElementById('btn-pay');
   if (method === 'cash') {
     cashBox.style.display = '';
-    btn.disabled = !document.getElementById('cash-commit-check').checked;
-    btn.innerHTML = 'Confirm Cash Booking ✓';
+    const sicherung = brauchtKartenSicherung();
+    document.getElementById('cash-garantie').style.display = sicherung ? '' : 'none';
+    document.getElementById('cash-alt').style.display = sicherung ? 'none' : '';
+    if (sicherung) {
+      const gebuehr = Math.round((state.totalPrice || 0) * 0.5);
+      document.getElementById('rv-text').innerHTML = window.RentMeVertrag
+        ? RentMeVertrag.reservierungHtml(RentMeVertrag.RESERVIERUNG_VERSION, gebuehr) : '';
+      const name = document.getElementById('rv-name');
+      if (!name.value) name.value = `${state.firstName} ${state.lastName}`.trim();
+      rvPadEinrichten();
+      btn.disabled = false;
+      btn.innerHTML = 'Sign & Add Card →';
+    } else {
+      btn.disabled = !document.getElementById('cash-commit-check').checked;
+      btn.innerHTML = 'Confirm Cash Booking ✓';
+    }
   } else {
     cashBox.style.display = 'none';
     btn.disabled = false;
@@ -2650,7 +2732,35 @@ async function startPayment() {
   btn.innerHTML = '<span class="spinner"></span>Processing…';
 
   try {
-    if (state.paymentMethod === 'cash') {
+    if (state.paymentMethod === 'cash' && brauchtKartenSicherung()) {
+      // 1) Reservierungsbedingungen unterschreiben, 2) Karte bei Stripe
+      // hinterlegen. Bestaetigt wird die Buchung erst vom Webhook, wenn die
+      // Karte da ist -- update_booking_payment verweigert Barzahlung ohne Karte.
+      const name = document.getElementById('rv-name').value.trim();
+      const pad = document.getElementById('rv-pad');
+      if (name.length < 2) throw new Error('Please enter your full name.');
+      if (pad.dataset.leer !== '0') throw new Error('Please sign in the signature field.');
+      if (!document.getElementById('rv-check').checked) throw new Error('Please accept the reservation terms.');
+      const { data: ok, error: signFehler } = await sb.rpc('sign_reservation', {
+        p_booking_id: state.bookingId, p_name: name,
+        p_signature: pad.toDataURL('image/png'),
+        p_version: window.RentMeVertrag ? RentMeVertrag.RESERVIERUNG_VERSION : 'R1'
+      });
+      if (signFehler || !ok) throw new Error('Could not save your signature. Your reservation may have expired — please start again.');
+      const res = await fetch(`${SUPABASE_FN_URL}/stripe-card-guarantee`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId: state.bookingId,
+          successUrl: `${location.origin}${location.pathname}?payment=success&booking=${state.bookingId}`,
+          cancelUrl: `${location.origin}${location.pathname}?payment=cancelled&booking=${state.bookingId}`
+        })
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || 'Could not start the card check.');
+      localStorage.setItem('rentme_pending_booking_' + state.bookingId, JSON.stringify(state));
+      window.location.href = json.url;
+    } else if (state.paymentMethod === 'cash') {
       const { data, error } = await sb.rpc('update_booking_payment', { p_booking_id: state.bookingId, p_payment_method: 'cash' });
       if (error || !data) throw new Error(error?.message || 'Could not confirm booking.');
       await finalizeBooking(null, data);
@@ -2701,7 +2811,8 @@ async function startPayment() {
     msgEl.textContent = 'Error: ' + err.message;
     msgEl.className = 'msg error';
     btn.disabled = false;
-    btn.innerHTML = state.paymentMethod === 'card' ? 'Pay with Card →' : state.paymentMethod === 'qr' ? 'Get QR Code →' : 'Confirm Cash Booking ✓';
+    btn.innerHTML = state.paymentMethod === 'card' ? 'Pay with Card →' : state.paymentMethod === 'qr' ? 'Get QR Code →'
+      : brauchtKartenSicherung() ? 'Sign & Add Card →' : 'Confirm Cash Booking ✓';
   }
 }
 
@@ -2830,6 +2941,18 @@ function updateQRCountdown(seconds) {
         state.bookingRef = row.booking_ref;
         localStorage.removeItem(stashKey);
         await finalizeBooking(null, syntheticBookingFromState(), true);
+        return;
+      }
+      // Karte als No-Show-Sicherheit hinterlegt (seit 2026-09-15): Barzahlung
+      // ist bestaetigt. Anders als bei Kartenzahlung gehen hier die Mails
+      // raus -- vorher schickte der Barzahlungsweg sie direkt beim Bestaetigen.
+      if (row && row.booking_status === 'cash_on_pickup') {
+        state.bookingId  = row.id;
+        state.bookingRef = row.booking_ref;
+        localStorage.removeItem(stashKey);
+        const b = syntheticBookingFromState();
+        b.booking_status = row.booking_status;
+        await finalizeBooking(null, b, false);
         return;
       }
       await new Promise(r => setTimeout(r, 1500));

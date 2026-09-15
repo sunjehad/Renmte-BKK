@@ -19,6 +19,7 @@ import {
   GERAETE_TAGESSATZ,
   HOECHSTBETRAG,
   miettage,
+  noShowGebuehr,
   PODCAST_SETUP_ANZAHLUNG,
   pruefeGemeldetenBetrag,
 } from "./preise.ts";
@@ -365,4 +366,22 @@ test("Miettage zaehlen beide Randtage und ueberstehen Zeitumstellungen", () => {
   // 2,958... herausgekommen und nach dem Runden zufaellig richtig gewesen.
   assert.equal(miettage("2026-10-24", "2026-10-26"), 3);
   assert.equal(miettage("kein-datum", "2026-08-01"), null);
+});
+
+test("No-Show-Gebuehr ist die Haelfte des ermittelten Betrags, glatt gerundet", () => {
+  assert.equal(noShowGebuehr(500), 250);
+  assert.equal(noShowGebuehr(700), 350);
+  assert.equal(noShowGebuehr(1300), 650);
+  assert.equal(noShowGebuehr(333), 167);
+  // Grundlage ist der serverseitige Betrag, nicht total_price: eine Geraetemiete
+  // ueber einen Tag kostet 500, die Gebuehr also 250 -- egal, was der Browser
+  // als Gesamtpreis in die Buchung geschrieben hat.
+  const e = ermittleBetrag({
+    service_type: "equipment",
+    equipment_start_date: "2026-09-30",
+    equipment_end_date: "2026-09-30",
+    equipment_items: ["pocket3"],
+  });
+  assert.ok(e.ok);
+  if (e.ok) assert.equal(noShowGebuehr(e.betrag), 250);
 });
