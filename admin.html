@@ -1389,7 +1389,7 @@ async function vertragSpeichern() {
     foto_kunde: vertragFotos['ct-foto-kunde'] || null,
     unterschrift_kunde: padKunde.toDataURL('image/png'),
     unterschrift_personal: padPersonal.dataset.leer !== '0' ? null : padPersonal.toDataURL('image/png'),
-    // Nur intern: im Vertrag steht "Rent Me Bangkok, on behalf of Sky Universe".
+    // Nur intern: im Vertrag steht "Rent Me Bangkok, on behalf of Sky Universe Group Co., Ltd.".
     personal_name: document.getElementById('ct-personal').value.trim(),
     // Mieter fest im Vertrag: bei Kunden mit Konto hat loadAllBookings den
     // Namen aus dem Profil eingesetzt, die Buchungszeile selbst ist leer.

@@ -24,9 +24,9 @@
 
   const FIRMA = {
     name: 'Rent Me Bangkok',
-    // Vertragspartner ist Sky Universe; RentMe handelt in deren Namen
+    // Vertragspartner ist Sky Universe Group Co., Ltd. (so auch im Stripe-Konto); RentMe handelt in deren Namen
     // (Andy, 15.09.2026). Unter der Unterschrift steht die Firma, keine Person.
-    vermieter: 'Sky Universe Co., Ltd.',
+    vermieter: 'Sky Universe Group Co., Ltd.',
     adresse: '600/9 B Square Rama 9 – Mengjai, Wang Thonglang, Bangkok 10310',
     email: 'rentmebkk@gmail.com',
     instagram: '@bangkok_rentme',
@@ -169,7 +169,7 @@
         `You are reserving without paying now and will pay in cash when you arrive. To keep the slot for you, we hold your card on file with our payment provider Stripe. Nothing is charged now.`,
         `If you do not show up, we charge a no-show fee of 50% of the booking price (${betrag}) to this card. You count as a no-show if you have not arrived ${NO_SHOW_KULANZ_MINUTEN} minutes after your booking time (for equipment: the pick-up time) and have not told us before.`,
         `No fee applies if you arrive, or if you tell us before your booking time that you cannot come (email rentmebkk@gmail.com, Instagram @bangkok_rentme or your chosen WhatsApp/LINE chat).`,
-        `The reservation is made by Rent Me Bangkok on behalf of Sky Universe Co., Ltd. The full Booking Terms and, for equipment, the Rental Terms also apply.`,
+        `The reservation is made by Rent Me Bangkok on behalf of ${FIRMA.vermieter}. The full Booking Terms and, for equipment, the Rental Terms also apply.`,
       ];
     },
   };
