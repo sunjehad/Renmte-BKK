@@ -689,7 +689,7 @@ tr.neu td:first-child::before{content:'NEU';position:absolute;left:2px;top:50%;t
         <div class="sign-kopf"><label style="margin:0">Renter Signature</label><button type="button" onclick="padLeeren('ct-pad-kunde')">Clear</button></div>
         <canvas class="sign-pad" id="ct-pad-kunde"></canvas>
       </div>
-      <div class="form-group"><label>Staff Name</label><input type="text" id="ct-personal" placeholder="who hands over the equipment"></div>
+      <div class="form-group"><label>Staff Name (internal, not printed)</label><input type="text" id="ct-personal" placeholder="who hands over the equipment"></div>
       <div class="form-group">
         <div class="sign-kopf"><label style="margin:0">Staff Signature</label><button type="button" onclick="padLeeren('ct-pad-personal')">Clear</button></div>
         <canvas class="sign-pad" id="ct-pad-personal"></canvas>
@@ -1330,6 +1330,7 @@ async function vertragSpeichern() {
     foto_kunde: vertragFotos['ct-foto-kunde'] || null,
     unterschrift_kunde: padKunde.toDataURL('image/png'),
     unterschrift_personal: padPersonal.dataset.leer !== '0' ? null : padPersonal.toDataURL('image/png'),
+    // Nur intern: im Vertrag steht "Rent Me Bangkok, on behalf of Sky Universe".
     personal_name: document.getElementById('ct-personal').value.trim(),
     // Mieter fest im Vertrag: bei Kunden mit Konto hat loadAllBookings den
     // Namen aus dem Profil eingesetzt, die Buchungszeile selbst ist leer.

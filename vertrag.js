@@ -24,6 +24,10 @@
 
   const FIRMA = {
     name: 'Rent Me Bangkok',
+    // Vertragspartner ist Sky Universe; RentMe handelt in deren Namen
+    // (Andy, 15.09.2026). Unter der Unterschrift steht die Firma, keine Person.
+    // Genaue Firmierung (z. B. "Co., Ltd.") noch offen.
+    vermieter: 'Sky Universe',
     adresse: '600/9 B Square Rama 9 – Mengjai, Wang Thonglang, Bangkok 10310',
     email: 'rentmebkk@gmail.com',
     instagram: '@bangkok_rentme',
@@ -212,7 +216,7 @@
 
   <h2>1. Parties</h2>
   <table class="rv-tab">
-    ${zeile('Lessor', esc(FIRMA.name))}
+    ${zeile('Lessor', esc(FIRMA.name) + ', on behalf of ' + esc(FIRMA.vermieter))}
     ${zeile('Renter', esc(b.guest_name || '—'))}
     ${zeile('Phone', esc(b.guest_phone || '—'))}
     ${zeile('Email', esc(b.guest_email || '—'))}
@@ -244,7 +248,7 @@
   <p class="rv-klein">By signing, the renter confirms that they have read and accept this agreement and received the equipment listed above complete and in working condition.</p>
   <div class="rv-signs">
     ${unterschrift(v && v.unterschrift_kunde, b.guest_name, 'Renter')}
-    ${unterschrift(v && v.unterschrift_personal, v && v.personal_name, 'For Rent Me Bangkok')}
+    ${unterschrift(v && v.unterschrift_personal, FIRMA.name, 'on behalf of ' + FIRMA.vermieter)}
   </div>
   ${v && (v.foto_ausweis || v.foto_kunde) ? `
   <div class="rv-fotos">
