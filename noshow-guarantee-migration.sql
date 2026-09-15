@@ -1,6 +1,6 @@
 -- ============================================================
 -- RENT ME BANGKOK — No-Show-Sicherung bei Barzahlung (2026-09-15)
--- EINMAL ausfuehren. Noch NICHT ausgefuehrt.
+-- Ausgefuehrt am 2026-09-15 (Andy). Nicht erneut laufen lassen.
 --
 -- Andy: Barzahlung bei Abholung bleibt, aber wer reserviert und nicht kommt,
 -- zahlt 50 %. Absicherung: der Kunde unterschreibt online die
