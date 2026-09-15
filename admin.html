@@ -1269,7 +1269,10 @@ function openContract(id) {
   // "unterschrieben" durch.
   padEinrichten('ct-pad-kunde'); padEinrichten('ct-pad-personal');
   if (vertraege.has(id)) {
-    vertragMeldung('This booking already has a signed agreement. <a href="rental-agreement.html?id=' + id + '" target="_blank" style="color:inherit;text-decoration:underline">Open it</a> — saving again replaces it.', 'success');
+    // Unterschrieben ist unterschrieben (seit 2026-09-15): kein zweites
+    // Speichern, das den Vertrag ersetzt. Die Datenbank verbietet es ebenso.
+    document.getElementById('ct-save').disabled = true;
+    vertragMeldung('✓ This booking already has a signed agreement and it cannot be changed. <a href="rental-agreement.html?id=' + id + '" target="_blank" style="color:inherit;text-decoration:underline">Open it</a>.', 'success');
   } else if (vertragsTabelleFehlt) {
     vertragMeldung('⚠ The contracts table is not set up yet (rental-contract-migration.sql). You can still sign — the agreement opens for saving as PDF, but it is not stored online.', 'error');
   }
@@ -1278,7 +1281,7 @@ function openContract(id) {
 async function vertragSpeichern() {
   const id = document.getElementById('ct-id').value;
   const b = allBookings.find(x => x.id === id);
-  if (!b) return;
+  if (!b || vertraege.has(id)) return;
   const padKunde = document.getElementById('ct-pad-kunde');
   const padPersonal = document.getElementById('ct-pad-personal');
   if (padKunde.dataset.leer !== '0') return vertragMeldung('The renter has not signed yet.', 'error');
@@ -1306,7 +1309,7 @@ async function vertragSpeichern() {
   const btn = document.getElementById('ct-save');
   btn.disabled = true;
   const { error } = await sb.from('rental_contracts')
-    .upsert({ booking_id: id, version: v.version, signed_at: v.signed_at, data: v });
+    .insert({ booking_id: id, version: v.version, signed_at: v.signed_at, data: v });
   if (error) {
     // Nicht verlieren, was gerade unterschrieben wurde.
     sessionStorage.setItem('rentme_vertrag_lokal', JSON.stringify({ b, v }));
@@ -1347,6 +1350,7 @@ function openEdit(id) {
   if (b.participant_count) rows.push('<div><strong>Participants:</strong> ' + b.participant_count + '</div>');
   if (b.equipment_items && b.equipment_items.length) rows.push('<div><strong>Equipment:</strong> ' + b.equipment_items.join(', ') + '</div>');
   if (b.notes) rows.push('<div><strong>Options / Notes:</strong> ' + b.notes + '</div>');
+  if (b.terms_version) rows.push('<div><strong>Rental terms:</strong> version ' + b.terms_version + (b.terms_accepted_at ? ', accepted ' + new Date(b.terms_accepted_at).toLocaleString('en-GB', { timeZone: 'Asia/Bangkok' }) : '') + '</div>');
   if (b.total_price) rows.push('<div><strong>Total:</strong> ฿' + b.total_price.toLocaleString() + '</div>');
   const bd = paymentBreakdown(b);
   if (bd) rows.push('<div style="color:#fbbf24"><strong>Paid / Due:</strong> ฿' + bd.paid.toLocaleString() + ' paid · ฿' + bd.due.toLocaleString() + ' due at studio</div>');

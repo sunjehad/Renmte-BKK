@@ -11,6 +11,9 @@
 // laesst die alte stehen -- sonst zeigt ein alter Vertrag nachtraeglich
 // Bedingungen, die niemand unterschrieben hat.
 //
+// Version 1 blieb unbenutzt (kein Vertrag darunter gezeichnet), steht aber
+// nach der Regel oben weiter da.
+//
 // Stand der Werte (Verspaetung, Kaution, Frist) ist ein Vorschlag vom
 // 15.09.2026, von Andy pauschal freigegeben ("mach alles so wie du denkst"),
 // **nicht juristisch geprueft**.
@@ -96,9 +99,58 @@
       );
       return k;
     },
+    // Version 2 (15.09.2026) nach Gegenpruefung mit ChatGPT: Kaution ist
+    // keine Haftungsgrenze, angemessene Reparatur-/Ersatzkosten statt
+    // Neupreis, Diebstahl "unverzueglich", Haftung fuer Aufnahmen nicht bei
+    // eigener Fahrlaessigkeit, Datenschutz verweist auf privacy.html.
+    '2': function (hatDrohne) {
+      const k = [
+        ['Rental period', [
+          'The equipment is picked up and returned at the Rent Me Bangkok studio (address above) on the dates and times stated in this agreement. The renter is responsible for the equipment from pick-up until it has been handed back and checked by our staff.',
+        ]],
+        ['Rental fee and payment', [
+          'The rental fee is the amount shown in the booking. It covers the booked rental days only. If not paid online, it is due in cash at pick-up before the equipment is handed over.',
+        ]],
+        ['Deposit', [
+          `A refundable deposit of ${baht(KAUTION)} is paid in cash at pick-up. It is returned in full when the equipment comes back on time, complete and undamaged. Late fees, repair costs or missing accessories may be deducted from the deposit. The deposit is a security, not a limit of the renter’s liability: costs above the deposit are charged separately.`,
+        ]],
+        ['Identification and personal data', [
+          'At pick-up we record the renter’s ID details and take a photo of the ID (passport or Thai ID card) and of the renter, to verify identity, prevent fraud and handle claims under this agreement. Only Rent Me Bangkok staff with admin access can see them, and they are never used for marketing. The photos are deleted 90 days after the equipment has been returned, unless a claim is still open. Details and your rights: rentme-bkk.com/privacy.html.',
+        ]],
+        ['Condition at pick-up', [
+          'The equipment and accessories are checked together at pick-up and listed in this agreement. By signing, the renter confirms that everything listed was received complete and in working condition. Any existing marks or defects are noted in the agreement.',
+        ]],
+        ['Use of the equipment', [
+          'The renter uses the equipment with care and only for its intended purpose. It may not be lent, sublet or handed to third parties, opened, modified or repaired by the renter. The equipment must be protected from water, sand, dust and extreme heat unless it is designed for such conditions.',
+        ]],
+      ];
+      if (hatDrohne) {
+        k.push(['Drones', [
+          'The renter flies the drone at their own responsibility and in line with Thai law, including registration and permission rules (CAAT / NBTC) where they apply. Flying over crowds, near airports, government or military sites, or in other restricted areas is not permitted. Fines, confiscation and damage caused by the flight are the renter’s responsibility. A crash counts as damage under this agreement.',
+        ]]);
+      }
+      k.push(
+        ['Late return', [
+          `A grace period of ${KULANZ_MINUTEN} minutes applies. After that, a late fee of ${baht(VERSPAETUNG_JE_STUNDE)} is charged for each started hour. From the next day on, each additional day is charged at the full daily rate of the rented equipment. If the equipment has not been returned 24 hours after the agreed time and the renter cannot be reached, Rent Me Bangkok may treat it as lost and report it to the police.`,
+        ]],
+        ['Damage, loss and theft', [
+          'The renter pays the reasonable actual cost of repairing damage that occurs during the rental period, and the reasonable replacement cost of missing accessories. If the equipment is lost, stolen or cannot be repaired, the renter pays the reasonable replacement cost of an equivalent device, taking into account its age, condition and current market value. Repair invoices or price evidence are provided on request. Loss or theft must be reported to Rent Me Bangkok immediately and to the police without undue delay, and a copy of the police report handed to Rent Me Bangkok.',
+        ]],
+        ['Cancellation', [
+          'Bookings can be cancelled free of charge up to 24 hours before the pick-up time.',
+        ]],
+        ['Footage and data', [
+          'The renter is responsible for backing up their own footage. Memory cards and internal storage are erased after return. Rent Me Bangkok is not liable for lost or corrupted recordings or for indirect losses caused by equipment or memory-card failure, accidental deletion or other technical faults, except where caused by Rent Me Bangkok’s negligence or where liability cannot be excluded by law.',
+        ]],
+        ['Governing law', [
+          'This agreement is governed by the laws of the Kingdom of Thailand. If a provision is invalid, the remaining provisions stay in effect.',
+        ]],
+      );
+      return k;
+    },
   };
 
-  const VERSION = '1';
+  const VERSION = '2';
 
   function bedingungenHtml(version, hatDrohne) {
     const klauseln = (VERSIONEN[version] || VERSIONEN[VERSION])(hatDrohne);

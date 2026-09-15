@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Notice — Rent Me Bangkok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="vertrag.js"></script>
+<style>
+body{margin:0;background:#e9e9ee;font-family:Inter,Arial,sans-serif}
+.blatt{margin:24px auto 40px;max-width:800px;box-shadow:0 2px 20px rgba(0,0,0,.12)}
+.rv ul{margin:0 0 8px;padding-left:20px}
+.rv li{margin-bottom:3px}
+@media (max-width:600px){.blatt{margin:0}}
+</style>
+</head>
+<body>
+<div class="blatt">
+<article class="rv">
+  <header class="rv-kopf">
+    <div class="rv-logo">RENT<span>ME</span> BANGKOK</div>
+    <div class="rv-firma" id="firma"></div>
+  </header>
+
+  <!-- Datenschutzhinweis nach Thai PDPA (seit 2026-09-15). Aufbau nach den
+       PDPC-Vorgaben: Daten, Zwecke, Rechtsgrundlagen, Empfaenger, Fristen,
+       Rechte. Nicht juristisch geprueft -- zusammen mit dem Mietvertrag
+       gegenlesen lassen. Dienstleister unten aus dem Code erhoben:
+       Supabase, Vercel, Stripe, EmailJS, Telegram. -->
+  <h1>Privacy Notice</h1>
+  <div class="rv-meta">Personal Data Protection Act B.E. 2562 (PDPA) · Last updated 15 September 2026</div>
+
+  <h2>Who is responsible</h2>
+  <p>Rent Me Bangkok is the data controller for the personal data described here. Contact us about your data at <strong>rentmebkk@gmail.com</strong> or at our studio (address above).</p>
+
+  <h2>What we collect</h2>
+  <ul>
+    <li><strong>Booking details:</strong> name, phone number, email address, booked service, dates and times, price, notes you give us.</li>
+    <li><strong>Account details</strong> (if you create an account): name, email, phone, login data.</li>
+    <li><strong>Payment details:</strong> payment method, status and reference. Card data is handled by Stripe; we never see or store your card number.</li>
+    <li><strong>Equipment rentals only:</strong> ID type and number, a photo of your ID (passport or Thai ID card), a photo of you at pick-up, your signature, serial numbers and condition of the rented equipment, deposit and return records.</li>
+  </ul>
+
+  <h2>Why we use it, and on what legal basis</h2>
+  <ul>
+    <li><strong>To take and carry out your booking or rental</strong> — contract (PDPA section 24(3)).</li>
+    <li><strong>To verify your identity, prevent fraud and theft, document the handover, and handle damage, loss or late-return claims</strong> — our legitimate interests (section 24(5)) and the rental contract.</li>
+    <li><strong>To keep accounting and tax records</strong> — legal obligation (section 24(6)).</li>
+  </ul>
+  <p>We do <strong>not</strong> use your ID photo, your photo or your contact details for marketing. If we ever want to use a photo or video of you (for example on Instagram), we ask separately, and you can say no without any effect on your booking.</p>
+
+  <h2>Who can see it</h2>
+  <p>Only Rent Me Bangkok staff with admin access. ID photos, renter photos and signed agreements are restricted to admins. We use these service providers, who process data on our behalf:</p>
+  <ul>
+    <li>Supabase — database and login</li>
+    <li>Vercel — website hosting</li>
+    <li>Stripe — card and PromptPay payments</li>
+    <li>EmailJS — booking confirmation emails</li>
+    <li>Telegram — internal booking alerts to our staff (booking details, name and phone; no ID photos)</li>
+  </ul>
+  <p>Some of these providers store data outside Thailand. We do not sell personal data, and we share it with authorities only where the law requires it or to report a theft or loss.</p>
+
+  <h2>How long we keep it</h2>
+  <ul>
+    <li><strong>ID photo and renter photo:</strong> deleted 90 days after the equipment has been returned, unless a claim is still open — then until the claim is settled.</li>
+    <li><strong>Signed rental agreement, ID number, equipment and deposit records:</strong> as long as claims under the rental can be made, and as required by Thai accounting and tax law.</li>
+    <li><strong>Bookings and payment records:</strong> as required by Thai accounting and tax law.</li>
+  </ul>
+  <p>After that, the data is deleted or anonymised.</p>
+
+  <h2>Your rights</h2>
+  <p>You can ask us to give you access to your data or a copy of it, to correct it, to delete it, to restrict or object to its use, and to withdraw any consent you gave. Some data we must keep while a rental is open or where the law requires it; we will tell you if that applies. Write to <strong>rentmebkk@gmail.com</strong>. You can also complain to the Personal Data Protection Committee (PDPC) of Thailand.</p>
+</article>
+</div>
+<script>
+// Adresse und Kontakt aus derselben Quelle wie Vertrag und Bedingungen.
+document.head.insertAdjacentHTML('beforeend', '<style>' + RentMeVertrag.CSS + '</style>');
+const F = RentMeVertrag.FIRMA;
+document.getElementById('firma').innerHTML = RentMeVertrag.esc(F.adresse) + '<br>' + RentMeVertrag.esc(F.email) + ' · Instagram ' + RentMeVertrag.esc(F.instagram);
+</script>
+</body>
+</html>

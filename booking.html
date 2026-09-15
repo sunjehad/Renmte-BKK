@@ -9,6 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/qr-creator/dist/qr-creator.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="vertrag.js"></script>
 <style>
 /* ── DESIGN TOKENS ── */
 :root{
@@ -806,7 +807,7 @@ input[type=date]{color-scheme:dark}
       <!-- T&C checkbox -->
       <label id="equip-terms-wrap" style="display:flex;align-items:flex-start;gap:12px;margin-top:16px;cursor:pointer;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;transition:border-color .2s">
         <input type="checkbox" id="equip-terms" onchange="document.getElementById('equip-terms-wrap').style.borderColor=this.checked?'rgba(37,99,235,.5)':'rgba(255,255,255,.08)'" style="width:16px;height:16px;accent-color:var(--blue);margin-top:1px;flex-shrink:0">
-        <span style="font-size:13px;color:var(--muted);line-height:1.5">I understand the deposit and ID photo requirements and agree to the <a href="rental-terms.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--blue-l)">rental terms</a>. The rental agreement is signed at pick-up.</span>
+        <span style="font-size:13px;color:var(--muted);line-height:1.5">I have read and agree to the <a href="rental-terms.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--blue-l)">Rental Terms</a>, including the deposit, late-return, damage and loss rules, and I have read the <a href="privacy.html" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--blue-l)">Privacy Notice</a> on ID and photo checks. The rental agreement is signed at pick-up.</span>
       </label>
     </div>
 
@@ -2480,6 +2481,10 @@ function bookingPayload() {
     equipment_end_date:   state.equipEnd   || null,
     rental_days:          days,
     equipment_items:      state.equipItems.length > 0 ? state.equipItems : null,
+    // Welche Bedingungen der Kunde angehakt hat (seit 2026-09-15). Den
+    // Zeitpunkt setzt die Datenbank selbst (terms-acceptance-migration.sql);
+    // bis zur Migration ignoriert create_booking das Feld folgenlos.
+    terms_version:        state.service === 'equipment' && window.RentMeVertrag ? RentMeVertrag.VERSION : null,
     participant_count:    state.participants || null,
     total_price:          state.totalPrice || null,
     notes:                state.service === 'drone' ? droneNotes() : state.service === 'full_podcast' ? fullPodcastNotes() : state.service === 'reel' ? `Reel package: ${state.reelCount} reel(s)${state.notes ? ' | ' + state.notes : ''}` : state.notes ? state.notes + (state.service === 'podcast_setup' ? ' | Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : '') : (state.service === 'podcast_setup' ? 'Cameras: ' + state.cameraCount + (state.withVideographer ? ' + Videographer' : '') + (state.reelAddonCount ? ' + ' + state.reelAddonCount + ' Reel(s) editing' : '') : null),
