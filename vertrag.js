@@ -26,8 +26,7 @@
     name: 'Rent Me Bangkok',
     // Vertragspartner ist Sky Universe; RentMe handelt in deren Namen
     // (Andy, 15.09.2026). Unter der Unterschrift steht die Firma, keine Person.
-    // Genaue Firmierung (z. B. "Co., Ltd.") noch offen.
-    vermieter: 'Sky Universe',
+    vermieter: 'Sky Universe Co., Ltd.',
     adresse: '600/9 B Square Rama 9 – Mengjai, Wang Thonglang, Bangkok 10310',
     email: 'rentmebkk@gmail.com',
     instagram: '@bangkok_rentme',
@@ -185,14 +184,13 @@
     const version = (v && v.version) || VERSION;
     const items = b.equipment_items || [];
     const hatDrohne = items.includes('neo');
-    const seriennr = (v && v.seriennummern) || {};
     const zeile = (label, wert) =>
       `<tr><th>${esc(label)}</th><td>${wert}</td></tr>`;
     const leer = '<span class="rv-leer"></span>';
 
+    // Seriennummern entfallen seit 15.09.2026 (Andy: "brauchen wir nicht").
     const geraeteZeilen = items.map(i => `
-      <tr><td>${esc(GERAETE[i] || i)}</td>
-          <td>${seriennr[i] ? esc(seriennr[i]) : leer}</td></tr>`).join('');
+      <tr><td>${esc(GERAETE[i] || i)}</td></tr>`).join('');
 
     const bezahlt = ['paid', 'confirmed'].includes(b.booking_status)
       ? 'paid online' : 'due in cash at pick-up';
@@ -225,8 +223,8 @@
 
   <h2>2. Equipment</h2>
   <table class="rv-tab rv-geraete">
-    <tr><th>Item</th><th>Serial number</th></tr>
-    ${geraeteZeilen || '<tr><td colspan="2">—</td></tr>'}
+    <tr><th>Item</th></tr>
+    ${geraeteZeilen || '<tr><td>—</td></tr>'}
   </table>
   <table class="rv-tab">
     ${zeile('Accessories / condition', v && v.zustand ? esc(v.zustand) : leer)}

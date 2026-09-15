@@ -665,7 +665,6 @@ tr.neu td:first-child::before{content:'NEU';position:absolute;left:2px;top:50%;t
         </div>
         <div class="form-group"><label>ID Number</label><input type="text" id="ct-id-nr" placeholder="as on the document"></div>
       </div>
-      <div id="ct-serien"></div>
       <div class="form-group"><label>Accessories / Condition</label><textarea id="ct-zustand" rows="2" placeholder="e.g. case, USB-C cable, 2 batteries — small scratch on lid"></textarea></div>
 
       <div class="form-row">
@@ -1277,9 +1276,6 @@ function openContract(id) {
     + '<div>' + RentMeVertrag.esc(geraete.join(', ') || '—') + '</div>'
     + '<div>Pick-up ' + (b.equipment_start_date || '—') + (b.start_time ? ' ' + b.start_time : '')
     + ' → Return ' + (b.equipment_end_date || '—') + (b.end_time ? ' by ' + b.end_time : '') + '</div>';
-  document.getElementById('ct-serien').innerHTML = (b.equipment_items || []).map(i =>
-    '<div class="form-group"><label>Serial Number — ' + RentMeVertrag.esc(RentMeVertrag.GERAETE[i] || i) + '</label>'
-    + '<input type="text" data-geraet="' + RentMeVertrag.esc(i) + '" class="ct-serie" placeholder="on the device or box"></div>').join('');
   ['ct-id-nr', 'ct-zustand', 'ct-personal'].forEach(f => { document.getElementById(f).value = ''; });
   document.getElementById('ct-kaution').checked = false;
   delete document.getElementById('ct-kaution').dataset.bestaetigt;
@@ -1316,14 +1312,11 @@ async function vertragSpeichern() {
   if (!document.getElementById('ct-kaution').checked &&
       !confirmOhneDialog('ct-kaution')) return;
 
-  const seriennummern = {};
-  document.querySelectorAll('.ct-serie').forEach(el => { if (el.value.trim()) seriennummern[el.dataset.geraet] = el.value.trim(); });
   const v = {
     version: RentMeVertrag.VERSION,
     signed_at: new Date().toISOString(),
     ausweis_art: document.getElementById('ct-id-art').value,
     ausweis_nummer: document.getElementById('ct-id-nr').value.trim(),
-    seriennummern,
     zustand: document.getElementById('ct-zustand').value.trim(),
     kaution_erhalten: document.getElementById('ct-kaution').checked,
     foto_ausweis: vertragFotos['ct-foto-ausweis'] || null,
