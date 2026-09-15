@@ -162,6 +162,18 @@ export function nachricht(b: any): string {
   z.push(`👤 ${b.guest_name || 'unknown'}`);
   if (b.guest_phone) z.push(`📞 ${b.guest_phone}`);
   if (b.guest_email) z.push(`✉️ ${b.guest_email}`);
+  // Kontaktkanal (seit 15.09.2026). Der Link oeffnet den Chat direkt aus
+  // Telegram heraus; Telegram macht die URL selbst klickbar.
+  if (b.contact_channel && b.contact_handle) {
+    const h = String(b.contact_handle).trim();
+    if (b.contact_channel === 'whatsapp') {
+      let ziffern = h.replace(/\D/g, '');
+      if (ziffern.startsWith('0')) ziffern = '66' + ziffern.slice(1);
+      z.push(`💬 WhatsApp ${h} → https://wa.me/${ziffern}`);
+    } else {
+      z.push(`💬 LINE ${h} → https://line.me/R/ti/p/~${encodeURIComponent(h.replace(/^@/, ''))}`);
+    }
+  }
 
   if (b.notes) {
     z.push('');

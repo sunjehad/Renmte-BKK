@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking Terms — Rent Me Bangkok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="vertrag.js"></script>
+<style>
+body{margin:0;background:#e9e9ee;font-family:Inter,Arial,sans-serif}
+.blatt{margin:24px auto 40px;max-width:800px;box-shadow:0 2px 20px rgba(0,0,0,.12)}
+.rv ul{margin:0 0 8px;padding-left:20px}
+.rv li{margin-bottom:3px}
+@media (max-width:600px){.blatt{margin:0}}
+</style>
+</head>
+<body>
+<div class="blatt">
+<article class="rv">
+  <header class="rv-kopf">
+    <div class="rv-logo">RENT<span>ME</span> BANGKOK</div>
+    <div class="rv-firma" id="firma"></div>
+  </header>
+
+  <!-- Allgemeine Buchungsbedingungen (seit 2026-09-15). Bis dahin fuehrten
+       "Terms & Conditions" und "Cancellation Policy" in booking.html ins
+       Leere. Hier steht NUR, was die Buchungsstrecke schon zusagt (Haltezeit,
+       Barzahlung, Aufbaugebuehr, 24-h-Storno) -- nichts dazuerfunden. Die
+       Frage, was bei spaeterer Stornierung passiert, ist offen (Andy). -->
+  <h1>Booking Terms</h1>
+  <div class="rv-meta">Studio, podcast and editing bookings · Last updated 15 September 2026</div>
+
+  <h2>Your booking</h2>
+  <ul>
+    <li>A booking is confirmed as soon as it is completed on our website.</li>
+    <li>Card and QR bookings are held for 30 minutes while you complete the payment. If the payment does not arrive in time, the slot is released again.</li>
+    <li>If you choose cash, you pay in person when you arrive. No-shows or unpaid bookings may affect future bookings.</li>
+    <li>Podcast recordings: the one-time setup fee of ฿1,500 is paid online to confirm the date. It is part of your total, not a deposit; the rest is paid at the studio on the day.</li>
+    <li>Enquiries (drone filming, full podcast service) are not bookings. Nothing is charged until you accept our quote.</li>
+    <li>Equipment rental has its own <a href="rental-terms.html">Rental Terms</a>, including the deposit and the rental agreement signed at pick-up.</li>
+  </ul>
+
+  <h2 id="cancellation">Cancellation policy</h2>
+  <ul>
+    <li>Cancellations must be made at least 24 hours before your booking time (for equipment: before the pick-up time).</li>
+    <li>To cancel or move a booking, contact us at <strong>rentmebkk@gmail.com</strong> or on Instagram <strong>@bangkok_rentme</strong> and give your booking reference (RMB-…).</li>
+    <li>For a later cancellation, please contact us as early as possible.</li>
+    <li>If we have to cancel on our side, we tell you right away and offer a refund or a new date.</li>
+  </ul>
+
+  <h2>Personal data</h2>
+  <p>How we handle your booking and contact details is explained in our <a href="privacy.html">Privacy Notice</a>.</p>
+</article>
+</div>
+<script>
+document.head.insertAdjacentHTML('beforeend', '<style>' + RentMeVertrag.CSS + '</style>');
+const F = RentMeVertrag.FIRMA;
+document.getElementById('firma').innerHTML = RentMeVertrag.esc(F.adresse) + '<br>' + RentMeVertrag.esc(F.email) + ' · Instagram ' + RentMeVertrag.esc(F.instagram);
+</script>
+</body>
+</html>

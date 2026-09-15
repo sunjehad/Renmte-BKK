@@ -184,6 +184,8 @@ tr.neu td:first-child::before{content:'NEU';position:absolute;left:2px;top:50%;t
 /* ── MSG ── */
 .msg{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px}
 /* Mietvertrag (seit 2026-09-15) */
+.kontakt-link{display:inline-block;font-size:11px;font-weight:600;color:#4ade80;text-decoration:none;margin-top:3px}
+.kontakt-link:hover{text-decoration:underline}
 .action-btn.vertrag{border-color:rgba(245,158,11,.45);color:#fbbf24}
 .action-btn.vertrag.signiert{border-color:rgba(34,197,94,.45);color:#4ade80}
 .sign-pad{width:100%;height:150px;background:#fff;border-radius:8px;touch-action:none;display:block;cursor:crosshair}
@@ -1072,6 +1074,29 @@ function renderStats() {
 }
 
 // ── TODAY ──
+// ── KONTAKTKANAL (seit 2026-09-15) ─────────────────────────────────────
+// Der Kunde waehlt beim Buchen WhatsApp oder LINE. Der Knopf oeffnet den Chat
+// direkt -- kostenlos und ohne Bot. WhatsApp: wa.me braucht die Nummer nur mit
+// Ziffern und Landesvorwahl; thailaendische Nummern mit fuehrender 0 bekommen
+// die 66. LINE: die ID oeffnet das Profil zum Hinzufuegen.
+function kontaktLink(b) {
+  if (!b.contact_channel || !b.contact_handle) return '';
+  const h = String(b.contact_handle).trim();
+  const esc = t => t.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let url, text;
+  if (b.contact_channel === 'whatsapp') {
+    let ziffern = h.replace(/\D/g, '');
+    if (ziffern.startsWith('0')) ziffern = '66' + ziffern.slice(1);
+    const gruss = encodeURIComponent('Hi ' + ((b.guest_name || '').split(' ')[0] || '') + ', this is Rent Me Bangkok about your booking ' + (b.booking_ref || '') + '.');
+    url = 'https://wa.me/' + ziffern + '?text=' + gruss;
+    text = 'WhatsApp';
+  } else {
+    url = 'https://line.me/R/ti/p/~' + encodeURIComponent(h.replace(/^@/, ''));
+    text = 'LINE';
+  }
+  return `<a class="kontakt-link" href="${url}" target="_blank" rel="noopener" title="${esc(h)}">💬 ${text} · ${esc(h)}</a>`;
+}
+
 function renderTodayList() {
   const today = new Date().toISOString().split('T')[0];
   // Equipment zaehlt am Abholtag mit; seit 2026-09-14 traegt es in
@@ -1093,6 +1118,7 @@ function renderTodayList() {
       <div class="today-info">
         <div class="today-name">${b.guest_name||'—'}</div>
         <div class="today-svc">${SVC_NAMES[b.service_type]||b.service_type}${b.service_type==='equipment'?(rueckgabeHeute(b)?' · return':' · pick-up'+(b.end_time?' (back '+(b.equipment_end_date===today?'':'on '+(b.equipment_end_date||'').slice(5)+' ')+'by '+b.end_time+')':'')+(vertraege.has(b.id)?' · ✓ contract':' · contract open')):''}${b.duration_hours?' · '+b.duration_hours+'h':''} · ${b.guest_phone||''}</div>
+        ${kontaktLink(b)}
       </div>
       <span class="badge badge-${b.status||'confirmed'}">${b.status||'confirmed'}</span>
     </div>`).join('');
@@ -1120,7 +1146,7 @@ function renderTable() {
     return `<tr class="${neueIds.has(b.id) ? 'neu' : ''}">
       <td><div class="booking-ref-cell">${b.booking_ref||'—'}</div></td>
       <td><div>${date}</div><div class="table-meta">${time}</div></td>
-      <td><div class="table-name">${b.guest_name||'—'}</div><div class="table-meta">${b.guest_email||''}</div><div class="table-meta">${b.guest_phone||''}</div></td>
+      <td><div class="table-name">${b.guest_name||'—'}</div><div class="table-meta">${b.guest_email||''}</div><div class="table-meta">${b.guest_phone||''}</div>${kontaktLink(b)}</td>
       <td><span class="badge badge-${cls}">${SVC_NAMES[b.service_type]||b.service_type}</span></td>
       <td><span class="badge badge-pay-${bookingStatus}">${bookingStatus.replace(/_/g,' ')}</span></td>
       <td><span style="font-size:11px;color:var(--muted)">${paymentMethod}</span></td>
@@ -1355,6 +1381,7 @@ function openEdit(id) {
   if (b.participant_count) rows.push('<div><strong>Participants:</strong> ' + b.participant_count + '</div>');
   if (b.equipment_items && b.equipment_items.length) rows.push('<div><strong>Equipment:</strong> ' + b.equipment_items.join(', ') + '</div>');
   if (b.notes) rows.push('<div><strong>Options / Notes:</strong> ' + b.notes + '</div>');
+  if (b.contact_channel) rows.push('<div><strong>Contact via:</strong> ' + kontaktLink(b) + '</div>');
   if (b.terms_version) rows.push('<div><strong>Rental terms:</strong> version ' + b.terms_version + (b.terms_accepted_at ? ', accepted ' + new Date(b.terms_accepted_at).toLocaleString('en-GB', { timeZone: 'Asia/Bangkok' }) : '') + '</div>');
   if (b.total_price) rows.push('<div><strong>Total:</strong> ฿' + b.total_price.toLocaleString() + '</div>');
   const bd = paymentBreakdown(b);

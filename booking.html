@@ -91,6 +91,9 @@ nav{position:sticky;top:0;z-index:50;padding:14px 40px;display:flex;align-items:
 
 /* ── FORM ELEMENTS ── */
 .form-group{margin-bottom:20px}
+.kanal-wahl{display:flex;gap:10px;flex-wrap:wrap}
+.kanal-btn{flex:1;min-width:120px;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);color:var(--fg);font-weight:600;font-size:14px;cursor:pointer;transition:all .2s}
+.kanal-btn.selected{border-color:var(--blue);background:rgba(37,99,235,.12)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 label{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
 input[type=text],input[type=email],input[type=tel],select,textarea{
@@ -956,6 +959,20 @@ input[type=date]{color-scheme:dark}
           <input type="email" id="d-email" placeholder="you@example.com" required>
         </div>
       </div>
+      <!-- Kontaktkanal (seit 2026-09-15): WhatsApp oder LINE. Grundlage fuer
+           den Chat-Knopf im Admin und spaeter fuer den Bot. -->
+      <div class="form-group">
+        <label>How should we contact you? *</label>
+        <div class="kanal-wahl">
+          <button type="button" class="kanal-btn" id="kanal-whatsapp" onclick="waehleKanal('whatsapp')">WhatsApp</button>
+          <button type="button" class="kanal-btn" id="kanal-line" onclick="waehleKanal('line')">LINE</button>
+        </div>
+      </div>
+      <div class="form-group" id="kanal-feld" style="display:none">
+        <label for="d-kontakt" id="kanal-label">WhatsApp number *</label>
+        <input type="text" id="d-kontakt" autocomplete="off">
+        <div id="kanal-hilfe" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
+      </div>
       <div class="form-group">
         <label for="d-notes">Special Requests (optional)</label>
         <textarea id="d-notes" placeholder="Any notes for us? Backdrop colors, special requirements..."></textarea>
@@ -986,7 +1003,7 @@ input[type=date]{color-scheme:dark}
     <div class="terms-check">
       <input type="checkbox" id="terms-check" onchange="document.getElementById('btn-confirm').disabled=!this.checked">
       <div class="terms-text">
-        I agree to the <a href="#" onclick="return false">Terms & Conditions</a> and <a href="#" onclick="return false">Cancellation Policy</a>. I understand that bookings are confirmed immediately and cancellations must be made 24h in advance.
+        I agree to the <a href="booking-terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="booking-terms.html#cancellation" target="_blank" rel="noopener">Cancellation Policy</a>. I understand that bookings are confirmed immediately and cancellations must be made 24h in advance.
       </div>
     </div>
 
@@ -1211,6 +1228,8 @@ let state = {
   equipEnd: null,
   equipPickupTime: null,
   equipReturnTime: null,
+  contactChannel: null,
+  contactHandle: null,
   equipItems: [],
   participants: 2,
   cameraCount: 1,
@@ -2297,6 +2316,30 @@ function chooseAccount(mode, el) {
   }
 }
 
+// Kontaktkanal. WhatsApp braucht eine Nummer (vorbelegt mit dem Telefon),
+// LINE die LINE-ID -- die Telefonnummer findet auf LINE niemanden.
+function waehleKanal(kanal) {
+  state.contactChannel = kanal;
+  document.querySelectorAll('.kanal-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('kanal-' + kanal).classList.add('selected');
+  document.getElementById('kanal-feld').style.display = '';
+  const feld = document.getElementById('d-kontakt');
+  const label = document.getElementById('kanal-label');
+  const hilfe = document.getElementById('kanal-hilfe');
+  if (kanal === 'whatsapp') {
+    label.textContent = 'WhatsApp number *';
+    feld.placeholder = '+66 81 234 5678';
+    if (!feld.value || feld.dataset.kanal === 'line') feld.value = document.getElementById('d-phone').value;
+    hilfe.textContent = 'With country code, e.g. +66 for Thailand.';
+  } else {
+    label.textContent = 'LINE ID *';
+    feld.placeholder = 'your LINE ID';
+    if (feld.dataset.kanal === 'whatsapp') feld.value = '';
+    hilfe.textContent = 'LINE → Home → Settings → Profile → LINE ID.';
+  }
+  feld.dataset.kanal = kanal;
+}
+
 function prefillForm() {
   document.getElementById('d-first').value = state.firstName;
   document.getElementById('d-last').value  = state.lastName;
@@ -2351,6 +2394,13 @@ function validateStep3() {
   state.phone     = phone;
   state.email     = email;
   state.notes     = document.getElementById('d-notes').value.trim();
+
+  if (!state.contactChannel) return alert('Please choose WhatsApp or LINE so we can contact you.');
+  const kontakt = document.getElementById('d-kontakt').value.trim();
+  if (!kontakt) return alert(state.contactChannel === 'line' ? 'Please enter your LINE ID.' : 'Please enter your WhatsApp number.');
+  if (state.contactChannel === 'whatsapp' && kontakt.replace(/\D/g, '').length < 8)
+    return alert('Please enter your full WhatsApp number with country code.');
+  state.contactHandle = kontakt;
 
   goStep(4);
 }
@@ -2442,13 +2492,16 @@ function buildReview() {
   if (termsEl) {
     termsEl.innerHTML = istAnfrage
       ? 'I agree to be contacted about this enquiry. <strong>No booking is made and nothing is charged</strong> — we reply with a quote and a proposed date.'
-      : 'I agree to the <a href="#" onclick="return false">Terms &amp; Conditions</a> and <a href="#" onclick="return false">Cancellation Policy</a>. I understand that bookings are confirmed immediately and cancellations must be made 24h in advance.';
+      // Links bis 2026-09-15 tot (href="#"). Equipment verweist auf die
+      // Mietbedingungen, alle anderen Dienste auf booking-terms.html.
+      : 'I agree to the <a href="' + (state.service === 'equipment' ? 'rental-terms.html' : 'booking-terms.html') + '" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="booking-terms.html#cancellation" target="_blank" rel="noopener">Cancellation Policy</a>. I understand that bookings are confirmed immediately and cancellations must be made 24h in advance.';
   }
 
   document.getElementById('review-person').innerHTML = `
     <div class="review-row"><span class="review-label">Name</span><span class="review-value">${state.firstName} ${state.lastName}</span></div>
     <div class="review-row"><span class="review-label">Phone</span><span class="review-value">${state.phone}</span></div>
     <div class="review-row"><span class="review-label">Email</span><span class="review-value">${state.email}</span></div>
+    <div class="review-row"><span class="review-label">Contact via</span><span class="review-value">${state.contactChannel === 'line' ? 'LINE' : 'WhatsApp'} · ${String(state.contactHandle || '').replace(/[&<>"']/g, '')}</span></div>
     ${state.notes ? `<div class="review-row"><span class="review-label">Notes</span><span class="review-value">${state.notes}</span></div>` : ''}`;
 }
 
@@ -2467,9 +2520,14 @@ function bookingPayload() {
     : null;
   return {
     user_id:              state.userId || null,
-    guest_name:           !state.userId ? `${state.firstName} ${state.lastName}` : null,
-    guest_email:          !state.userId ? state.email : null,
-    guest_phone:          !state.userId ? state.phone : null,
+    // Seit 2026-09-15 auch mit Konto: bis dahin ging der im Formular
+    // eingetippte Name bei eingeloggten Kunden verloren, und Admin, Vertrag
+    // und Telegram zeigten den Profilnamen (Testbuchung RMB-F3C2E85B).
+    guest_name:           `${state.firstName} ${state.lastName}`.trim() || null,
+    guest_email:          state.email || null,
+    guest_phone:          state.phone || null,
+    contact_channel:      state.contactChannel || null,
+    contact_handle:       state.contactHandle || null,
     service_type:         state.service,
     service_subtype:      state.service === 'drone' ? state.dronePackage : state.subtype,
     // Eine Anfrage hat noch kein Datum -- der Termin wird abgestimmt.
