@@ -1,6 +1,6 @@
 -- ============================================================
 -- RENT ME BANGKOK — Zustimmung zu den Mietbedingungen + unveraenderliche
--- Vertraege (2026-09-15). EINMAL ausfuehren. Noch NICHT ausgefuehrt.
+-- Vertraege (2026-09-15). Ausgefuehrt am 2026-09-15 (Andy). Nicht erneut laufen lassen.
 --
 -- 1) `bookings` merkt sich, welche Bedingungen beim Buchen angehakt wurden.
 --    Die Version kommt vom Browser (vertrag.js), der ZEITPUNKT aus der

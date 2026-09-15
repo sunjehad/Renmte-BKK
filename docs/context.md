@@ -41,8 +41,15 @@ angelegt — RLS an, drei Admin-Policies, anon liest nichts).
 - **Admin:** Knopf „Contract“ bei Equipment — Ausweis, Seriennummern, Zustand,
   Fotos, Kaution, Unterschrift Kunde/Personal → `rental_contracts`.
   „Today“ zeigt auch Rückgaben.
-- **Offen:** Vertragstext juristisch gegenlesen lassen (Thailand); noch kein
-  echter Vertrag unterschrieben.
+- **Version 2 (15.09., Push `c1689e3`)** nach Gegenprüfung mit ChatGPT:
+  Kaution keine Haftungsgrenze, angemessene Kosten statt Neupreis,
+  `privacy.html` (PDPA), `terms_version`/`terms_accepted_at` an `bookings`
+  (Zeitpunkt aus der DB), unterschriebene Verträge unveränderlich (UPDATE-Policy
+  entfernt). `terms-acceptance-migration.sql` von Andy ausgeführt, geprüft:
+  Spalten da, `create_booking` neu und weiter SECURITY DEFINER, Rechte
+  unverändert.
+- **Offen:** Vertragstext juristisch gegenlesen lassen (Thailand); Drohnen-
+  Registrierung (CAAT/NBTC) klärt Andy; noch kein echter Vertrag unterschrieben.
 
 **2026-07-27** — Erste Bestandsaufnahme durch BrainMag, Fokusübernahme.
 Rein lesend erhoben, dann:
