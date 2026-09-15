@@ -1305,6 +1305,11 @@ async function vertragSpeichern() {
     unterschrift_kunde: padKunde.toDataURL('image/png'),
     unterschrift_personal: padPersonal.dataset.leer !== '0' ? null : padPersonal.toDataURL('image/png'),
     personal_name: document.getElementById('ct-personal').value.trim(),
+    // Mieter fest im Vertrag: bei Kunden mit Konto hat loadAllBookings den
+    // Namen aus dem Profil eingesetzt, die Buchungszeile selbst ist leer.
+    mieter_name: b.guest_name || '',
+    mieter_email: b.guest_email || '',
+    mieter_telefon: b.guest_phone || '',
   };
   const btn = document.getElementById('ct-save');
   btn.disabled = true;

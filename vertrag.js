@@ -167,6 +167,17 @@
   //      end_time, rental_days, equipment_items, total_price, booking_status)
   // `v`  Vertragsdaten aus rental_contracts.data -- oder null (ungezeichnet)
   function vertragHtml(b, v) {
+    // Beim Unterschreiben werden Name und Kontakt in den Vertrag geschrieben
+    // (seit 15.09.2026). Sie gehen vor: Bei Kunden mit Konto steht der Name
+    // nicht an der Buchung, sondern im Profil -- und ein gezeichneter Vertrag
+    // soll zeigen, wer damals unterschrieben hat, nicht das heutige Profil.
+    if (v && (v.mieter_name || v.mieter_email || v.mieter_telefon)) {
+      b = Object.assign({}, b, {
+        guest_name: v.mieter_name || b.guest_name,
+        guest_email: v.mieter_email || b.guest_email,
+        guest_phone: v.mieter_telefon || b.guest_phone,
+      });
+    }
     const version = (v && v.version) || VERSION;
     const items = b.equipment_items || [];
     const hatDrohne = items.includes('neo');

@@ -85,6 +85,16 @@ function fehler(text) {
   );
   const { data: b, error } = await sb.from('bookings').select('*').eq('id', id).maybeSingle();
   if (error || !b) return fehler('Booking not found. Log in to the admin page first.');
+  // Kunden mit Konto: Kontaktdaten stehen im Profil, nicht an der Buchung
+  // (wie in admin.html loadAllBookings).
+  if (!b.guest_name && b.user_id) {
+    const { data: p } = await sb.from('profiles').select('first_name,last_name,email,phone').eq('id', b.user_id).maybeSingle();
+    if (p) {
+      b.guest_name = `${p.first_name || ''} ${p.last_name || ''}`.trim();
+      b.guest_email = b.guest_email || p.email || '';
+      b.guest_phone = b.guest_phone || p.phone || '';
+    }
+  }
   const { data: v, error: vErr } = await sb.from('rental_contracts').select('data').eq('booking_id', id).maybeSingle();
   zeige(b, v ? v.data : null);
   if (vErr) hinweis.textContent = 'Signed contracts cannot be loaded yet (database table missing) — showing the unsigned agreement.';
