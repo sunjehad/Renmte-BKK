@@ -1,6 +1,6 @@
 -- ============================================================
 -- RENT ME BANGKOK — Kontaktkanal WhatsApp / LINE (2026-09-15)
--- EINMAL ausfuehren. Noch NICHT ausgefuehrt.
+-- Ausgefuehrt am 2026-09-15 (Andy). Nicht erneut laufen lassen.
 --
 -- bookings merkt sich, wo der Kunde kontaktiert werden will. Grundlage fuer
 -- den Chat-Knopf im Admin, die Zeile im Telegram-Alarm und spaeter den Bot.
