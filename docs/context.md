@@ -29,7 +29,9 @@ festgehaltene Entscheidung. Dieser Ordner `docs/` ist der erste Schritt dagegen.
 ## Was zuletzt geschah
 
 **2026-09-15** — Andys Auftrag: Abholung mit Uhrzeit und automatischer
-Mietvertrag („mach alles so wie du denkst“). **Lokal gebaut, nicht gepusht.**
+Mietvertrag („mach alles so wie du denkst“). **Seit 15.09. live** (Push
+`761b10d`, `notify-booking-webhook` ausgespielt, `rental_contracts` von Andy
+angelegt — RLS an, drei Admin-Policies, anon liest nichts).
 - **Rückgabezeit** im Equipment-Formular (Pflicht, am selben Tag nur nach der
   Abholzeit), gespeichert in `end_time`; Übersicht, Bestätigung, Kalender.
 - **Mietvertrag:** Text versioniert in `vertrag.js` (Version 1, Werte als
@@ -39,9 +41,8 @@ Mietvertrag („mach alles so wie du denkst“). **Lokal gebaut, nicht gepusht.*
 - **Admin:** Knopf „Contract“ bei Equipment — Ausweis, Seriennummern, Zustand,
   Fotos, Kaution, Unterschrift Kunde/Personal → `rental_contracts`.
   „Today“ zeigt auch Rückgaben.
-- **Offen, braucht Freigabe:** `rental-contract-migration.sql` ausführen (bis
-  dahin wird nur lokal als PDF gesichert), Push, Deploy von
-  `notify-booking-webhook` (Rückgabezeit im Telegram-Alarm).
+- **Offen:** Vertragstext juristisch gegenlesen lassen (Thailand); noch kein
+  echter Vertrag unterschrieben.
 
 **2026-07-27** — Erste Bestandsaufnahme durch BrainMag, Fokusübernahme.
 Rein lesend erhoben, dann:

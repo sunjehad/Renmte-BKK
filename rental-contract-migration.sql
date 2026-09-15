@@ -1,6 +1,6 @@
 -- ============================================================
 -- RENT ME BANGKOK — Unterschriebene Mietvertraege (2026-09-15)
--- EINMAL im Supabase SQL-Editor ausfuehren. Noch NICHT ausgefuehrt.
+-- Ausgefuehrt am 2026-09-15 (Andy, supabase db query --linked). Nicht erneut laufen lassen.
 --
 -- Eine eigene Tabelle statt Spalten an `bookings`: die Zeile traegt
 -- Unterschriften und zwei Fotos (Ausweis, Kunde) als Daten-URLs, zusammen
